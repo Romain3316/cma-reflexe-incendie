@@ -10,7 +10,7 @@ from typing import Any
 
 import streamlit as st
 from reportlab.lib.colors import HexColor, white
-from reportlab.lib.pagesizes import A4, landscape
+from reportlab.lib.pagesizes import A4
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.pdfgen import canvas
 
@@ -299,23 +299,23 @@ def draw_checkbox_list(
     y: float,
     width: float,
     field_prefix: str,
-    font_size: float = 9.2,
-    leading: float = 11.4,
-    gap: float = 4.5,
+    font_size: float = 8.6,
+    leading: float = 10.8,
+    gap: float = 5.0,
     checkbox_size: float = 10,
 ) -> float:
-    """Dessine une liste avec de vraies cases AcroForm cliquables."""
-    for index, item in enumerate(items):
-        lines = wrap_canvas_text(
-            pdf,
-            item,
-            "Helvetica",
-            font_size,
-            width - checkbox_size - 9,
-        )
+    """Dessine une liste lisible avec de vraies cases PDF cliquables.
 
-        # La coordonnée y du formulaire correspond au coin inférieur gauche.
-        field_y = y - checkbox_size + 1
+    Le premier texte commence volontairement plus bas que le bandeau de section
+    afin d'éviter tout chevauchement visuel. Chaque ligne utilise une hauteur
+    calculée à partir de son nombre réel de retours à la ligne.
+    """
+    for index, item in enumerate(items):
+        text_width = width - checkbox_size - 10
+        lines = wrap_canvas_text(pdf, item, "Helvetica", font_size, text_width)
+
+        # Le champ est aligné sur la première ligne de texte.
+        field_y = y - checkbox_size + 2
         pdf.acroForm.checkbox(
             name=pdf_field_name(field_prefix, index),
             tooltip=item,
@@ -334,23 +334,24 @@ def draw_checkbox_list(
             fieldFlags="",
         )
 
-        text_x = x + checkbox_size + 7
+        text_x = x + checkbox_size + 8
         pdf.setFillColor(HexColor(CMA_TEXT))
         pdf.setFont("Helvetica", font_size)
+
         line_y = y
         for line in lines:
             pdf.drawString(text_x, line_y, line)
             line_y -= leading
 
-        # Une ligne discrète améliore la lecture et sépare les actions.
-        row_bottom = line_y + 2
+        # La séparation est placée sous la dernière ligne, jamais dessus.
+        separator_y = line_y + 2
         pdf.setStrokeColor(HexColor("#E7EBF0"))
         pdf.setLineWidth(0.35)
-        pdf.line(text_x, row_bottom, x + width, row_bottom)
+        pdf.line(text_x, separator_y, x + width, separator_y)
+
         y = line_y - gap
 
     return y
-
 
 def draw_section_title(
     pdf: canvas.Canvas,
@@ -360,13 +361,15 @@ def draw_section_title(
     width: float,
     accent: str,
 ) -> float:
+    bar_height = 25
     pdf.setFillColor(HexColor(accent))
-    pdf.roundRect(x, y - 20, width, 24, 6, stroke=0, fill=1)
+    pdf.roundRect(x, y - bar_height, width, bar_height, 6, stroke=0, fill=1)
     pdf.setFillColor(white)
     pdf.setFont("Helvetica-Bold", 11)
-    pdf.drawString(x + 10, y - 12, title)
-    return y - 30
+    pdf.drawString(x + 11, y - 17, title)
 
+    # Espace réel sous le bandeau : le premier item ne touche plus le titre.
+    return y - bar_height - 18
 
 def draw_logo_or_fallback(
     pdf: canvas.Canvas,
@@ -505,69 +508,74 @@ def draw_organisme_page(
     fiche: dict[str, Any],
     page_number: int,
 ) -> None:
-    # Le format paysage donne plus de largeur aux listes, limite les retours à la
-    # ligne et permet une police nettement plus confortable.
-    page_size = landscape(A4)
-    pdf.setPageSize(page_size)
-    page_w, page_h = page_size
-    margin = 34
+    """Fiche organisme en A4 portrait, avec deux colonnes équilibrées."""
+    pdf.setPageSize(A4)
+    page_w, page_h = A4
+    margin = 28
     content_w = page_w - 2 * margin
 
-    # En-tête compact
-    header_h = 82
+    # En-tête compact pour préserver la place utile.
+    header_h = 84
     pdf.setFillColor(HexColor(CMA_BLUE))
     pdf.rect(0, page_h - header_h, page_w, header_h, stroke=0, fill=1)
     pdf.setFillColor(HexColor(CMA_RED))
     pdf.rect(0, page_h - 7, page_w, 7, stroke=0, fill=1)
 
-    draw_logo_or_fallback(pdf, page_w - 178, page_h - 70, 138, 40)
+    draw_logo_or_fallback(pdf, page_w - 168, page_h - 72, 132, 42)
 
     pdf.setFillColor(white)
-    pdf.setFont("Helvetica-Bold", 22)
+    pdf.setFont("Helvetica-Bold", 19)
     pdf.drawString(margin, page_h - 39, nom)
-    pdf.setFont("Helvetica", 10.5)
+    pdf.setFont("Helvetica", 9.2)
     pdf.setFillColor(HexColor("#D7E1ED"))
-    pdf.drawString(margin, page_h - 59, fiche["sous_titre"])
+    pdf.drawString(margin, page_h - 58, fiche["sous_titre"])
 
     # Objectif
-    y = page_h - 104
-    objective_h = 48
+    objective_top = page_h - 102
+    objective_h = 50
     pdf.setFillColor(HexColor("#EEF3F8"))
-    pdf.roundRect(margin, y - objective_h + 4, content_w, objective_h, 8, stroke=0, fill=1)
+    pdf.roundRect(
+        margin,
+        objective_top - objective_h,
+        content_w,
+        objective_h,
+        8,
+        stroke=0,
+        fill=1,
+    )
     pdf.setFillColor(HexColor(CMA_BLUE))
-    pdf.setFont("Helvetica-Bold", 10)
-    pdf.drawString(margin + 13, y - 12, "OBJECTIF")
+    pdf.setFont("Helvetica-Bold", 9.4)
+    pdf.drawString(margin + 12, objective_top - 17, "OBJECTIF")
     draw_wrapped(
         pdf,
         fiche["objectif"],
         margin + 78,
-        y - 12,
-        content_w - 94,
-        font_size=9.5,
-        leading=11.5,
+        objective_top - 17,
+        content_w - 92,
+        font_size=8.8,
+        leading=10.5,
+        max_lines=3,
     )
 
-    # Deux colonnes principales
-    col_gap = 22
+    # Deux colonnes en portrait. Les retours à la ligne sont calculés et espacés.
+    col_gap = 18
     col_w = (content_w - col_gap) / 2
     left_x = margin
     right_x = margin + col_w + col_gap
-    section_y = y - 66
+    section_y = objective_top - objective_h - 22
 
-    left_y = draw_section_title(
-        pdf, "TO-DO LIST", left_x, section_y, col_w, CMA_RED
-    )
+    left_y = draw_section_title(pdf, "TO-DO LIST", left_x, section_y, col_w, CMA_RED)
     left_y = draw_checkbox_list(
         pdf,
         fiche["todo"],
-        left_x + 10,
-        left_y - 1,
-        col_w - 20,
+        left_x + 9,
+        left_y,
+        col_w - 18,
         field_prefix=f"p{page_number}_{nom}_todo",
-        font_size=9.2,
-        leading=11.2,
-        gap=3.8,
-        checkbox_size=10,
+        font_size=8.4,
+        leading=10.4,
+        gap=4.7,
+        checkbox_size=9.5,
     )
 
     right_y = draw_section_title(
@@ -576,35 +584,34 @@ def draw_organisme_page(
     right_y = draw_checkbox_list(
         pdf,
         fiche["documents"],
-        right_x + 10,
-        right_y - 1,
-        col_w - 20,
+        right_x + 9,
+        right_y,
+        col_w - 18,
         field_prefix=f"p{page_number}_{nom}_documents",
-        font_size=9.2,
-        leading=11.2,
-        gap=3.8,
-        checkbox_size=10,
+        font_size=8.4,
+        leading=10.4,
+        gap=4.7,
+        checkbox_size=9.5,
     )
 
-    # Zone de vigilance fixe en bas de page : elle ne chevauche plus les listes.
-    bottom_y = 45
-    bottom_h = 84
+    # Bloc inférieur fixe, suffisamment séparé des listes.
+    bottom_y = 43
+    bottom_h = 112
     pdf.setFillColor(HexColor("#FFF7E8"))
     pdf.setStrokeColor(HexColor("#F0D7A5"))
     pdf.roundRect(margin, bottom_y, content_w, bottom_h, 8, stroke=1, fill=1)
 
     pdf.setFillColor(HexColor(CMA_AMBER))
-    pdf.setFont("Helvetica-Bold", 9.5)
+    pdf.setFont("Helvetica-Bold", 9.2)
     pdf.drawString(margin + 12, bottom_y + bottom_h - 18, "POINTS DE VIGILANCE")
 
-    # Répartition des vigilances sur deux colonnes pour conserver une police lisible.
-    vigilance_gap = 18
-    vigilance_w = (content_w - 24 - vigilance_gap) / 2
+    vigilance_gap = 16
+    vigilance_w = (content_w - 26 - vigilance_gap) / 2
     for index, point in enumerate(fiche["vigilance"]):
         column = index % 2
         row = index // 2
         vx = margin + 14 + column * (vigilance_w + vigilance_gap)
-        vy = bottom_y + bottom_h - 37 - row * 22
+        vy = bottom_y + bottom_h - 38 - row * 31
         pdf.setFillColor(HexColor(CMA_AMBER))
         pdf.circle(vx + 2, vy + 2, 1.6, stroke=0, fill=1)
         draw_wrapped(
@@ -613,41 +620,40 @@ def draw_organisme_page(
             vx + 9,
             vy,
             vigilance_w - 10,
-            font_size=7.8,
-            leading=9.2,
-            max_lines=2,
+            font_size=7.5,
+            leading=8.8,
+            max_lines=3,
         )
 
     pdf.setFillColor(HexColor(CMA_BLUE))
-    pdf.setFont("Helvetica-Bold", 7.8)
-    pdf.drawString(margin + 12, bottom_y + 9, "Contact / démarche :")
+    pdf.setFont("Helvetica-Bold", 7.5)
+    pdf.drawString(margin + 12, bottom_y + 12, "Contact / démarche :")
     draw_wrapped(
         pdf,
         fiche["contact"],
         margin + 90,
-        bottom_y + 9,
-        content_w - 210,
-        font_size=7.8,
-        leading=9,
-        max_lines=1,
+        bottom_y + 12,
+        content_w - 102,
+        font_size=7.5,
+        leading=8.5,
+        max_lines=2,
     )
 
-    pdf.setFillColor(HexColor(CMA_MUTED))
-    pdf.setFont("Helvetica-Oblique", 6.8)
-    pdf.drawRightString(page_w - margin, bottom_y + 9, fiche["source"])
-
-    # Contrôle interne : signale en développement une liste trop longue.
-    if min(left_y, right_y) < bottom_y + bottom_h + 4:
+    # Alerte discrète uniquement si un contenu exceptionnellement long descend trop bas.
+    safe_limit = bottom_y + bottom_h + 8
+    if min(left_y, right_y) < safe_limit:
         pdf.setFillColor(HexColor(CMA_RED))
         pdf.setFont("Helvetica-Bold", 6.5)
         pdf.drawRightString(
             page_w - margin,
-            bottom_y + bottom_h + 4,
-            "Contenu dense : réduire ou répartir certains éléments.",
+            safe_limit - 2,
+            "Contenu dense : certains éléments gagneraient à être raccourcis.",
         )
 
-    draw_footer(pdf, page_number, page_size)
-
+    pdf.setFillColor(HexColor(CMA_MUTED))
+    pdf.setFont("Helvetica-Oblique", 6.6)
+    pdf.drawRightString(page_w - margin, 34, fiche["source"])
+    draw_footer(pdf, page_number, A4)
 
 def generate_pdf(
     selected: list[str],
@@ -667,9 +673,10 @@ def generate_pdf(
     draw_cover(pdf, selected, entreprise, conseiller, date_edition)
     pdf.showPage()
 
-    # Fiches organismes en paysage pour une lecture plus confortable.
+    # Toutes les pages restent en A4 portrait.
     page_number = 2
     for nom in selected:
+        pdf.setPageSize(A4)
         draw_organisme_page(pdf, nom, ORGANISMES[nom], page_number)
         pdf.showPage()
         page_number += 1
