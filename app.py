@@ -708,67 +708,137 @@ st.markdown(
 
         .block-container {{
             max-width: 1220px;
-            padding-top: 1.25rem;
+            padding-top: 1.1rem;
             padding-bottom: 3rem;
         }}
 
-        .cma-header {{
+        /* Bandeau institutionnel */
+        .institutional-banner {{
+            position: relative;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            align-items: center;
+            min-height: 178px;
+            padding: 26px 36px;
+            margin-bottom: 18px;
+            overflow: hidden;
+            border-radius: 18px 18px 0 0;
+            background:
+                radial-gradient(circle at 18% 50%, rgba(255,255,255,.055), transparent 31%),
+                linear-gradient(115deg, #0E315D 0%, {CMA_BLUE} 100%);
+            box-shadow: 0 10px 28px rgba(23, 54, 93, .16);
+        }}
+
+        .institutional-banner::before {{
+            content: "CMA";
+            position: absolute;
+            left: -28px;
+            bottom: -82px;
+            color: rgba(255,255,255,.035);
+            font-size: 13rem;
+            font-weight: 950;
+            letter-spacing: -.08em;
+            line-height: 1;
+            pointer-events: none;
+        }}
+
+        .institutional-title {{
+            position: relative;
+            z-index: 1;
+            color: #FFFFFF;
+            font-size: clamp(1.45rem, 2.6vw, 2.15rem);
+            font-weight: 900;
+            letter-spacing: -.02em;
+            line-height: 1.12;
+        }}
+
+        .institutional-title::after {{
+            content: "";
+            display: block;
+            width: 112px;
+            height: 4px;
+            margin-top: 18px;
+            border-radius: 10px;
+            background: {CMA_RED};
+        }}
+
+        .institutional-logo-zone {{
+            position: relative;
+            z-index: 1;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            gap: 32px;
-            min-height: 190px;
-            padding: 28px 34px;
-            margin-bottom: 24px;
-            color: white;
-            border-radius: 18px;
-            background:
-                linear-gradient(118deg, {CMA_BLUE} 0%, {CMA_BLUE} 78%, {CMA_RED} 78%, {CMA_RED} 100%);
-            box-shadow: 0 10px 30px rgba(23, 54, 93, .16);
+            gap: 30px;
+            padding-left: 32px;
+            margin-left: 32px;
+            border-left: 2px solid rgba(255,255,255,.78);
         }}
 
-        .cma-header h1 {{
-            margin: 4px 0 8px;
-            color: white;
-            font-size: 2.35rem;
-            line-height: 1.05;
-        }}
-
-        .cma-header p {{
-            max-width: 680px;
-            margin: 0;
-            color: #EAF0F7;
-            font-size: 1rem;
-            line-height: 1.5;
-        }}
-
-        .cma-eyebrow {{
-            font-size: .78rem;
-            font-weight: 800;
-            letter-spacing: .08em;
-            text-transform: uppercase;
-            color: #D7E2EF;
-        }}
-
-        .cma-logo {{
+        .institutional-logo {{
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 245px;
-            min-width: 245px;
+            width: 270px;
             min-height: 108px;
-            padding: 12px;
-            border-radius: 14px;
-            background: white;
-            color: {CMA_BLUE};
-            font-weight: 900;
-            text-align: center;
         }}
 
-        .cma-logo img {{
-            max-width: 215px;
-            max-height: 85px;
+        .institutional-logo img {{
+            width: 100%;
+            max-width: 270px;
+            max-height: 105px;
             object-fit: contain;
+            /* Rend le logo monochrome blanc sur le bandeau bleu */
+            filter: brightness(0) invert(1);
+        }}
+
+        .institutional-logo-fallback {{
+            color: white;
+            font-size: 1.7rem;
+            font-weight: 950;
+            text-align: center;
+            line-height: 1.15;
+        }}
+
+        /* Bloc titre de l'application */
+        .app-intro {{
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            padding: 21px 26px;
+            margin: 0 0 24px;
+            border: 1px solid var(--cma-border);
+            border-top: 0;
+            border-radius: 0 0 18px 18px;
+            background: white;
+            box-shadow: 0 8px 24px rgba(16, 40, 70, .06);
+        }}
+
+        .app-icon {{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 68px;
+            height: 68px;
+            flex: 0 0 68px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #E22A31, #B9151C);
+            color: white;
+            font-size: 2rem;
+            box-shadow: 0 7px 18px rgba(216,35,42,.20);
+        }}
+
+        .app-intro h1 {{
+            margin: 0 0 4px;
+            color: var(--cma-blue);
+            font-size: clamp(1.8rem, 3vw, 2.55rem);
+            line-height: 1.05;
+            letter-spacing: -.025em;
+        }}
+
+        .app-intro p {{
+            margin: 0;
+            color: var(--cma-muted);
+            font-size: 1rem;
+            line-height: 1.45;
         }}
 
         .section-card {{
@@ -868,26 +938,62 @@ st.markdown(
             font-weight: 750;
         }}
 
-        @media (max-width: 850px) {{
-            .cma-header {{
-                flex-direction: column;
-                align-items: stretch;
-                background:
-                    linear-gradient(165deg, {CMA_BLUE} 0%, {CMA_BLUE} 74%, {CMA_RED} 74%, {CMA_RED} 100%);
+        @media (max-width: 900px) {{
+            .institutional-banner {{
+                grid-template-columns: 1fr;
+                gap: 24px;
+                padding: 28px 25px;
             }}
 
-            .cma-logo {{
-                width: 100%;
-                min-width: 0;
-                max-width: 360px;
-                align-self: center;
+            .institutional-logo-zone {{
+                justify-content: flex-start;
+                padding: 22px 0 0;
+                margin: 0;
+                border-left: 0;
+                border-top: 1px solid rgba(255,255,255,.42);
+            }}
+
+            .institutional-logo {{
+                width: 235px;
+                justify-content: flex-start;
+            }}
+
+            .app-intro {{
+                align-items: flex-start;
+            }}
+        }}
+
+        @media (max-width: 560px) {{
+            .block-container {{
+                padding-left: .75rem;
+                padding-right: .75rem;
+            }}
+
+            .institutional-banner {{
+                min-height: 0;
+                border-radius: 14px 14px 0 0;
+            }}
+
+            .institutional-logo {{
+                width: 205px;
+            }}
+
+            .app-intro {{
+                gap: 13px;
+                padding: 18px;
+            }}
+
+            .app-icon {{
+                width: 54px;
+                height: 54px;
+                flex-basis: 54px;
+                font-size: 1.55rem;
             }}
         }}
     </style>
     """,
     unsafe_allow_html=True,
 )
-
 
 # ============================================================
 # INTERFACE
@@ -896,27 +1002,29 @@ st.markdown(
 logo_path = find_logo()
 if logo_path:
     logo_html = (
-        f'<div class="cma-logo"><img src="{image_to_data_uri(logo_path)}" '
+        f'<div class="institutional-logo"><img src="{image_to_data_uri(logo_path)}" '
         'alt="Logo CMA Nouvelle-Aquitaine Gironde"></div>'
     )
 else:
     logo_html = (
-        '<div class="cma-logo">CMA<br>'
-        '<span style="font-size:.72rem;">NOUVELLE-AQUITAINE · GIRONDE</span></div>'
+        '<div class="institutional-logo institutional-logo-fallback">'
+        'CMA<br><span style="font-size:.72rem;">NOUVELLE-AQUITAINE · GIRONDE</span></div>'
     )
 
 st.markdown(
     f"""
-    <div class="cma-header">
-        <div>
-            <div class="cma-eyebrow">CMA Nouvelle-Aquitaine · Gironde</div>
-            <h1>CMA Réflexe Incendie</h1>
-            <p>
-                Sélectionnez les organismes concernés, consultez les démarches
-                avec le chef d'entreprise, puis générez un dossier PDF prêt à transmettre.
-            </p>
+    <div class="institutional-banner">
+        <div class="institutional-title">CMA NOUVELLE-AQUITAINE · GIRONDE</div>
+        <div class="institutional-logo-zone">
+            {logo_html}
         </div>
-        {logo_html}
+    </div>
+    <div class="app-intro">
+        <div class="app-icon">🔥</div>
+        <div>
+            <h1>CMA Réflexe Incendie</h1>
+            <p>Assistant pour les premières démarches après un incendie.</p>
+        </div>
     </div>
     """,
     unsafe_allow_html=True,
