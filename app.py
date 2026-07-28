@@ -509,6 +509,102 @@ def draw_cover(
         pdf.drawString(76, y, name)
         y -= 22
 
+    # Encadré humain : soutien médico-psychologique
+    support_x = 44
+    support_y = 205
+    support_w = page_w - 88
+    support_h = 102
+
+    pdf.setFillColor(HexColor("#F7F9FC"))
+    pdf.roundRect(
+        support_x,
+        support_y,
+        support_w,
+        support_h,
+        10,
+        stroke=0,
+        fill=1,
+    )
+
+    # Accent CMA discret sur la gauche
+    pdf.setFillColor(HexColor(CMA_RED))
+    pdf.roundRect(
+        support_x,
+        support_y,
+        7,
+        support_h,
+        3,
+        stroke=0,
+        fill=1,
+    )
+
+    pdf.setFillColor(HexColor(CMA_BLUE))
+    pdf.setFont("Helvetica-Bold", 11)
+    pdf.drawString(
+        support_x + 20,
+        support_y + support_h - 24,
+        "BESOIN D'UN SOUTIEN PSYCHOLOGIQUE ?",
+    )
+
+    support_text = (
+        "Un incendie peut avoir des conséquences importantes sur le plan humain. "
+        "La Cellule d'Urgence Médico-Psychologique (CUMP), mise en place par "
+        "l'Agence Régionale de Santé, peut être contactée par toute personne "
+        "ressentant le besoin d'un accompagnement."
+    )
+    draw_wrapped(
+        pdf,
+        support_text,
+        support_x + 20,
+        support_y + support_h - 42,
+        support_w - 170,
+        font_name="Helvetica",
+        font_size=8.2,
+        leading=10.5,
+        color=CMA_TEXT,
+    )
+
+    # Numéro très visible à droite
+    phone_box_w = 126
+    phone_box_h = 42
+    phone_box_x = support_x + support_w - phone_box_w - 16
+    phone_box_y = support_y + 20
+
+    pdf.setFillColor(HexColor(CMA_BLUE))
+    pdf.roundRect(
+        phone_box_x,
+        phone_box_y,
+        phone_box_w,
+        phone_box_h,
+        7,
+        stroke=0,
+        fill=1,
+    )
+    pdf.setFillColor(white)
+    pdf.setFont("Helvetica-Bold", 7.5)
+    pdf.drawCentredString(
+        phone_box_x + phone_box_w / 2,
+        phone_box_y + 27,
+        "CELLULE CUMP",
+    )
+    pdf.setFont("Helvetica-Bold", 13)
+    pdf.drawCentredString(
+        phone_box_x + phone_box_w / 2,
+        phone_box_y + 10,
+        CUMP_PHONE_DISPLAY,
+    )
+    pdf.linkURL(
+        CUMP_PHONE_LINK,
+        (
+            phone_box_x,
+            phone_box_y,
+            phone_box_x + phone_box_w,
+            phone_box_y + phone_box_h,
+        ),
+        relative=0,
+        thickness=0,
+    )
+
     info_y = 135
     pdf.setFillColor(white)
     pdf.setFont("Helvetica-Bold", 9)
