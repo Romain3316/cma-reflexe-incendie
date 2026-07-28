@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 
 import base64
@@ -35,6 +36,10 @@ CMA_GREEN = "#157F5B"
 CMA_AMBER = "#B06B00"
 
 CPSTI_FORM_URL = "https://secu-independants.fr/files/live/sites/ssi/files/mediatheque/Espace_telechargement/Formulaires/CPSTI-%20aide%20d'urgence%20CPSTI%20aux%20actifs%20victimes%20de%20catastrophe%20et%20d'intemp%c3%a9ries.pdf"
+
+# Cellule d’Urgence Médico-Psychologique (CUMP)
+CUMP_PHONE_DISPLAY = "0800 719 912"
+CUMP_PHONE_LINK = "tel:+33800719912"
 
 LOGO_CANDIDATES = [
     Path("logo_cma_na_gironde.png"),
