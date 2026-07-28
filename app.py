@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 import base64
@@ -40,6 +39,8 @@ CPSTI_FORM_URL = "https://secu-independants.fr/files/live/sites/ssi/files/mediat
 # Cellule d’Urgence Médico-Psychologique (CUMP)
 CUMP_PHONE_DISPLAY = "0800 719 912"
 CUMP_PHONE_LINK = "tel:+33800719912"
+
+ACTIVITE_PARTIELLE_URL = "https://activitepartielle.emploi.gouv.fr/aparts/"
 
 LOGO_CANDIDATES = [
     Path("logo_cma_na_gironde.png"),
@@ -97,6 +98,54 @@ ORGANISMES: dict[str, dict[str, Any]] = {
         ],
         "contact": "Coordonnées figurant sur le contrat d'assurance de l'entreprise.",
         "source": "Informations générales à adapter aux garanties et conditions du contrat.",
+    },
+    "Assurances complémentaires": {
+        "icone": "🔎",
+        "sous_titre": "Garanties annexes et continuité de l'activité",
+        "objectif": (
+            "Vérifier avec l'assureur ou le courtier toutes les garanties susceptibles "
+            "de limiter les conséquences financières et opérationnelles de l'incendie, "
+            "au-delà de la seule indemnisation des biens endommagés."
+        ),
+        "todo": [
+            "Demander à l'assureur la liste complète des garanties mobilisables au titre du contrat.",
+            "Vérifier si une garantie pertes d'exploitation a été souscrite et son événement déclencheur.",
+            "Identifier la période d'indemnisation, la franchise et le plafond de la perte d'exploitation.",
+            "Demander si les frais de relogement, de réinstallation ou de location temporaire sont couverts.",
+            "Vérifier la prise en charge des frais de démolition, déblai, gardiennage et mesures conservatoires.",
+            "Contrôler l'existence d'une garantie perte d'usage ou perte de loyers selon le statut d'occupation.",
+            "Vérifier la couverture du matériel loué, financé ou détenu en crédit-bail.",
+            "Examiner les garanties relatives aux marchandises, au froid et aux frais supplémentaires d'exploitation.",
+            "Vérifier si une protection juridique ou une garantie honoraires d'expert peut être mobilisée.",
+            "Contrôler l'existence d'une assurance homme-clé ou d'une garantie couvrant l'indisponibilité d'une personne essentielle.",
+            "Demander un écrit récapitulant les garanties acceptées, refusées ou restant à expertiser.",
+        ],
+        "documents": [
+            "Contrat multirisque professionnelle et conditions particulières.",
+            "Tableau des garanties, plafonds, franchises et exclusions.",
+            "Avenants et attestations d'assurance en vigueur à la date du sinistre.",
+            "Derniers bilans, comptes de résultat et situations comptables.",
+            "Chiffre d'affaires mensuel des exercices précédents.",
+            "Prévisionnel de trésorerie et estimation de la durée d'interruption.",
+            "Baux, contrats de location et justificatifs des loyers.",
+            "Contrats de crédit-bail, location financière ou prêt portant sur le matériel.",
+            "Devis de relogement, location temporaire, gardiennage, déblai et réinstallation.",
+            "Liste des salariés ou personnes indispensables à la continuité de l'activité.",
+        ],
+        "vigilance": [
+            "Une garantie n'est mobilisable que si elle figure dans le contrat et si ses conditions sont remplies.",
+            "La perte d'exploitation est souvent liée à un dommage matériel garanti : vérifier précisément le déclencheur.",
+            "Ne pas engager de dépenses importantes sans demander l'accord préalable de l'assureur lorsqu'il est requis.",
+            "Comparer les réponses de l'assureur avec les conditions particulières et conserver tous les échanges écrits.",
+        ],
+        "contact": (
+            "Demander un rendez-vous dédié avec l'assureur, le courtier ou l'agent général "
+            "afin de passer en revue l'intégralité du contrat."
+        ),
+        "source": (
+            "Informations générales fondées sur les garanties professionnelles présentées "
+            "par France Assureurs ; seule l'analyse du contrat permet de confirmer la couverture."
+        ),
     },
     "URSSAF / CPSTI": {
         "icone": "🤝",
@@ -216,6 +265,9 @@ ORGANISMES: dict[str, dict[str, Any]] = {
             "Gironde : ddets-activite-partielle@gironde.gouv.fr."
         ),
         "source": "Fiche DREETS Nouvelle-Aquitaine du 24 juillet 2026.",
+        "action_url": ACTIVITE_PARTIELLE_URL,
+        "action_label": "Accéder au portail de l’activité partielle",
+        "action_caption": "Déposer et suivre la demande sur le portail officiel de l’ASP.",
     },
 }
 
@@ -783,6 +835,52 @@ def draw_organisme_page(
         max_lines=2,
     )
 
+    # Bouton principal vers un portail officiel, lorsqu'il existe.
+    action_url = fiche.get("action_url")
+    if action_url:
+        button_w = 222
+        button_h = 22
+        button_x = page_w - margin - button_w
+        button_y = bottom_y + 6
+
+        pdf.setFillColor(HexColor("#FFF7E8"))
+        pdf.rect(
+            button_x - 5,
+            button_y - 4,
+            button_w + 10,
+            button_h + 8,
+            stroke=0,
+            fill=1,
+        )
+        pdf.setFillColor(HexColor(CMA_BLUE))
+        pdf.roundRect(
+            button_x,
+            button_y,
+            button_w,
+            button_h,
+            6,
+            stroke=0,
+            fill=1,
+        )
+        pdf.setFillColor(white)
+        pdf.setFont("Helvetica-Bold", 8.2)
+        pdf.drawCentredString(
+            button_x + button_w / 2,
+            button_y + 7.1,
+            fiche.get("action_label", "ACCÉDER AU SITE OFFICIEL").upper(),
+        )
+        pdf.linkURL(
+            action_url,
+            (
+                button_x,
+                button_y,
+                button_x + button_w,
+                button_y + button_h,
+            ),
+            relative=0,
+            thickness=0,
+        )
+
     # Bouton cliquable vers un formulaire officiel, lorsqu'il existe.
     form_url = fiche.get("form_url")
     if form_url:
@@ -1234,6 +1332,15 @@ for nom in selected:
         for point in fiche["vigilance"]:
             st.warning(point, icon="⚠️")
 
+        if fiche.get("action_url"):
+            st.link_button(
+                f"🌐 {fiche.get('action_label', 'Accéder au site officiel')}",
+                fiche["action_url"],
+                use_container_width=True,
+            )
+            if fiche.get("action_caption"):
+                st.caption(fiche["action_caption"])
+
         st.markdown(
             f"""
             <div class="contact-box">
@@ -1258,7 +1365,7 @@ st.markdown(
     <div class="section-card">
         <div class="section-title">4. Générer le dossier PDF</div>
         <p class="section-help">
-            Le document contient une couverture en portrait puis une page paysage par organisme.
+            Le document contient une couverture puis une page en portrait par organisme.
             Les cases sont interactives : elles peuvent être cochées et enregistrées sans impression.
         </p>
     </div>
