@@ -34,6 +34,8 @@ CMA_BORDER = "#DDE3EA"
 CMA_GREEN = "#157F5B"
 CMA_AMBER = "#B06B00"
 
+CPSTI_FORM_URL = "https://secu-independants.fr/files/live/sites/ssi/files/mediatheque/Espace_telechargement/Formulaires/CPSTI-%20aide%20d'urgence%20CPSTI%20aux%20actifs%20victimes%20de%20catastrophe%20et%20d'intemp%c3%a9ries.pdf"
+
 LOGO_CANDIDATES = [
     Path("logo_cma_na_gironde.png"),
     Path("logo_cma_na_gironde.jpg"),
@@ -128,6 +130,8 @@ ORGANISMES: dict[str, dict[str, Any]] = {
             "Messagerie sécurisée de l'espace en ligne."
         ),
         "source": "Communiqué URSSAF Aquitaine / CPSTI du 24 juillet 2026.",
+        "form_url": CPSTI_FORM_URL,
+        "form_label": "Télécharger le formulaire de demande d’aide CPSTI",
     },
     "DGFIP / SIE / CDED / CCSF": {
         "icone": "🏛️",
@@ -678,6 +682,56 @@ def draw_organisme_page(
         max_lines=2,
     )
 
+    # Bouton cliquable vers un formulaire officiel, lorsqu'il existe.
+    form_url = fiche.get("form_url")
+    if form_url:
+        button_w = 210
+        button_h = 18
+        button_x = page_w - margin - button_w
+        button_y = bottom_y + 7
+
+        # Masque propre derrière le bouton dans le bloc inférieur.
+        pdf.setFillColor(HexColor("#FFF7E8"))
+        pdf.rect(
+            button_x - 4,
+            button_y - 3,
+            button_w + 8,
+            button_h + 6,
+            stroke=0,
+            fill=1,
+        )
+
+        pdf.setFillColor(HexColor(CMA_RED))
+        pdf.roundRect(
+            button_x,
+            button_y,
+            button_w,
+            button_h,
+            5,
+            stroke=0,
+            fill=1,
+        )
+        pdf.setFillColor(white)
+        pdf.setFont("Helvetica-Bold", 7.8)
+        pdf.drawCentredString(
+            button_x + button_w / 2,
+            button_y + 5.6,
+            "TÉLÉCHARGER LE FORMULAIRE D'AIDE CPSTI",
+        )
+
+        # Zone cliquable du formulaire PDF.
+        pdf.linkURL(
+            form_url,
+            (
+                button_x,
+                button_y,
+                button_x + button_w,
+                button_y + button_h,
+            ),
+            relative=0,
+            thickness=0,
+        )
+
     # Alerte discrète uniquement si un contenu exceptionnellement long descend trop bas.
     safe_limit = bottom_y + bottom_h + 8
     if min(left_y, right_y) < safe_limit:
@@ -1087,6 +1141,16 @@ for nom in selected:
             """,
             unsafe_allow_html=True,
         )
+
+        if fiche.get("form_url"):
+            st.link_button(
+                "📄 Télécharger le formulaire de demande d’aide CPSTI",
+                fiche["form_url"],
+                use_container_width=True,
+            )
+            st.caption(
+                "Le formulaire s’ouvre depuis le site de la Sécurité sociale des indépendants."
+            )
 
 st.markdown(
     """
