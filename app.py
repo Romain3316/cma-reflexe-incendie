@@ -47,6 +47,10 @@ FAQ_INCENDIES_URL = (
     "dans-le-cadre-des-incendies-exceptionnels"
 )
 ATMO_FRANCE_URL = "https://www.atmo-france.org/"
+PREFECTURE_EVACUATION_URL = (
+    "https://www.gironde.gouv.fr/Actualites/Breves/"
+    "Incendie-Foire-aux-questions/Foire-aux-questions-incendie"
+)
 
 LOGO_CANDIDATES = [
     Path("logo_cma_na_gironde.png"),
@@ -309,6 +313,8 @@ ORGANISMES: dict[str, dict[str, Any]] = {
             "SIRET et coordonnées de l'établissement concerné.",
             "Déclaration de sinistre, photos ou attestation établissant les dommages directs.",
             "Arrêté préfectoral ou municipal d'évacuation ou d'interdiction d'accès.",
+            "Copie d'écran de la liste officielle des communes évacuées publiée par la Préfecture.",
+            "SMS, courriels ou notifications d'évacuation reçus.",
             "Note expliquant le lien entre l'incendie et l'impossibilité ou la réduction d'activité.",
             "Mesures de prévention mises en œuvre lorsque les fumées empêchent la poursuite du travail.",
             "Liste des salariés concernés, apprentis compris le cas échéant.",
@@ -455,10 +461,16 @@ def build_activity_recommendations(situation: dict[str, Any]) -> list[str]:
         )
 
     if access in {"Accès interdit", "Zone évacuée"}:
-        recommendations.append(
+        recommendations.extend([
             "Accès administratif impossible : joindre l'arrêté préfectoral ou municipal et "
-            "utiliser le motif « Toute autre circonstance de caractère exceptionnel »."
-        )
+            "utiliser le motif « Toute autre circonstance de caractère exceptionnel ».",
+            "Conserver une copie d'écran de la liste officielle des communes concernées par "
+            "les mesures d'évacuation publiée par la Préfecture de la Gironde. La Préfecture "
+            "indique que cette copie d'écran, faisant apparaître le nom de la commune, peut "
+            "servir de justificatif.",
+            "Conserver également les SMS, courriels, notifications d'évacuation et tout document "
+            "attestant de l'impossibilité d'accéder aux locaux.",
+        ])
     elif access == "Partiellement accessible":
         recommendations.append(
             "Accès partiel : expliquer les zones, postes ou horaires réellement inutilisables."
@@ -1018,8 +1030,9 @@ def draw_situation_page(
         ) - 7
 
     # Rappels officiels
+    evacuation_case = situation.get("acces_locaux") in {"Accès interdit", "Zone évacuée"}
     box_y = 54
-    box_h = 124
+    box_h = 94 if evacuation_case else 124
     pdf.setFillColor(HexColor("#FFF7E8"))
     pdf.setStrokeColor(HexColor("#F0D7A5"))
     pdf.roundRect(margin, box_y, content_w, box_h, 8, stroke=1, fill=1)
@@ -1040,8 +1053,63 @@ def draw_situation_page(
         pdf.circle(margin + 15, yy + 2, 1.5, stroke=0, fill=1)
         yy = draw_wrapped(
             pdf, item, margin + 23, yy, content_w - 35,
-            font_size=7.7, leading=9.1, max_lines=2
-        ) - 4
+            font_size=7.4 if evacuation_case else 7.7,
+            leading=8.8 if evacuation_case else 9.1,
+            max_lines=2
+        ) - 3
+
+    if evacuation_case:
+        evac_y = box_y + box_h + 8
+        evac_h = 87
+        pdf.setFillColor(HexColor("#EAF2FA"))
+        pdf.setStrokeColor(HexColor("#B8CCE1"))
+        pdf.roundRect(margin, evac_y, content_w, evac_h, 8, stroke=1, fill=1)
+
+        pdf.setFillColor(HexColor(CMA_BLUE))
+        pdf.setFont("Helvetica-Bold", 9.1)
+        pdf.drawString(
+            margin + 12,
+            evac_y + evac_h - 18,
+            "JUSTIFICATIF D'ÉVACUATION À CONSERVER",
+        )
+
+        evac_text = (
+            "La Préfecture de la Gironde indique qu'une copie d'écran de la liste officielle "
+            "des communes concernées par les mesures d'évacuation peut servir de justificatif, "
+            "à condition que le nom de la commune apparaisse clairement."
+        )
+        draw_wrapped(
+            pdf,
+            evac_text,
+            margin + 12,
+            evac_y + evac_h - 35,
+            content_w - 24,
+            font_size=7.4,
+            leading=8.8,
+            max_lines=4,
+        )
+
+        pdf.setFillColor(HexColor(CMA_RED))
+        pdf.setFont("Helvetica-Bold", 7.4)
+        pdf.drawString(margin + 12, evac_y + 16, "À conserver également :")
+        draw_wrapped(
+            pdf,
+            "arrêté préfectoral ou municipal, SMS, courriels, notifications d'évacuation "
+            "et tout document prouvant l'impossibilité d'accéder aux locaux.",
+            margin + 92,
+            evac_y + 16,
+            content_w - 104,
+            font_size=7.1,
+            leading=8.2,
+            max_lines=2,
+        )
+
+        pdf.linkURL(
+            PREFECTURE_EVACUATION_URL,
+            (margin, evac_y, margin + content_w, evac_y + evac_h),
+            relative=0,
+            thickness=0,
+        )
 
     draw_footer(pdf, page_number, A4)
 
@@ -1198,6 +1266,9 @@ def draw_activity_guide_page(
             "3. PIÈCES À CONSERVER",
             [
                 "Déclaration de sinistre, photos, rapports des secours et arrêtés d'évacuation ou d'interdiction.",
+                "En Gironde, conserver une copie d'écran de la liste préfectorale des communes évacuées "
+                "faisant apparaître le nom de la commune : la Préfecture indique qu'elle peut servir de justificatif.",
+                "Conserver aussi les SMS, courriels et notifications reçus au moment de l'évacuation.",
                 "Liste des salariés concernés, période demandée et nombre prévisionnel d'heures chômées.",
                 "Comparatifs de chiffre d'affaires, annulations, commandes perdues et messages de clients ou fournisseurs.",
                 "Avis de coupure, preuves de rupture d'approvisionnement et impossibilité de solution alternative.",
@@ -1909,6 +1980,18 @@ situation = {
     "niveau_activite": niveau_activite,
     "causes_arret": causes_arret,
 }
+
+if acces_locaux in {"Accès interdit", "Zone évacuée"}:
+    st.info(
+        "Justificatif utile : la Préfecture de la Gironde indique qu'une copie d'écran "
+        "de la liste officielle des communes évacuées, faisant apparaître le nom de la "
+        "commune, peut servir de justificatif. Pensez à la conserver."
+    )
+    st.link_button(
+        "Consulter la liste officielle des communes concernées",
+        PREFECTURE_EVACUATION_URL,
+        use_container_width=True,
+    )
 
 if salaries and niveau_activite in {
     "Activité fortement réduite",
