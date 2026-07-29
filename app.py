@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 
 import base64
@@ -156,33 +157,30 @@ ORGANISMES: dict[str, dict[str, Any]] = {
         "icone": "🤝",
         "sous_titre": "Cotisations sociales et aide d'urgence aux indépendants",
         "objectif": (
-            "Signaler les difficultés liées à l'incendie et solliciter, selon la situation, "
-            "un délai de paiement, une modulation des cotisations ou une aide d'urgence."
+            "Signaler rapidement les difficultés, demander un délai de paiement ou une "
+            "modulation des cotisations et solliciter l'action sociale du CPSTI."
         ),
         "todo": [
-            "Se connecter à la messagerie sécurisée de l'espace URSSAF.",
-            "Choisir « Une formalité déclarative » puis « Déclarer une situation exceptionnelle ».",
-            "Expliquer précisément l'impact de l'incendie sur l'activité et la trésorerie.",
-            "Demander un délai de paiement ou un report des échéances de cotisations.",
-            "Pour un indépendant, demander si nécessaire une baisse des cotisations provisionnelles.",
-            "Vérifier l'éligibilité à l'aide d'urgence du CPSTI.",
-            "Déposer rapidement le formulaire CPSTI avec les justificatifs demandés.",
-            "Conserver les accusés de réception et les réponses de l'URSSAF.",
+            "Signaler l'incendie depuis la messagerie sécurisée de l'espace URSSAF.",
+            "Demander un délai de paiement ou le report des échéances de cotisations.",
+            "Vérifier la remise des pénalités et majorations liées au retard provoqué par le sinistre.",
+            "Pour un travailleur indépendant, ajuster les cotisations provisionnelles si l'activité baisse.",
+            "Déposer rapidement une demande d'action sociale CPSTI avec les justificatifs utiles.",
+            "Conserver l'accusé de réception, les messages et la décision reçue.",
         ],
         "documents": [
-            "SIRET et coordonnées de l'entreprise.",
-            "Courrier ou message décrivant l'incendie et ses conséquences.",
-            "Justificatif du sinistre : attestation, photos ou document des secours.",
-            "État des échéances sociales concernées.",
-            "Éléments récents de trésorerie et de chiffre d'affaires.",
-            "RIB de l'entreprise.",
-            "Formulaire de demande d'aide CPSTI, le cas échéant.",
-            "Pièces complémentaires demandées par l'URSSAF ou le CPSTI.",
+            "SIRET, identité et coordonnées de l'entreprise.",
+            "Explication synthétique du sinistre et de ses conséquences.",
+            "Attestation de sinistre, photos ou document des secours.",
+            "État des échéances sociales et difficultés de trésorerie.",
+            "Éléments récents de chiffre d'affaires ou de revenu.",
+            "RIB et justificatifs des dépenses ou pertes urgentes.",
         ],
         "vigilance": [
-            "Les démarches et offres de service de l'URSSAF sont gratuites.",
-            "Les mesures sont examinées selon la situation de chaque entreprise.",
-            "L'aide CPSTI peut atteindre 2 000 € sous conditions pour les indépendants concernés.",
+            "Toutes les démarches URSSAF et les offres de service sont gratuites.",
+            "Les demandes sont examinées selon la situation et les justificatifs fournis.",
+            "L'aide d'urgence CPSTI peut aller jusqu'à 2 000 € sous conditions.",
+            "Le communiqué de juillet 2026 annonce un paiement sous 15 jours après réception d'un dossier recevable.",
         ],
         "contact": (
             "Employeurs : 3957 - Travailleurs indépendants : 3698 - "
@@ -192,6 +190,7 @@ ORGANISMES: dict[str, dict[str, Any]] = {
         "form_url": CPSTI_FORM_URL,
         "form_label": "Télécharger le formulaire de demande d’aide CPSTI",
     },
+
     "DGFIP / SIE / CDED / CCSF": {
         "icone": "🏛️",
         "sous_titre": "Échéances fiscales et accompagnement des difficultés",
@@ -343,6 +342,97 @@ ORGANISMES: dict[str, dict[str, Any]] = {
         "secondary_label": "Lire les conditions exceptionnelles incendies",
     },
 }
+
+
+# ============================================================
+# PERSONNALISATION SELON LA SITUATION
+# ============================================================
+
+def build_activity_recommendations(situation: dict[str, Any]) -> list[str]:
+    """Construit les recommandations prioritaires selon les réponses du conseiller."""
+    recommendations: list[str] = []
+
+    if not situation.get("salaries", False):
+        return [
+            "L'entreprise n'a pas déclaré de salarié : l'activité partielle n'est pas à mobiliser.",
+            "Concentrer l'accompagnement sur l'assurance, la trésorerie, l'URSSAF / CPSTI et la reprise.",
+        ]
+
+    direct = situation.get("sinistre_direct") == "Oui"
+    access = situation.get("acces_locaux", "")
+    reasons = set(situation.get("causes_arret", []))
+    activity = situation.get("niveau_activite", "")
+
+    if direct:
+        recommendations.append(
+            "Dommages directs : documenter précisément le sinistre et vérifier le motif "
+            "« Sinistre ou intempéries de caractère exceptionnel »."
+        )
+
+    if access in {"Accès interdit", "Zone évacuée"}:
+        recommendations.append(
+            "Accès administratif impossible : joindre l'arrêté préfectoral ou municipal et "
+            "utiliser le motif « Toute autre circonstance de caractère exceptionnel »."
+        )
+    elif access == "Partiellement accessible":
+        recommendations.append(
+            "Accès partiel : expliquer les zones, postes ou horaires réellement inutilisables."
+        )
+
+    if "Fumées / qualité de l'air" in reasons:
+        recommendations.extend([
+            "Fumées : tracer l'évaluation des risques et les relevés de qualité de l'air.",
+            "Démontrer l'étude du télétravail, de la délocalisation, des horaires adaptés, "
+            "des rotations et de la réduction des activités physiques extérieures.",
+            "Privilégier les protections collectives ; prévoir des FFP2 adaptés lorsque "
+            "l'exposition extérieure prolongée ne peut être évitée.",
+        ])
+
+    if "Rupture d'approvisionnement" in reasons:
+        recommendations.append(
+            "Rupture d'approvisionnement : conserver les messages fournisseurs, délais, "
+            "commandes bloquées et preuves de l'impossibilité de substituer l'approvisionnement."
+        )
+
+    if "Baisse ou absence de clientèle" in reasons:
+        recommendations.append(
+            "Baisse de clientèle : réunir comparatifs de chiffre d'affaires, annulations, "
+            "réservations perdues et tout élément démontrant le lien direct avec les incendies."
+        )
+
+    if "Coupure d'électricité / réseau" in reasons:
+        recommendations.append(
+            "Coupure de réseau : conserver les avis du gestionnaire, dates et durées d'interruption."
+        )
+
+    if activity == "Activité totalement arrêtée":
+        recommendations.append(
+            "Arrêt total : préciser les dates, salariés concernés et heures chômées ; déposer "
+            "la demande dans les 30 jours suivant le placement en activité partielle."
+        )
+    elif activity == "Activité fortement réduite":
+        recommendations.append(
+            "Réduction forte : quantifier la baisse, identifier les salariés et les heures réellement chômées."
+        )
+
+    recommendations.extend([
+        "L'activité partielle ne couvre pas une fermeture volontaire sans impossibilité objectivée.",
+        "Tous les salariés de droit privé peuvent être concernés, y compris les apprentis.",
+        "Chaque demande est examinée au cas par cas par l'administration.",
+    ])
+    return recommendations
+
+
+def build_personalized_activity_fiche(
+    base_fiche: dict[str, Any],
+    situation: dict[str, Any],
+) -> dict[str, Any]:
+    fiche = dict(base_fiche)
+    fiche["todo"] = build_activity_recommendations(situation) + [
+        "Déposer la demande sur activitepartielle.emploi.gouv.fr.",
+        "Informer les salariés et conserver les échanges avec l'administration.",
+    ]
+    return fiche
 
 
 # ============================================================
@@ -771,6 +861,173 @@ def draw_cover(
     )
 
 
+def draw_situation_page(
+    pdf: canvas.Canvas,
+    situation: dict[str, Any],
+    page_number: int,
+) -> None:
+    page_w, page_h = A4
+    margin = 34
+    content_w = page_w - 2 * margin
+
+    pdf.setFillColor(HexColor(CMA_BLUE))
+    pdf.rect(0, page_h - 88, page_w, 88, stroke=0, fill=1)
+    pdf.setFillColor(HexColor(CMA_RED))
+    pdf.rect(0, page_h - 7, page_w, 7, stroke=0, fill=1)
+    draw_logo_or_fallback(pdf, page_w - 170, page_h - 75, 132, 42)
+
+    pdf.setFillColor(white)
+    pdf.setFont("Helvetica-Bold", 20)
+    pdf.drawString(margin, page_h - 40, "Situation de l'entreprise")
+    pdf.setFillColor(HexColor("#D7E1ED"))
+    pdf.setFont("Helvetica", 9.5)
+    pdf.drawString(margin, page_h - 60, "Qualification rapide réalisée pendant l'appel")
+
+    # Résumé des réponses
+    y = page_h - 112
+    rows = [
+        ("Salariés", "Oui" if situation.get("salaries") else "Non"),
+        ("Sinistre direct", situation.get("sinistre_direct", "Non renseigné")),
+        ("Accès aux locaux", situation.get("acces_locaux", "Non renseigné")),
+        ("Niveau d'activité", situation.get("niveau_activite", "Non renseigné")),
+    ]
+    reasons = ", ".join(situation.get("causes_arret", [])) or "Aucune cause précisée"
+    rows.append(("Causes principales", reasons))
+
+    pdf.setFillColor(HexColor("#EEF3F8"))
+    pdf.roundRect(margin, y - 130, content_w, 130, 9, stroke=0, fill=1)
+    ry = y - 22
+    for label, value in rows:
+        pdf.setFillColor(HexColor(CMA_BLUE))
+        pdf.setFont("Helvetica-Bold", 8.5)
+        pdf.drawString(margin + 14, ry, label)
+        draw_wrapped(
+            pdf, str(value), margin + 125, ry, content_w - 145,
+            font_size=8.5, leading=10, max_lines=2
+        )
+        ry -= 23
+
+    # Recommandations ciblées
+    top = y - 155
+    pdf.setFillColor(HexColor(CMA_RED))
+    pdf.roundRect(margin, top - 26, content_w, 26, 6, stroke=0, fill=1)
+    pdf.setFillColor(white)
+    pdf.setFont("Helvetica-Bold", 11)
+    pdf.drawString(margin + 12, top - 18, "RECOMMANDATIONS PRIORITAIRES")
+
+    recs = build_activity_recommendations(situation)
+    current_y = top - 46
+    for rec in recs[:11]:
+        pdf.setFillColor(HexColor(CMA_RED))
+        pdf.circle(margin + 4, current_y + 3, 2, stroke=0, fill=1)
+        current_y = draw_wrapped(
+            pdf, rec, margin + 14, current_y, content_w - 18,
+            font_size=8.6, leading=10.7, max_lines=3
+        ) - 7
+
+    # Rappels officiels
+    box_y = 54
+    box_h = 124
+    pdf.setFillColor(HexColor("#FFF7E8"))
+    pdf.setStrokeColor(HexColor("#F0D7A5"))
+    pdf.roundRect(margin, box_y, content_w, box_h, 8, stroke=1, fill=1)
+    pdf.setFillColor(HexColor(CMA_AMBER))
+    pdf.setFont("Helvetica-Bold", 9.5)
+    pdf.drawString(margin + 12, box_y + box_h - 20, "REPÈRES DU DISPOSITIF D'ACTIVITÉ PARTIELLE")
+    reminders = [
+        "Demande en ligne sur le portail officiel ; dépôt rétroactif possible dans les 30 jours.",
+        "Dispositif possible pour les salariés de droit privé à temps plein ou partiel et les apprentis.",
+        "Lien direct obligatoire entre l'incendie, l'arrêté ou la situation exceptionnelle et la baisse d'activité.",
+        "Fermeture volontaire : absence de prise en charge au titre de l'activité partielle.",
+        "Taux publiés le 24/07/2026 : indemnité salarié 60 % du brut (minimum 9,74 €) ; "
+        "allocation employeur 36 % du brut (minimum 8,57 €), à revérifier au dépôt.",
+    ]
+    yy = box_y + box_h - 39
+    for item in reminders:
+        pdf.setFillColor(HexColor(CMA_AMBER))
+        pdf.circle(margin + 15, yy + 2, 1.5, stroke=0, fill=1)
+        yy = draw_wrapped(
+            pdf, item, margin + 23, yy, content_w - 35,
+            font_size=7.7, leading=9.1, max_lines=2
+        ) - 4
+
+    draw_footer(pdf, page_number, A4)
+
+
+def draw_cpsti_submission_box(
+    pdf: canvas.Canvas,
+    x: float,
+    y: float,
+    width: float,
+    height: float,
+) -> None:
+    """Encadré opérationnel avec les deux parcours de dépôt CPSTI."""
+    pdf.setFillColor(HexColor("#EEF3F8"))
+    pdf.setStrokeColor(HexColor("#C9D6E4"))
+    pdf.roundRect(x, y, width, height, 8, stroke=1, fill=1)
+
+    pdf.setFillColor(HexColor(CMA_BLUE))
+    pdf.setFont("Helvetica-Bold", 9.4)
+    pdf.drawString(x + 12, y + height - 18, "COMMENT TRANSMETTRE LA DEMANDE D'ACTION SOCIALE ?")
+
+    gap = 12
+    col_w = (width - 28 - gap) / 2
+    left_x = x + 12
+    right_x = left_x + col_w + gap
+    title_y = y + height - 38
+
+    for bx, title in [
+        (left_x, "Artisan, commerçant ou profession libérale"),
+        (right_x, "Micro-entrepreneur"),
+    ]:
+        pdf.setFillColor(HexColor(CMA_BLUE))
+        pdf.roundRect(bx, title_y - 21, col_w, 22, 5, stroke=0, fill=1)
+        pdf.setFillColor(white)
+        pdf.setFont("Helvetica-Bold", 7.5)
+        lines = wrap_canvas_text(pdf, title, "Helvetica-Bold", 7.5, col_w - 12)
+        ty = title_y - 9
+        for line in lines[:2]:
+            pdf.drawCentredString(bx + col_w / 2, ty, line)
+            ty -= 8
+
+    left_steps = [
+        "1. Se connecter à l'espace personnel sur urssaf.fr.",
+        "2. Ouvrir Messagerie.",
+        "3. Nouveau message > Un autre sujet.",
+        "4. Solliciter l'action sociale du CPSTI.",
+    ]
+    right_steps = [
+        "1. Se connecter sur autoentrepreneur.urssaf.fr.",
+        "2. Ouvrir Ma messagerie.",
+        "3. Nouvelle demande.",
+        "4. Une demande d'action sociale.",
+    ]
+
+    for bx, steps in [(left_x, left_steps), (right_x, right_steps)]:
+        sy = title_y - 36
+        for step in steps:
+            sy = draw_wrapped(
+                pdf, step, bx + 2, sy, col_w - 4,
+                font_size=7.2, leading=8.7, max_lines=2
+            ) - 3
+
+    pdf.setFillColor(HexColor(CMA_RED))
+    pdf.setFont("Helvetica-Bold", 7.5)
+    pdf.drawString(x + 12, y + 14, "À joindre :")
+    draw_wrapped(
+        pdf,
+        "explication de la situation, justificatif du sinistre, pertes ou dépenses urgentes, "
+        "éléments financiers récents et RIB.",
+        x + 62,
+        y + 14,
+        width - 74,
+        font_size=7.2,
+        leading=8.4,
+        max_lines=2,
+    )
+
+
+
 def draw_organisme_page(
     pdf: canvas.Canvas,
     nom: str,
@@ -865,14 +1122,27 @@ def draw_organisme_page(
 
     # Bloc inférieur fixe, suffisamment séparé des listes.
     bottom_y = 43
-    bottom_h = 112
+    bottom_h = 190 if nom == "URSSAF / CPSTI" else 112
     pdf.setFillColor(HexColor("#FFF7E8"))
     pdf.setStrokeColor(HexColor("#F0D7A5"))
     pdf.roundRect(margin, bottom_y, content_w, bottom_h, 8, stroke=1, fill=1)
 
+    if nom == "URSSAF / CPSTI":
+        draw_cpsti_submission_box(
+            pdf,
+            margin + 8,
+            bottom_y + 47,
+            content_w - 16,
+            130,
+        )
+
     pdf.setFillColor(HexColor(CMA_AMBER))
     pdf.setFont("Helvetica-Bold", 9.2)
-    pdf.drawString(margin + 12, bottom_y + bottom_h - 18, "POINTS DE VIGILANCE")
+    vigilance_title_y = (
+        bottom_y + 35 if nom == "URSSAF / CPSTI"
+        else bottom_y + bottom_h - 18
+    )
+    pdf.drawString(margin + 12, vigilance_title_y, "POINTS DE VIGILANCE")
 
     vigilance_gap = 16
     vigilance_w = (content_w - 26 - vigilance_gap) / 2
@@ -880,7 +1150,11 @@ def draw_organisme_page(
         column = index % 2
         row = index // 2
         vx = margin + 14 + column * (vigilance_w + vigilance_gap)
-        vy = bottom_y + bottom_h - 38 - row * 31
+        vy = (
+            bottom_y + 18 - row * 19
+            if nom == "URSSAF / CPSTI"
+            else bottom_y + bottom_h - 38 - row * 31
+        )
         pdf.setFillColor(HexColor(CMA_AMBER))
         pdf.circle(vx + 2, vy + 2, 1.6, stroke=0, fill=1)
         draw_wrapped(
@@ -894,19 +1168,21 @@ def draw_organisme_page(
             max_lines=3,
         )
 
-    pdf.setFillColor(HexColor(CMA_BLUE))
-    pdf.setFont("Helvetica-Bold", 7.5)
-    pdf.drawString(margin + 12, bottom_y + 12, "Contact / démarche :")
-    draw_wrapped(
-        pdf,
-        fiche["contact"],
-        margin + 90,
-        bottom_y + 12,
-        content_w - 102,
-        font_size=7.5,
-        leading=8.5,
-        max_lines=2,
-    )
+    contact_y = bottom_y + 12 if nom != "URSSAF / CPSTI" else bottom_y + 3
+    if nom != "URSSAF / CPSTI":
+        pdf.setFillColor(HexColor(CMA_BLUE))
+        pdf.setFont("Helvetica-Bold", 7.5)
+        pdf.drawString(margin + 12, contact_y, "Contact / démarche :")
+        draw_wrapped(
+            pdf,
+            fiche["contact"],
+            margin + 90,
+            contact_y,
+            content_w - 102,
+            font_size=7.5,
+            leading=8.5,
+            max_lines=2,
+        )
 
     # Bouton principal vers un portail officiel, lorsqu'il existe.
     action_url = fiche.get("action_url")
@@ -1024,6 +1300,7 @@ def generate_pdf(
     selected: list[str],
     entreprise: str,
     conseiller: str,
+    situation: dict[str, Any],
 ) -> bytes:
     buffer = io.BytesIO()
     pdf = canvas.Canvas(buffer, pagesize=A4)
@@ -1038,11 +1315,19 @@ def generate_pdf(
     draw_cover(pdf, selected, entreprise, conseiller, date_edition)
     pdf.showPage()
 
-    # Toutes les pages restent en A4 portrait.
+    # Page de qualification et recommandations personnalisées.
     page_number = 2
+    draw_situation_page(pdf, situation, page_number)
+    pdf.showPage()
+    page_number += 1
+
+    # Toutes les pages restent en A4 portrait.
     for nom in selected:
         pdf.setPageSize(A4)
-        draw_organisme_page(pdf, nom, ORGANISMES[nom], page_number)
+        fiche = ORGANISMES[nom]
+        if nom == "Activité partielle / DREETS":
+            fiche = build_personalized_activity_fiche(fiche, situation)
+        draw_organisme_page(pdf, nom, fiche, page_number)
         pdf.showPage()
         page_number += 1
 
@@ -1277,11 +1562,10 @@ st.markdown(
             <div class="cma-eyebrow">CMA Nouvelle-Aquitaine · Gironde</div>
             <h1>CMA Réflexe Incendie</h1>
             <p>
-                Sélectionnez les organismes concernés, consultez les démarches
-                et transmettez à l'artisan une ressource claire en complément de l'appel.
-                Les fiches « Protection des salariés / fumées » et « Activité partielle »
-                intègrent les recommandations exceptionnelles publiées par l'État en juillet 2026.
-                avec le chef d'entreprise, puis générez un dossier PDF prêt à transmettre.
+                Qualifiez la situation en quelques secondes, sélectionnez les fiches utiles
+                et transmettez à l'artisan un guide personnalisé. Les recommandations
+                relatives aux fumées et à l'activité partielle reprennent largement les
+                documents officiels diffusés en Nouvelle-Aquitaine en juillet 2026.
             </p>
         </div>
         {logo_html}
@@ -1318,9 +1602,78 @@ with col2:
 st.markdown(
     """
     <div class="section-card">
-        <div class="section-title">2. Sélectionner les organismes</div>
+        <div class="section-title">2. Qualifier rapidement la situation</div>
         <p class="section-help">
-            Cochez uniquement les interlocuteurs utiles à la situation de l'entreprise.
+            Quelques réponses suffisent pour personnaliser les recommandations,
+            notamment lorsque l'entreprise emploie des salariés.
+        </p>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+q1, q2 = st.columns(2)
+with q1:
+    salaries = st.toggle("L'entreprise emploie au moins un salarié", value=False)
+    sinistre_direct = st.radio(
+        "L'entreprise est-elle directement sinistrée ?",
+        ["Oui", "Non"],
+        horizontal=True,
+    )
+with q2:
+    acces_locaux = st.selectbox(
+        "Accès aux locaux",
+        ["Accessible", "Partiellement accessible", "Accès interdit", "Zone évacuée"],
+    )
+    niveau_activite = st.selectbox(
+        "Niveau actuel d'activité",
+        [
+            "Activité normale",
+            "Activité légèrement réduite",
+            "Activité fortement réduite",
+            "Activité totalement arrêtée",
+        ],
+    )
+
+causes_arret: list[str] = []
+if salaries and niveau_activite != "Activité normale":
+    causes_arret = st.multiselect(
+        "Pourquoi les salariés ne peuvent-ils pas travailler normalement ?",
+        [
+            "Locaux ou outil de production endommagés",
+            "Fumées / qualité de l'air",
+            "Accès interdit ou évacuation",
+            "Coupure d'électricité / réseau",
+            "Rupture d'approvisionnement",
+            "Baisse ou absence de clientèle",
+            "Autre conséquence directe",
+        ],
+        placeholder="Sélectionnez une ou plusieurs causes",
+    )
+
+situation = {
+    "salaries": salaries,
+    "sinistre_direct": sinistre_direct,
+    "acces_locaux": acces_locaux,
+    "niveau_activite": niveau_activite,
+    "causes_arret": causes_arret,
+}
+
+if salaries and niveau_activite in {
+    "Activité fortement réduite",
+    "Activité totalement arrêtée",
+}:
+    st.info(
+        "La fiche Activité partielle est recommandée. Le PDF précisera le motif "
+        "et les justificatifs selon la situation décrite."
+    )
+
+st.markdown(
+    """
+    <div class="section-card">
+        <div class="section-title">3. Sélectionner les fiches utiles</div>
+        <p class="section-help">
+            La qualification personnalise le rapport mais ne remplace pas le choix du conseiller.
         </p>
     </div>
     """,
@@ -1334,7 +1687,23 @@ for idx, (nom, fiche) in enumerate(ORGANISMES.items()):
     with selection_cols[idx % 2]:
         if st.checkbox(
             f"{fiche['icone']} {nom}",
-            value=(nom == "Assurance"),
+            value=(
+                nom == "Assurance"
+                or (nom == "URSSAF / CPSTI" and niveau_activite != "Activité normale")
+                or (
+                    nom == "Protection des salariés / fumées"
+                    and salaries
+                    and "Fumées / qualité de l'air" in causes_arret
+                )
+                or (
+                    nom == "Activité partielle / DREETS"
+                    and salaries
+                    and niveau_activite in {
+                        "Activité fortement réduite",
+                        "Activité totalement arrêtée",
+                    }
+                )
+            ),
             key=f"select_{nom}",
         ):
             selected.append(nom)
@@ -1354,7 +1723,7 @@ m3.metric("Documents à prévoir", total_documents)
 st.markdown(
     """
     <div class="section-card">
-        <div class="section-title">3. Consulter la feuille de route</div>
+        <div class="section-title">4. Consulter la feuille de route</div>
         <p class="section-help">
             Les cases peuvent être cochées pendant l'échange. Leur état n'est pas conservé
             après fermeture ou rechargement de la page.
@@ -1446,7 +1815,7 @@ for nom in selected:
 st.markdown(
     """
     <div class="section-card">
-        <div class="section-title">4. Générer le dossier PDF</div>
+        <div class="section-title">5. Générer le dossier PDF</div>
         <p class="section-help">
             Le document contient une couverture puis une page en portrait par organisme.
             Les cases sont interactives : elles peuvent être cochées et enregistrées sans impression.
@@ -1456,7 +1825,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-pdf_bytes = generate_pdf(selected, entreprise, conseiller)
+pdf_bytes = generate_pdf(selected, entreprise, conseiller, situation)
 filename = f"CMA_Reflexe_Incendie_{safe_filename(entreprise)}_{datetime.now():%Y%m%d}.pdf"
 
 st.download_button(
