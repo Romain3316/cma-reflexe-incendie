@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 import base64
@@ -527,6 +526,7 @@ def draw_checkbox_list(
     leading: float = 10.8,
     gap: float = 5.0,
     checkbox_size: float = 10,
+    max_lines: int | None = None,
 ) -> float:
     """Dessine une liste lisible avec de vraies cases PDF cliquables.
 
@@ -537,6 +537,12 @@ def draw_checkbox_list(
     for index, item in enumerate(items):
         text_width = width - checkbox_size - 10
         lines = wrap_canvas_text(pdf, item, "Helvetica", font_size, text_width)
+        if max_lines is not None and len(lines) > max_lines:
+            lines = lines[:max_lines]
+            last = lines[-1].rstrip(" .")
+            while stringWidth(last + "...", "Helvetica", font_size) > text_width and last:
+                last = last[:-1]
+            lines[-1] = last.rstrip() + "..."
 
         # Le champ est aligné sur la première ligne de texte.
         field_y = y - checkbox_size + 2
@@ -961,31 +967,36 @@ def draw_cpsti_submission_box(
     width: float,
     height: float,
 ) -> None:
-    """Encadré opérationnel avec les deux parcours de dépôt CPSTI."""
+    """Encadré opérationnel avec deux parcours de dépôt clairement séparés."""
     pdf.setFillColor(HexColor("#EEF3F8"))
     pdf.setStrokeColor(HexColor("#C9D6E4"))
     pdf.roundRect(x, y, width, height, 8, stroke=1, fill=1)
 
     pdf.setFillColor(HexColor(CMA_BLUE))
-    pdf.setFont("Helvetica-Bold", 9.4)
-    pdf.drawString(x + 12, y + height - 18, "COMMENT TRANSMETTRE LA DEMANDE D'ACTION SOCIALE ?")
+    pdf.setFont("Helvetica-Bold", 9.0)
+    pdf.drawString(
+        x + 12,
+        y + height - 17,
+        "COMMENT TRANSMETTRE LA DEMANDE D'ACTION SOCIALE ?",
+    )
 
     gap = 12
     col_w = (width - 28 - gap) / 2
     left_x = x + 12
     right_x = left_x + col_w + gap
-    title_y = y + height - 38
+    banner_y = y + height - 46
+    banner_h = 25
 
     for bx, title in [
         (left_x, "Artisan, commerçant ou profession libérale"),
         (right_x, "Micro-entrepreneur"),
     ]:
         pdf.setFillColor(HexColor(CMA_BLUE))
-        pdf.roundRect(bx, title_y - 21, col_w, 22, 5, stroke=0, fill=1)
+        pdf.roundRect(bx, banner_y, col_w, banner_h, 5, stroke=0, fill=1)
         pdf.setFillColor(white)
-        pdf.setFont("Helvetica-Bold", 7.5)
-        lines = wrap_canvas_text(pdf, title, "Helvetica-Bold", 7.5, col_w - 12)
-        ty = title_y - 9
+        pdf.setFont("Helvetica-Bold", 7.2)
+        lines = wrap_canvas_text(pdf, title, "Helvetica-Bold", 7.2, col_w - 12)
+        ty = banner_y + 15
         for line in lines[:2]:
             pdf.drawCentredString(bx + col_w / 2, ty, line)
             ty -= 8
@@ -1003,29 +1014,175 @@ def draw_cpsti_submission_box(
         "4. Une demande d'action sociale.",
     ]
 
+    steps_top = banner_y - 15
     for bx, steps in [(left_x, left_steps), (right_x, right_steps)]:
-        sy = title_y - 36
+        sy = steps_top
         for step in steps:
             sy = draw_wrapped(
-                pdf, step, bx + 2, sy, col_w - 4,
-                font_size=7.2, leading=8.7, max_lines=2
-            ) - 3
+                pdf,
+                step,
+                bx + 2,
+                sy,
+                col_w - 4,
+                font_size=6.9,
+                leading=8.1,
+                max_lines=2,
+            ) - 2
 
+    join_y = y + 15
     pdf.setFillColor(HexColor(CMA_RED))
-    pdf.setFont("Helvetica-Bold", 7.5)
-    pdf.drawString(x + 12, y + 14, "À joindre :")
+    pdf.setFont("Helvetica-Bold", 7.3)
+    pdf.drawString(x + 12, join_y, "À joindre :")
     draw_wrapped(
         pdf,
         "explication de la situation, justificatif du sinistre, pertes ou dépenses urgentes, "
         "éléments financiers récents et RIB.",
-        x + 62,
-        y + 14,
-        width - 74,
-        font_size=7.2,
-        leading=8.4,
+        x + 59,
+        join_y,
+        width - 71,
+        font_size=6.9,
+        leading=8.0,
         max_lines=2,
     )
 
+
+def draw_activity_guide_page(
+    pdf: canvas.Canvas,
+    situation: dict[str, Any],
+    page_number: int,
+) -> None:
+    """Page complémentaire sans cases, consacrée aux recommandations du guide de l'État."""
+    page_w, page_h = A4
+    margin = 30
+    content_w = page_w - 2 * margin
+
+    pdf.setFillColor(HexColor(CMA_BLUE))
+    pdf.rect(0, page_h - 84, page_w, 84, stroke=0, fill=1)
+    pdf.setFillColor(HexColor(CMA_RED))
+    pdf.rect(0, page_h - 7, page_w, 7, stroke=0, fill=1)
+    draw_logo_or_fallback(pdf, page_w - 168, page_h - 72, 132, 42)
+
+    pdf.setFillColor(white)
+    pdf.setFont("Helvetica-Bold", 15.5)
+    draw_wrapped(
+        pdf,
+        "Activité partielle : recommandations détaillées",
+        margin,
+        page_h - 35,
+        page_w - margin - 205,
+        font_name="Helvetica-Bold",
+        font_size=15.5,
+        leading=17,
+        max_lines=2,
+        color="#FFFFFF",
+    )
+    pdf.setFont("Helvetica", 8.8)
+    pdf.setFillColor(HexColor("#D7E1ED"))
+    pdf.drawString(
+        margin,
+        page_h - 56,
+        "Synthèse opérationnelle du guide de l'État - incendies exceptionnels",
+    )
+
+    sections = [
+        (
+            "1. AVANT LE RECOURS À L'ACTIVITÉ PARTIELLE",
+            [
+                "Étudier et tracer les solutions de poursuite d'activité : télétravail, "
+                "délocalisation temporaire, adaptation des horaires et rotation des équipes.",
+                "Réduire les déplacements et les activités physiques extérieures lorsque la qualité de l'air est dégradée.",
+                "Privilégier les mesures collectives ; utiliser des FFP2 adaptés lorsque l'exposition extérieure prolongée ne peut être évitée.",
+                "Associer le service de prévention et de santé au travail pour les salariés vulnérables.",
+                "Conserver les consignes internes, relevés de qualité de l'air et preuves des mesures testées.",
+            ],
+        ),
+        (
+            "2. CHOISIR LE MOTIF ET JUSTIFIER LA SITUATION",
+            [
+                "Entreprise directement sinistrée : documenter les dommages et vérifier le motif "
+                "« Sinistre ou intempéries de caractère exceptionnel ».",
+                "Zone évacuée ou interdite d'accès sans dommage direct : joindre l'arrêté et vérifier le motif "
+                "« Toute autre circonstance de caractère exceptionnel ».",
+                "Fumées : démontrer que le travail reste impossible malgré les mesures de prévention et d'organisation.",
+                "Impact économique indirect : prouver la baisse significative d'activité et son lien direct avec les incendies.",
+                "Une fermeture volontaire ou de simple convenance ne permet pas la prise en charge.",
+            ],
+        ),
+        (
+            "3. PIÈCES À CONSERVER",
+            [
+                "Déclaration de sinistre, photos, rapports des secours et arrêtés d'évacuation ou d'interdiction.",
+                "Liste des salariés concernés, période demandée et nombre prévisionnel d'heures chômées.",
+                "Comparatifs de chiffre d'affaires, annulations, commandes perdues et messages de clients ou fournisseurs.",
+                "Avis de coupure, preuves de rupture d'approvisionnement et impossibilité de solution alternative.",
+                "Évaluation des risques, consignes aux salariés et échanges avec la médecine du travail.",
+                "Avis du CSE lorsque l'entreprise est concernée, ainsi que les échanges avec l'administration.",
+            ],
+        ),
+        (
+            "4. DÉPÔT ET SUIVI",
+            [
+                "Déposer la demande sur le portail officiel ; un dépôt rétroactif est possible dans les 30 jours.",
+                "Tous les salariés de droit privé peuvent être concernés, y compris les apprentis, selon leur situation.",
+                "Informer les salariés de la mesure et conserver les décisions, accusés de réception et demandes de pièces.",
+                "Les taux, minima et durées d'autorisation doivent être revérifiés sur le portail au moment du dépôt.",
+                "Chaque dossier est examiné au regard du motif invoqué et des justificatifs produits.",
+            ],
+        ),
+    ]
+
+    y = page_h - 108
+    for title, items in sections:
+        pdf.setFillColor(HexColor(CMA_BLUE))
+        pdf.roundRect(margin, y - 22, content_w, 22, 5, stroke=0, fill=1)
+        pdf.setFillColor(white)
+        pdf.setFont("Helvetica-Bold", 9.2)
+        pdf.drawString(margin + 10, y - 15, title)
+        y -= 35
+
+        for item in items:
+            pdf.setFillColor(HexColor(CMA_RED))
+            pdf.circle(margin + 5, y + 2, 1.7, stroke=0, fill=1)
+            y = draw_wrapped(
+                pdf,
+                item,
+                margin + 14,
+                y,
+                content_w - 20,
+                font_size=7.7,
+                leading=9.2,
+                max_lines=3,
+            ) - 5
+        y -= 5
+
+    button_w = 250
+    button_h = 23
+    button_x = page_w - margin - button_w
+    button_y = 42
+    pdf.setFillColor(HexColor(CMA_BLUE))
+    pdf.roundRect(button_x, button_y, button_w, button_h, 6, stroke=0, fill=1)
+    pdf.setFillColor(white)
+    pdf.setFont("Helvetica-Bold", 8.3)
+    pdf.drawCentredString(
+        button_x + button_w / 2,
+        button_y + 7.5,
+        "ACCÉDER AU PORTAIL DE L'ACTIVITÉ PARTIELLE",
+    )
+    pdf.linkURL(
+        ACTIVITE_PARTIELLE_URL,
+        (button_x, button_y, button_x + button_w, button_y + button_h),
+        relative=0,
+        thickness=0,
+    )
+
+    pdf.setFillColor(HexColor(CMA_MUTED))
+    pdf.setFont("Helvetica-Oblique", 6.4)
+    pdf.drawString(
+        margin,
+        47,
+        "Source : ministère du Travail et DREETS - documents diffusés en juillet 2026.",
+    )
+    draw_footer(pdf, page_number, A4)
 
 
 def draw_organisme_page(
@@ -1034,19 +1191,17 @@ def draw_organisme_page(
     fiche: dict[str, Any],
     page_number: int,
 ) -> None:
-    """Fiche organisme en A4 portrait, avec deux colonnes équilibrées."""
+    """Fiche organisme en A4 portrait, avec espaces réservés et sans chevauchement."""
     pdf.setPageSize(A4)
     page_w, page_h = A4
     margin = 28
     content_w = page_w - 2 * margin
 
-    # En-tête compact pour préserver la place utile.
     header_h = 84
     pdf.setFillColor(HexColor(CMA_BLUE))
     pdf.rect(0, page_h - header_h, page_w, header_h, stroke=0, fill=1)
     pdf.setFillColor(HexColor(CMA_RED))
     pdf.rect(0, page_h - 7, page_w, 7, stroke=0, fill=1)
-
     draw_logo_or_fallback(pdf, page_w - 168, page_h - 72, 132, 42)
 
     pdf.setFillColor(white)
@@ -1056,19 +1211,10 @@ def draw_organisme_page(
     pdf.setFillColor(HexColor("#D7E1ED"))
     pdf.drawString(margin, page_h - 58, fiche["sous_titre"])
 
-    # Objectif
     objective_top = page_h - 102
     objective_h = 50
     pdf.setFillColor(HexColor("#EEF3F8"))
-    pdf.roundRect(
-        margin,
-        objective_top - objective_h,
-        content_w,
-        objective_h,
-        8,
-        stroke=0,
-        fill=1,
-    )
+    pdf.roundRect(margin, objective_top - objective_h, content_w, objective_h, 8, stroke=0, fill=1)
     pdf.setFillColor(HexColor(CMA_BLUE))
     pdf.setFont("Helvetica-Bold", 9.4)
     pdf.drawString(margin + 12, objective_top - 17, "OBJECTIF")
@@ -1078,222 +1224,236 @@ def draw_organisme_page(
         margin + 78,
         objective_top - 17,
         content_w - 92,
-        font_size=8.8,
-        leading=10.5,
+        font_size=8.6,
+        leading=10.2,
         max_lines=3,
     )
 
-    # Deux colonnes en portrait. Les retours à la ligne sont calculés et espacés.
+    # Réservation explicite du bas de page.
+    if nom == "URSSAF / CPSTI":
+        bottom_h = 220
+    elif nom == "Activité partielle / DREETS":
+        bottom_h = 142
+    else:
+        bottom_h = 118
+
+    bottom_y = 43
+    safe_top = bottom_y + bottom_h + 10
+
     col_gap = 18
     col_w = (content_w - col_gap) / 2
     left_x = margin
     right_x = margin + col_w + col_gap
     section_y = objective_top - objective_h - 22
 
+    # Réduction automatique des cases pour les pages denses.
+    dense = max(len(fiche["todo"]), len(fiche["documents"])) >= 9
+    cpsti = nom == "URSSAF / CPSTI"
+    activity = nom == "Activité partielle / DREETS"
+
+    font_size = 7.5 if dense else 8.1
+    leading = 8.9 if dense else 9.8
+    gap = 3.0 if dense else 4.0
+    checkbox_size = 8.2 if dense else 9.0
+    max_lines = 2 if dense else 3
+
+    todo_items = list(fiche["todo"])
+    doc_items = list(fiche["documents"])
+
+    # La page complémentaire conserve les recommandations détaillées.
+    if activity:
+        todo_items = todo_items[:7]
+        doc_items = doc_items[:7]
+        font_size = 7.6
+        leading = 9.0
+        gap = 3.2
+        checkbox_size = 8.3
+        max_lines = 2
+
     left_y = draw_section_title(pdf, "TO-DO LIST", left_x, section_y, col_w, CMA_RED)
     left_y = draw_checkbox_list(
         pdf,
-        fiche["todo"],
+        todo_items,
         left_x + 9,
         left_y,
         col_w - 18,
         field_prefix=f"p{page_number}_{nom}_todo",
-        font_size=8.4,
-        leading=10.4,
-        gap=4.7,
-        checkbox_size=9.5,
+        font_size=font_size,
+        leading=leading,
+        gap=gap,
+        checkbox_size=checkbox_size,
+        max_lines=max_lines,
     )
 
-    right_y = draw_section_title(
-        pdf, "DOCUMENTS À PRÉPARER", right_x, section_y, col_w, CMA_BLUE
-    )
+    right_y = draw_section_title(pdf, "DOCUMENTS À PRÉPARER", right_x, section_y, col_w, CMA_BLUE)
     right_y = draw_checkbox_list(
         pdf,
-        fiche["documents"],
+        doc_items,
         right_x + 9,
         right_y,
         col_w - 18,
         field_prefix=f"p{page_number}_{nom}_documents",
-        font_size=8.4,
-        leading=10.4,
-        gap=4.7,
-        checkbox_size=9.5,
+        font_size=font_size,
+        leading=leading,
+        gap=gap,
+        checkbox_size=checkbox_size,
+        max_lines=max_lines,
     )
 
-    # Bloc inférieur fixe, suffisamment séparé des listes.
-    bottom_y = 43
-    bottom_h = 190 if nom == "URSSAF / CPSTI" else 112
+    # Masque blanc de sécurité : empêche tout élément de liste de pénétrer dans le bloc inférieur.
+    pdf.setFillColor(white)
+    pdf.rect(0, 0, page_w, safe_top - 2, stroke=0, fill=1)
+
     pdf.setFillColor(HexColor("#FFF7E8"))
     pdf.setStrokeColor(HexColor("#F0D7A5"))
     pdf.roundRect(margin, bottom_y, content_w, bottom_h, 8, stroke=1, fill=1)
 
-    if nom == "URSSAF / CPSTI":
+    if cpsti:
         draw_cpsti_submission_box(
             pdf,
             margin + 8,
-            bottom_y + 47,
+            bottom_y + 90,
             content_w - 16,
-            130,
+            120,
         )
 
-    pdf.setFillColor(HexColor(CMA_AMBER))
-    pdf.setFont("Helvetica-Bold", 9.2)
-    vigilance_title_y = (
-        bottom_y + 35 if nom == "URSSAF / CPSTI"
-        else bottom_y + bottom_h - 18
-    )
-    pdf.drawString(margin + 12, vigilance_title_y, "POINTS DE VIGILANCE")
-
-    vigilance_gap = 16
-    vigilance_w = (content_w - 26 - vigilance_gap) / 2
-    for index, point in enumerate(fiche["vigilance"]):
-        column = index % 2
-        row = index // 2
-        vx = margin + 14 + column * (vigilance_w + vigilance_gap)
-        vy = (
-            bottom_y + 18 - row * 19
-            if nom == "URSSAF / CPSTI"
-            else bottom_y + bottom_h - 38 - row * 31
-        )
         pdf.setFillColor(HexColor(CMA_AMBER))
-        pdf.circle(vx + 2, vy + 2, 1.6, stroke=0, fill=1)
-        draw_wrapped(
-            pdf,
-            point,
-            vx + 9,
-            vy,
-            vigilance_w - 10,
-            font_size=7.5,
-            leading=8.8,
-            max_lines=3,
-        )
+        pdf.setFont("Helvetica-Bold", 8.7)
+        pdf.drawString(margin + 12, bottom_y + 75, "POINTS DE VIGILANCE")
 
-    contact_y = bottom_y + 12 if nom != "URSSAF / CPSTI" else bottom_y + 3
-    if nom != "URSSAF / CPSTI":
+        vigilance_w = (content_w - 42) / 2
+        for index, point in enumerate(fiche["vigilance"][:4]):
+            column = index % 2
+            row = index // 2
+            vx = margin + 14 + column * (vigilance_w + 14)
+            vy = bottom_y + 58 - row * 20
+            pdf.setFillColor(HexColor(CMA_AMBER))
+            pdf.circle(vx + 2, vy + 2, 1.5, stroke=0, fill=1)
+            draw_wrapped(
+                pdf,
+                point,
+                vx + 9,
+                vy,
+                vigilance_w - 12,
+                font_size=6.5,
+                leading=7.6,
+                max_lines=2,
+            )
+
+        form_url = fiche.get("form_url")
+        if form_url:
+            button_w = 210
+            button_h = 20
+            button_x = page_w - margin - button_w
+            button_y = bottom_y + 7
+            pdf.setFillColor(HexColor(CMA_RED))
+            pdf.roundRect(button_x, button_y, button_w, button_h, 5, stroke=0, fill=1)
+            pdf.setFillColor(white)
+            pdf.setFont("Helvetica-Bold", 7.6)
+            pdf.drawCentredString(
+                button_x + button_w / 2,
+                button_y + 6.5,
+                "TÉLÉCHARGER LE FORMULAIRE D'AIDE CPSTI",
+            )
+            pdf.linkURL(
+                form_url,
+                (button_x, button_y, button_x + button_w, button_y + button_h),
+                relative=0,
+                thickness=0,
+            )
+
+    else:
+        pdf.setFillColor(HexColor(CMA_AMBER))
+        pdf.setFont("Helvetica-Bold", 8.8)
+        pdf.drawString(margin + 12, bottom_y + bottom_h - 17, "POINTS DE VIGILANCE")
+
+        vigilance_items = fiche["vigilance"][:6] if activity else fiche["vigilance"][:4]
+        vigilance_gap = 14
+        vigilance_w = (content_w - 28 - vigilance_gap) / 2
+        row_step = 24 if activity else 27
+
+        for index, point in enumerate(vigilance_items):
+            column = index % 2
+            row = index // 2
+            vx = margin + 14 + column * (vigilance_w + vigilance_gap)
+            vy = bottom_y + bottom_h - 35 - row * row_step
+            pdf.setFillColor(HexColor(CMA_AMBER))
+            pdf.circle(vx + 2, vy + 2, 1.5, stroke=0, fill=1)
+            draw_wrapped(
+                pdf,
+                point,
+                vx + 9,
+                vy,
+                vigilance_w - 10,
+                font_size=6.8 if activity else 7.0,
+                leading=8.0 if activity else 8.3,
+                max_lines=2,
+            )
+
+        action_url = fiche.get("action_url")
+        button_w = 222 if action_url else 0
+        button_h = 22
+        button_y = bottom_y + 7
+
+        # Contact limité à la zone située à gauche du bouton.
+        contact_x = margin + 12
+        contact_label_w = 72
+        contact_max_x = (
+            page_w - margin - button_w - 18
+            if action_url
+            else page_w - margin
+        )
+        contact_text_w = max(90, contact_max_x - (contact_x + contact_label_w))
+
         pdf.setFillColor(HexColor(CMA_BLUE))
-        pdf.setFont("Helvetica-Bold", 7.5)
-        pdf.drawString(margin + 12, contact_y, "Contact / démarche :")
+        pdf.setFont("Helvetica-Bold", 6.8)
+        pdf.drawString(contact_x, bottom_y + 14, "Contact / démarche :")
         draw_wrapped(
             pdf,
             fiche["contact"],
-            margin + 90,
-            contact_y,
-            content_w - 102,
-            font_size=7.5,
-            leading=8.5,
+            contact_x + contact_label_w,
+            bottom_y + 14,
+            contact_text_w,
+            font_size=6.6,
+            leading=7.6,
             max_lines=2,
         )
 
-    # Bouton principal vers un portail officiel, lorsqu'il existe.
-    action_url = fiche.get("action_url")
-    if action_url:
-        button_w = 222
-        button_h = 22
-        button_x = page_w - margin - button_w
-        button_y = bottom_y + 6
+        if action_url:
+            button_x = page_w - margin - button_w
+            pdf.setFillColor(HexColor(CMA_BLUE))
+            pdf.roundRect(button_x, button_y, button_w, button_h, 6, stroke=0, fill=1)
+            pdf.setFillColor(white)
+            pdf.setFont("Helvetica-Bold", 8.0)
+            pdf.drawCentredString(
+                button_x + button_w / 2,
+                button_y + 7.0,
+                fiche.get("action_label", "ACCÉDER AU SITE OFFICIEL").upper(),
+            )
+            pdf.linkURL(
+                action_url,
+                (button_x, button_y, button_x + button_w, button_y + button_h),
+                relative=0,
+                thickness=0,
+            )
 
-        pdf.setFillColor(HexColor("#FFF7E8"))
-        pdf.rect(
-            button_x - 5,
-            button_y - 4,
-            button_w + 10,
-            button_h + 8,
-            stroke=0,
-            fill=1,
-        )
-        pdf.setFillColor(HexColor(CMA_BLUE))
-        pdf.roundRect(
-            button_x,
-            button_y,
-            button_w,
-            button_h,
-            6,
-            stroke=0,
-            fill=1,
-        )
-        pdf.setFillColor(white)
-        pdf.setFont("Helvetica-Bold", 8.2)
-        pdf.drawCentredString(
-            button_x + button_w / 2,
-            button_y + 7.1,
-            fiche.get("action_label", "ACCÉDER AU SITE OFFICIEL").upper(),
-        )
-        pdf.linkURL(
-            action_url,
-            (
-                button_x,
-                button_y,
-                button_x + button_w,
-                button_y + button_h,
-            ),
-            relative=0,
-            thickness=0,
-        )
-
-    # Bouton cliquable vers un formulaire officiel, lorsqu'il existe.
-    form_url = fiche.get("form_url")
-    if form_url:
-        button_w = 210
-        button_h = 18
-        button_x = page_w - margin - button_w
-        button_y = bottom_y + 7
-
-        # Masque propre derrière le bouton dans le bloc inférieur.
-        pdf.setFillColor(HexColor("#FFF7E8"))
-        pdf.rect(
-            button_x - 4,
-            button_y - 3,
-            button_w + 8,
-            button_h + 6,
-            stroke=0,
-            fill=1,
-        )
-
-        pdf.setFillColor(HexColor(CMA_RED))
-        pdf.roundRect(
-            button_x,
-            button_y,
-            button_w,
-            button_h,
-            5,
-            stroke=0,
-            fill=1,
-        )
-        pdf.setFillColor(white)
-        pdf.setFont("Helvetica-Bold", 7.8)
-        pdf.drawCentredString(
-            button_x + button_w / 2,
-            button_y + 5.6,
-            "TÉLÉCHARGER LE FORMULAIRE D'AIDE CPSTI",
-        )
-
-        # Zone cliquable du formulaire PDF.
-        pdf.linkURL(
-            form_url,
-            (
-                button_x,
-                button_y,
-                button_x + button_w,
-                button_y + button_h,
-            ),
-            relative=0,
-            thickness=0,
-        )
-
-    # Alerte discrète uniquement si un contenu exceptionnellement long descend trop bas.
-    safe_limit = bottom_y + bottom_h + 8
-    if min(left_y, right_y) < safe_limit:
-        pdf.setFillColor(HexColor(CMA_RED))
-        pdf.setFont("Helvetica-Bold", 6.5)
-        pdf.drawRightString(
-            page_w - margin,
-            safe_limit - 2,
-            "Contenu dense : certains éléments gagneraient à être raccourcis.",
-        )
-
+    # Source positionnée au-dessus du pied de page, sans croiser le contenu.
     pdf.setFillColor(HexColor(CMA_MUTED))
-    pdf.setFont("Helvetica-Oblique", 6.6)
-    pdf.drawRightString(page_w - margin, 34, fiche["source"])
+    pdf.setFont("Helvetica-Oblique", 6.1)
+    source_text = fiche["source"]
+    draw_wrapped(
+        pdf,
+        source_text,
+        margin,
+        35,
+        content_w,
+        font_name="Helvetica-Oblique",
+        font_size=6.1,
+        leading=7.0,
+        max_lines=1,
+        color=CMA_MUTED,
+    )
+
     draw_footer(pdf, page_number, A4)
 
 def generate_pdf(
@@ -1330,6 +1490,11 @@ def generate_pdf(
         draw_organisme_page(pdf, nom, fiche, page_number)
         pdf.showPage()
         page_number += 1
+
+        if nom == "Activité partielle / DREETS":
+            draw_activity_guide_page(pdf, situation, page_number)
+            pdf.showPage()
+            page_number += 1
 
     pdf.save()
     buffer.seek(0)
