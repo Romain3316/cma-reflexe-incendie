@@ -41,6 +41,11 @@ CUMP_PHONE_DISPLAY = "0800 719 912"
 CUMP_PHONE_LINK = "tel:+33800719912"
 
 ACTIVITE_PARTIELLE_URL = "https://activitepartielle.emploi.gouv.fr/aparts/"
+FAQ_INCENDIES_URL = (
+    "https://travail-emploi.gouv.fr/faq-accompagnement-des-entreprises-"
+    "dans-le-cadre-des-incendies-exceptionnels"
+)
+ATMO_FRANCE_URL = "https://www.atmo-france.org/"
 
 LOGO_CANDIDATES = [
     Path("logo_cma_na_gironde.png"),
@@ -227,47 +232,115 @@ ORGANISMES: dict[str, dict[str, Any]] = {
         ),
         "source": "Note DGFIP Nouvelle-Aquitaine / Gironde du 24 juillet 2026.",
     },
+    "Protection des salariés / fumées": {
+        "icone": "😷",
+        "sous_titre": "Santé, sécurité et organisation du travail pendant les épisodes de fumées",
+        "objectif": (
+            "Évaluer l'exposition aux fumées et mettre en place des mesures de prévention "
+            "adaptées avant de maintenir ou de reprendre l'activité des salariés."
+        ),
+        "todo": [
+            "Suivre l'évolution de la qualité de l'air et des recommandations des autorités.",
+            "Évaluer les risques liés aux fumées selon les postes, les lieux et la durée d'exposition.",
+            "Privilégier la délocalisation temporaire de l'activité dans un environnement non pollué.",
+            "Mettre en place le télétravail lorsque les postes et l'organisation le permettent.",
+            "Limiter les déplacements professionnels et les activités physiques en extérieur.",
+            "En extérieur, supprimer les efforts physiques non indispensables et organiser des rotations.",
+            "Maintenir portes et fenêtres fermées lorsque l'air extérieur est dégradé.",
+            "Arrêter les systèmes faisant entrer de l'air extérieur non filtré lorsque cela est pertinent.",
+            "Solliciter le médecin du travail pour les salariés particulièrement vulnérables.",
+            "Fournir des masques FFP2 adaptés lorsque l'exposition extérieure prolongée ne peut être évitée.",
+            "Former les salariés au bon ajustement, au retrait et au remplacement du masque.",
+            "Mettre à disposition de l'eau et permettre un lavage régulier des mains et du visage.",
+            "Mettre à jour l'évaluation des risques et conserver la trace des mesures décidées.",
+        ],
+        "documents": [
+            "Évaluation des risques ou mise à jour du document unique.",
+            "Informations locales sur la qualité de l'air et recommandations sanitaires.",
+            "Liste des postes exposés et durée prévisible d'exposition.",
+            "Consignes écrites communiquées aux salariés.",
+            "Échanges avec le service de prévention et de santé au travail.",
+            "Justificatifs d'achat et de remise des équipements de protection.",
+            "Organisation du télétravail, des rotations ou de la délocalisation temporaire.",
+            "Éléments démontrant les mesures prises avant une éventuelle demande d'activité partielle.",
+        ],
+        "vigilance": [
+            "Il n'existe pas de seuil spécifique du Code du travail pour les particules fines liées aux fumées.",
+            "Les protections collectives et les mesures d'organisation doivent être privilégiées.",
+            "Le masque FFP2 complète les mesures de prévention mais ne remplace pas la réduction de l'exposition.",
+            "Un masque doit être bien ajusté et remplacé lorsqu'il est humide, sale ou difficile à respirer.",
+            "En intérieur, la priorité porte sur la limitation de l'entrée d'air pollué et l'organisation du travail.",
+            "Les situations individuelles de santé doivent être traitées avec le médecin du travail.",
+        ],
+        "contact": (
+            "Service de prévention et de santé au travail de l'entreprise ; "
+            "suivi de la qualité de l'air sur Atmo France."
+        ),
+        "source": (
+            "FAQ du ministère du Travail et des Solidarités : "
+            "« Accompagnement des entreprises dans le cadre des incendies exceptionnels », juillet 2026."
+        ),
+        "action_url": FAQ_INCENDIES_URL,
+        "action_label": "Consulter la FAQ officielle incendies",
+        "action_caption": "Recommandations de prévention et modalités de recours à l'activité partielle.",
+        "secondary_url": ATMO_FRANCE_URL,
+        "secondary_label": "Consulter la qualité de l’air",
+    },
     "Activité partielle / DREETS": {
         "icone": "👥",
         "sous_titre": "Réduction ou suspension temporaire de l'activité des salariés",
         "objectif": (
-            "Demander l'activité partielle lorsque l'activité est directement affectée "
-            "par une mesure administrative liée aux incendies."
+            "Préserver l'emploi lorsque l'incendie, une interdiction d'accès ou les conséquences "
+            "directes de la crise empêchent temporairement les salariés de travailler."
         ),
         "todo": [
-            "Identifier l'arrêté préfectoral ou municipal affectant directement l'activité.",
-            "Vérifier qu'il existe un lien direct entre la mesure administrative et la baisse d'activité.",
-            "Ne pas présenter une fermeture volontaire comme motif de recours.",
-            "Réunir les éléments démontrant la réduction ou la suspension temporaire d'activité.",
-            "Déposer la demande sur le portail de l'activité partielle.",
-            "Utiliser le motif « Toute autre circonstance de caractère exceptionnel ».",
-            "Déposer la demande au plus tard dans les 30 jours suivant le placement des salariés.",
-            "Conserver les justificatifs et répondre aux éventuelles demandes de l'administration.",
+            "Rechercher d'abord les solutions permettant de poursuivre l'activité : télétravail, délocalisation ou adaptation des horaires.",
+            "Identifier précisément la situation de l'entreprise : sinistre direct, zone évacuée, interdiction d'accès ou impact indirect.",
+            "Pour une entreprise directement sinistrée, utiliser le motif « Sinistre ou intempéries de caractère exceptionnel ».",
+            "Pour une entreprise en zone évacuée ou interdite d'accès sans dommage direct, utiliser le motif « Toute autre circonstance de caractère exceptionnel ».",
+            "Si l'activité est impossible en raison des fumées, démontrer que les mesures de prévention recommandées ont été mises en œuvre.",
+            "Pour un impact économique indirect, réunir les éléments prouvant la baisse significative d'activité.",
+            "Déposer la demande sur le portail officiel de l'activité partielle.",
+            "La demande peut être déposée rétroactivement dans les 30 jours suivant le placement des salariés en activité partielle.",
+            "Indiquer la période, les salariés concernés et le nombre prévisionnel d'heures chômées.",
+            "Conserver les arrêtés, preuves du sinistre, consignes sanitaires et justificatifs économiques.",
+            "Informer les salariés des mesures prises et conserver les échanges avec l'administration.",
         ],
         "documents": [
             "SIRET et coordonnées de l'établissement concerné.",
-            "Arrêté préfectoral ou municipal applicable.",
-            "Note expliquant le lien direct avec la baisse d'activité.",
-            "Liste des salariés concernés, y compris apprentis le cas échéant.",
+            "Déclaration de sinistre, photos ou attestation établissant les dommages directs.",
+            "Arrêté préfectoral ou municipal d'évacuation ou d'interdiction d'accès.",
+            "Note expliquant le lien entre l'incendie et l'impossibilité ou la réduction d'activité.",
+            "Mesures de prévention mises en œuvre lorsque les fumées empêchent la poursuite du travail.",
+            "Liste des salariés concernés, apprentis compris le cas échéant.",
             "Période et nombre prévisionnel d'heures chômées.",
-            "Éléments de paie nécessaires à la demande.",
-            "Justificatifs de baisse ou d'impossibilité temporaire d'activité.",
-            "Décisions et échanges avec l'administration.",
+            "Éléments de paie nécessaires au dépôt et à l'indemnisation.",
+            "Justificatifs de baisse d'activité, d'annulations ou de rupture d'approvisionnement.",
+            "Avis du CSE lorsque l'entreprise est concernée.",
+            "Décisions et échanges avec la DDETS ou l'administration.",
         ],
         "vigilance": [
-            "La fermeture volontaire n'ouvre pas droit au dispositif.",
-            "Chaque demande est examinée au cas par cas.",
-            "Le dispositif concerne les salariés de droit privé à temps plein ou partiel et les apprentis.",
-            "Les taux et montants doivent être vérifiés au moment du dépôt.",
+            "L'activité partielle n'est pas automatique : la situation est appréciée au regard du motif invoqué et des justificatifs.",
+            "Une entreprise directement sinistrée peut bénéficier d'une autorisation pouvant aller jusqu'à six mois, renouvelable selon la durée du sinistre.",
+            "Pour une entreprise en zone évacuée ou interdite d'accès, l'autorisation initiale est limitée à trois mois, renouvelable dans la limite réglementaire.",
+            "Une simple recommandation sanitaire ne suffit pas toujours : il faut démontrer que l'activité reste impossible malgré les mesures de prévention.",
+            "Les entreprises seulement affectées indirectement sont examinées au cas par cas.",
+            "Avant le dépôt, vérifier les alternatives possibles avec les salariés : télétravail, congés convenus ou récupération des heures perdues.",
+            "Les taux d'indemnité et d'allocation doivent être vérifiés sur le portail officiel au moment du dépôt.",
         ],
         "contact": (
-            "Portail : activitepartielle.emploi.gouv.fr - "
+            "Portail officiel de l'activité partielle - "
             "Gironde : ddets-activite-partielle@gironde.gouv.fr."
         ),
-        "source": "Fiche DREETS Nouvelle-Aquitaine du 24 juillet 2026.",
+        "source": (
+            "FAQ du ministère du Travail et des Solidarités : "
+            "« Accompagnement des entreprises dans le cadre des incendies exceptionnels », juillet 2026."
+        ),
         "action_url": ACTIVITE_PARTIELLE_URL,
         "action_label": "Accéder au portail de l’activité partielle",
         "action_caption": "Déposer et suivre la demande sur le portail officiel de l’ASP.",
+        "secondary_url": FAQ_INCENDIES_URL,
+        "secondary_label": "Lire les conditions exceptionnelles incendies",
     },
 }
 
@@ -1205,6 +1278,9 @@ st.markdown(
             <h1>CMA Réflexe Incendie</h1>
             <p>
                 Sélectionnez les organismes concernés, consultez les démarches
+                et transmettez à l'artisan une ressource claire en complément de l'appel.
+                Les fiches « Protection des salariés / fumées » et « Activité partielle »
+                intègrent les recommandations exceptionnelles publiées par l'État en juillet 2026.
                 avec le chef d'entreprise, puis générez un dossier PDF prêt à transmettre.
             </p>
         </div>
@@ -1340,6 +1416,13 @@ for nom in selected:
             )
             if fiche.get("action_caption"):
                 st.caption(fiche["action_caption"])
+
+        if fiche.get("secondary_url"):
+            st.link_button(
+                f"↗️ {fiche.get('secondary_label', 'Consulter la ressource complémentaire')}",
+                fiche["secondary_url"],
+                use_container_width=True,
+            )
 
         st.markdown(
             f"""
