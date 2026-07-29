@@ -3,6 +3,7 @@ from __future__ import annotations
 import base64
 import html
 import io
+import hashlib
 import textwrap
 from datetime import datetime
 from pathlib import Path
@@ -346,6 +347,91 @@ ORGANISMES: dict[str, dict[str, Any]] = {
 # ============================================================
 # PERSONNALISATION SELON LA SITUATION
 # ============================================================
+
+def get_recommended_organismes(situation: dict[str, Any]) -> set[str]:
+    """Détermine les fiches à présélectionner à partir du mini-diagnostic."""
+    recommended: set[str] = {
+        "Assurance",
+        "Assurances complémentaires",
+    }
+
+    salaries = bool(situation.get("salaries"))
+    direct = situation.get("sinistre_direct") == "Oui"
+    access = situation.get("acces_locaux", "Accessible")
+    activity = situation.get("niveau_activite", "Activité normale")
+    reasons = set(situation.get("causes_arret", []))
+
+    activity_reduced = activity != "Activité normale"
+    activity_strongly_impacted = activity in {
+        "Activité fortement réduite",
+        "Activité totalement arrêtée",
+    }
+    access_restricted = access in {
+        "Partiellement accessible",
+        "Accès interdit",
+        "Zone évacuée",
+    }
+
+    economic_reasons = {
+        "Coupure d'électricité / réseau",
+        "Rupture d'approvisionnement",
+        "Baisse ou absence de clientèle",
+    }
+    work_prevention_reasons = {
+        "Locaux ou outil de production endommagés",
+        "Fumées / qualité de l'air",
+        "Accès interdit ou évacuation",
+        "Coupure d'électricité / réseau",
+        "Rupture d'approvisionnement",
+        "Baisse ou absence de clientèle",
+        "Autre conséquence directe",
+    }
+
+    # Cotisations et aide sociale : utile dès qu'il existe un impact réel
+    # sur l'activité ou un sinistre direct.
+    if activity_reduced or direct or access_restricted:
+        recommended.add("URSSAF / CPSTI")
+
+    # Fiscalité / CCSF : à privilégier lorsque la baisse d'activité ou les
+    # tensions de trésorerie sont importantes.
+    if activity_strongly_impacted or bool(reasons & economic_reasons):
+        recommended.add("DGFIP / SIE / CDED / CCSF")
+
+    # Protection des salariés : fiche utile en présence de salariés lorsque
+    # les fumées ou les conditions d'accès peuvent affecter leur sécurité.
+    if salaries and (
+        "Fumées / qualité de l'air" in reasons
+        or access_restricted
+    ):
+        recommended.add("Protection des salariés / fumées")
+
+    # Activité partielle : seulement en présence de salariés et lorsqu'une
+    # impossibilité ou une forte réduction du travail est objectivée.
+    if salaries and (
+        activity_strongly_impacted
+        or access in {"Accès interdit", "Zone évacuée"}
+        or (direct and activity_reduced)
+        or bool(reasons & work_prevention_reasons)
+    ):
+        recommended.add("Activité partielle / DREETS")
+
+    return recommended
+
+
+def diagnostic_signature(situation: dict[str, Any]) -> str:
+    """Empreinte stable utilisée pour actualiser les cases uniquement si le diagnostic change."""
+    reasons = "|".join(sorted(situation.get("causes_arret", [])))
+    raw = "||".join(
+        [
+            str(bool(situation.get("salaries"))),
+            str(situation.get("sinistre_direct", "")),
+            str(situation.get("acces_locaux", "")),
+            str(situation.get("niveau_activite", "")),
+            reasons,
+        ]
+    )
+    return hashlib.sha1(raw.encode("utf-8")).hexdigest()
+
 
 def build_activity_recommendations(situation: dict[str, Any]) -> list[str]:
     """Construit les recommandations prioritaires selon les réponses du conseiller."""
@@ -1833,17 +1919,38 @@ if salaries and niveau_activite in {
         "et les justificatifs selon la situation décrite."
     )
 
+recommended_organismes = get_recommended_organismes(situation)
+current_diagnostic_signature = diagnostic_signature(situation)
+previous_diagnostic_signature = st.session_state.get("_diagnostic_signature")
+
+# Les cases sont recalculées uniquement lorsque le mini-diagnostic change.
+# Le conseiller peut ensuite modifier librement la sélection sans que ses
+# choix soient écrasés à chaque interaction dans l'application.
+if previous_diagnostic_signature != current_diagnostic_signature:
+    for organisme_name in ORGANISMES:
+        st.session_state[f"select_{organisme_name}"] = (
+            organisme_name in recommended_organismes
+        )
+    st.session_state["_diagnostic_signature"] = current_diagnostic_signature
+
 st.markdown(
     """
     <div class="section-card">
         <div class="section-title">3. Sélectionner les fiches utiles</div>
         <p class="section-help">
-            La qualification personnalise le rapport mais ne remplace pas le choix du conseiller.
+            Les fiches ont été présélectionnées à partir du mini-diagnostic.
+            Le conseiller reste libre de modifier cette sélection.
         </p>
     </div>
     """,
     unsafe_allow_html=True,
 )
+
+if recommended_organismes:
+    recommended_labels = " · ".join(
+        name for name in ORGANISMES if name in recommended_organismes
+    )
+    st.caption(f"Fiches recommandées : {recommended_labels}")
 
 selection_cols = st.columns(2)
 selected: list[str] = []
@@ -1852,23 +1959,6 @@ for idx, (nom, fiche) in enumerate(ORGANISMES.items()):
     with selection_cols[idx % 2]:
         if st.checkbox(
             f"{fiche['icone']} {nom}",
-            value=(
-                nom == "Assurance"
-                or (nom == "URSSAF / CPSTI" and niveau_activite != "Activité normale")
-                or (
-                    nom == "Protection des salariés / fumées"
-                    and salaries
-                    and "Fumées / qualité de l'air" in causes_arret
-                )
-                or (
-                    nom == "Activité partielle / DREETS"
-                    and salaries
-                    and niveau_activite in {
-                        "Activité fortement réduite",
-                        "Activité totalement arrêtée",
-                    }
-                )
-            ),
             key=f"select_{nom}",
         ):
             selected.append(nom)
