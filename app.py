@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 
 import base64
@@ -51,6 +52,31 @@ PREFECTURE_EVACUATION_URL = (
     "https://www.gironde.gouv.fr/Actualites/Breves/"
     "Incendie-Foire-aux-questions/Foire-aux-questions-incendie"
 )
+
+# Actualités visibles uniquement dans l'interface collaborateurs.
+ACTUALITES = [
+    {
+        "date": "30 juillet 2026",
+        "badge": "Aide d'urgence",
+        "titre": (
+            "Incendies en Gironde et dans les Landes : le Gouvernement annonce "
+            "une aide d'urgence rehaussée pour certains travailleurs indépendants"
+        ),
+        "resume": (
+            "Une nouvelle annonce concerne l'accompagnement de certains travailleurs "
+            "indépendants touchés par les incendies. Consultez l'article avant l'appel "
+            "afin de vérifier le public concerné, les conditions et les modalités de demande."
+        ),
+        "source": "Sud Ouest",
+        "url": (
+            "https://www.sudouest.fr/economie/"
+            "incendies-en-gironde-et-dans-les-landes-le-gouvernement-annonce-"
+            "une-aide-d-urgence-rehaussee-pour-certains-travailleurs-independants-"
+            "30109577.php"
+        ),
+        "active": True,
+    },
+]
 
 LOGO_CANDIDATES = [
     Path("logo_cma_na_gironde.png"),
@@ -348,6 +374,38 @@ ORGANISMES: dict[str, dict[str, Any]] = {
         "secondary_label": "Lire les conditions exceptionnelles incendies",
     },
 }
+
+
+# ============================================================
+# ACTUALITÉS COLLABORATEURS
+# ============================================================
+
+def render_actualites() -> None:
+    """Affiche les actualités actives uniquement dans l'interface Streamlit."""
+    actualites_actives = [item for item in ACTUALITES if item.get("active", True)]
+    if not actualites_actives:
+        return
+
+    st.markdown("### Actualités à connaître avant les appels")
+    for index, actualite in enumerate(actualites_actives):
+        st.markdown(
+            f"""
+            <div class="actualite-card">
+                <div class="actualite-meta">
+                    <span class="actualite-badge">{actualite.get('badge', 'Actualité')}</span>
+                    {actualite.get('date', '')} · Source : {actualite.get('source', '')}
+                </div>
+                <div class="actualite-title">{actualite.get('titre', '')}</div>
+                <p class="actualite-summary">{actualite.get('resume', '')}</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        st.link_button(
+            "Lire l'actualité", actualite["url"],
+            use_container_width=True, key=f"actualite_link_{index}"
+        )
+    st.caption("Cet encart est réservé aux collaborateurs et n'apparaît pas dans le rapport PDF.")
 
 
 # ============================================================
@@ -1759,6 +1817,27 @@ st.markdown(
             font-weight: 850;
         }}
 
+        .actualite-card {{
+            background: linear-gradient(135deg, #eef4fa 0%, #ffffff 100%);
+            border: 1px solid #cbd8e6;
+            border-left: 6px solid var(--cma-red);
+            border-radius: 14px;
+            padding: 1rem 1.1rem;
+            margin: 0.7rem 0 0.45rem 0;
+            box-shadow: 0 6px 18px rgba(20, 55, 91, 0.08);
+        }}
+        .actualite-meta {{ color: #607084; font-size: 0.82rem; margin-bottom: 0.35rem; }}
+        .actualite-badge {{
+            display: inline-block; background: var(--cma-blue); color: white;
+            border-radius: 999px; padding: 0.18rem 0.55rem; margin-right: 0.45rem;
+            font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+        }}
+        .actualite-title {{
+            color: var(--cma-blue); font-size: 1.02rem; line-height: 1.35;
+            font-weight: 750; margin: 0.25rem 0 0.35rem 0;
+        }}
+        .actualite-summary {{ color: #34465a; font-size: 0.91rem; line-height: 1.45; margin: 0; }}
+
         .section-help {{
             margin: 0;
             color: var(--cma-muted);
@@ -1895,6 +1974,8 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
+
+render_actualites()
 
 st.markdown(
     """
