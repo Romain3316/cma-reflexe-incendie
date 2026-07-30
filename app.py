@@ -403,34 +403,128 @@ ORGANISMES: dict[str, dict[str, Any]] = {
 # ACTUALITÉS COLLABORATEURS
 # ============================================================
 
+def get_actualite_illustration(badge: str) -> str:
+    """Retourne une illustration SVG légère et embarquée dans l'application."""
+    badge_normalise = (badge or "").lower()
+
+    if "aide" in badge_normalise or "dispositif" in badge_normalise:
+        return """
+        <svg viewBox="0 0 360 150" role="img" aria-label="Illustration d'une aide financière pour un artisan">
+            <defs>
+                <linearGradient id="aidBg" x1="0" x2="1">
+                    <stop offset="0%" stop-color="#dceafb"/>
+                    <stop offset="100%" stop-color="#f5f9fd"/>
+                </linearGradient>
+            </defs>
+            <rect x="2" y="2" width="356" height="146" rx="18" fill="url(#aidBg)"/>
+            <circle cx="78" cy="60" r="25" fill="#173b65"/>
+            <rect x="52" y="88" width="54" height="31" rx="13" fill="#2e5d8f"/>
+            <rect x="139" y="29" width="144" height="94" rx="10" fill="#ffffff" stroke="#9db6cf" stroke-width="2"/>
+            <rect x="158" y="47" width="74" height="7" rx="3.5" fill="#173b65"/>
+            <rect x="158" y="63" width="102" height="6" rx="3" fill="#bfd0e1"/>
+            <rect x="158" y="77" width="88" height="6" rx="3" fill="#bfd0e1"/>
+            <circle cx="264" cy="98" r="23" fill="#e5252a"/>
+            <text x="264" y="106" text-anchor="middle" font-size="24" font-family="Arial, sans-serif" font-weight="700" fill="#ffffff">€</text>
+            <path d="M106 81 C126 76, 134 72, 144 68" fill="none" stroke="#173b65" stroke-width="5" stroke-linecap="round"/>
+            <path d="M117 79 L128 91 L144 69" fill="none" stroke="#2f6d4f" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        """
+
+    return """
+    <svg viewBox="0 0 360 150" role="img" aria-label="Illustration d'une réouverture de route et d'un retour dans les communes">
+        <defs>
+            <linearGradient id="roadBg" x1="0" x2="1">
+                <stop offset="0%" stop-color="#e3f2ea"/>
+                <stop offset="100%" stop-color="#edf5fb"/>
+            </linearGradient>
+        </defs>
+        <rect x="2" y="2" width="356" height="146" rx="18" fill="url(#roadBg)"/>
+        <circle cx="299" cy="35" r="16" fill="#f3c85b"/>
+        <path d="M0 112 L80 68 L138 111 Z" fill="#6f9d77"/>
+        <path d="M82 112 L168 57 L244 112 Z" fill="#527d62"/>
+        <rect x="38" y="82" width="66" height="38" rx="4" fill="#ffffff" stroke="#173b65" stroke-width="2"/>
+        <path d="M33 85 L71 55 L109 85 Z" fill="#e5252a"/>
+        <rect x="62" y="96" width="17" height="24" fill="#bfd0e1"/>
+        <path d="M139 150 C151 118, 166 96, 180 81 C195 99, 212 121, 226 150 Z" fill="#4f5964"/>
+        <path d="M178 96 L181 128" stroke="#ffffff" stroke-width="4" stroke-dasharray="8 8"/>
+        <rect x="225" y="49" width="79" height="40" rx="6" fill="#173b65"/>
+        <text x="264.5" y="74" text-anchor="middle" font-size="22" font-family="Arial, sans-serif" font-weight="700" fill="#ffffff">A63</text>
+        <rect x="261" y="89" width="7" height="35" fill="#657789"/>
+        <circle cx="311" cy="108" r="19" fill="#ffffff" stroke="#2f6d4f" stroke-width="4"/>
+        <path d="M302 108 L309 115 L321 101" fill="none" stroke="#2f6d4f" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    """
+
+
+def get_actualite_badge_class(badge: str) -> str:
+    badge_normalise = (badge or "").lower()
+    if "alerte" in badge_normalise:
+        return "alert"
+    if "évolution" in badge_normalise or "retour" in badge_normalise:
+        return "evolution"
+    return ""
+
+
 def render_actualites() -> None:
-    """Affiche les actualités actives uniquement dans l'interface Streamlit."""
-    actualites_actives = [item for item in ACTUALITES if item.get("active", True)]
+    """Affiche un carrousel illustré dans l'interface Streamlit uniquement."""
+    actualites_actives = [
+        item for item in ACTUALITES if item.get("active", True)
+    ]
     if not actualites_actives:
         return
 
-    st.markdown("### Actualités à connaître avant les appels")
-    for index, actualite in enumerate(actualites_actives):
-        st.markdown(
+    cards_html = []
+
+    for actualite in actualites_actives:
+        badge = actualite.get("badge", "Actualité")
+        badge_class = get_actualite_badge_class(badge)
+        illustration = get_actualite_illustration(badge)
+
+        cards_html.append(
             f"""
-            <div class="actualite-card">
-                <div class="actualite-meta">
-                    <span class="actualite-badge">{actualite.get('badge', 'Actualité')}</span>
-                    {actualite.get('date', '')} · Source : {actualite.get('source', '')}
+            <article class="news-card">
+                <div class="news-visual">{illustration}</div>
+                <div class="news-body">
+                    <div class="news-meta">
+                        <span class="news-badge {badge_class}">{badge}</span>
+                        <span>{actualite.get("date", "")}</span>
+                    </div>
+                    <div class="news-title">{actualite.get("titre", "")}</div>
+                    <p class="news-summary">{actualite.get("resume", "")}</p>
+                    <div class="news-source">Source : {actualite.get("source", "")}</div>
                 </div>
-                <div class="actualite-title">{actualite.get('titre', '')}</div>
-                <p class="actualite-summary">{actualite.get('resume', '')}</p>
+            </article>
+            """
+        )
+
+    st.markdown(
+        f"""
+        <section class="news-shell">
+            <div class="news-heading-row">
+                <div class="news-heading">À la une pour les conseillers</div>
+                <div class="news-count">{len(actualites_actives)} actualité{"s" if len(actualites_actives) > 1 else ""}</div>
             </div>
-            """,
-            unsafe_allow_html=True,
-        )
-        st.link_button(
-            f"Consulter la source — {actualite.get('source', 'Actualité')}",
-            actualite["url"],
-            use_container_width=True,
-            key=f"actualite_link_{index}",
-        )
-    st.caption("Cet encart est réservé aux collaborateurs et n'apparaît pas dans le rapport PDF.")
+            <div class="news-carousel">
+                {''.join(cards_html)}
+            </div>
+            <div class="news-hint">
+                Faites défiler horizontalement pour consulter les informations.
+                Cet espace n'apparaît pas dans le PDF remis à l'entreprise.
+            </div>
+        </section>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    cols = st.columns(len(actualites_actives))
+    for index, (column, actualite) in enumerate(zip(cols, actualites_actives)):
+        with column:
+            st.link_button(
+                f"Consulter — {actualite.get('source', 'Source')}",
+                actualite["url"],
+                use_container_width=True,
+                key=f"actualite_link_{index}",
+            )
 
 
 # ============================================================
@@ -1841,27 +1935,164 @@ st.markdown(
             font-size: 1.25rem;
             font-weight: 850;
         }}
+        .news-shell {{
+            margin: 0.85rem 0 1.35rem 0;
+            padding: 1rem 1rem 0.8rem 1rem;
+            border-radius: 18px;
+            background: linear-gradient(180deg, #f6f9fc 0%, #eef4f9 100%);
+            border: 1px solid #dbe5ee;
+            box-shadow: 0 10px 28px rgba(18, 52, 86, 0.08);
+        }}
 
-        .actualite-card {{
-            background: linear-gradient(135deg, #eef4fa 0%, #ffffff 100%);
-            border: 1px solid #cbd8e6;
-            border-left: 6px solid var(--cma-red);
-            border-radius: 14px;
-            padding: 1rem 1.1rem;
-            margin: 0.7rem 0 0.45rem 0;
-            box-shadow: 0 6px 18px rgba(20, 55, 91, 0.08);
+        .news-heading-row {{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.7rem;
         }}
-        .actualite-meta {{ color: #607084; font-size: 0.82rem; margin-bottom: 0.35rem; }}
-        .actualite-badge {{
-            display: inline-block; background: var(--cma-blue); color: white;
-            border-radius: 999px; padding: 0.18rem 0.55rem; margin-right: 0.45rem;
-            font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+
+        .news-heading {{
+            color: #173b65;
+            font-size: 1.08rem;
+            font-weight: 800;
+            letter-spacing: -0.01em;
         }}
-        .actualite-title {{
-            color: var(--cma-blue); font-size: 1.02rem; line-height: 1.35;
-            font-weight: 750; margin: 0.25rem 0 0.35rem 0;
+
+        .news-count {{
+            color: #607084;
+            background: #ffffff;
+            border: 1px solid #d5e0ea;
+            border-radius: 999px;
+            padding: 0.2rem 0.55rem;
+            font-size: 0.76rem;
+            white-space: nowrap;
         }}
-        .actualite-summary {{ color: #34465a; font-size: 0.91rem; line-height: 1.45; margin: 0; }}
+
+        .news-carousel {{
+            display: flex;
+            gap: 1rem;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            padding: 0.15rem 0.1rem 0.55rem 0.1rem;
+            scrollbar-width: none;
+        }}
+
+        .news-carousel::-webkit-scrollbar {{
+            display: none;
+        }}
+
+        .news-card {{
+            flex: 0 0 min(430px, 88vw);
+            scroll-snap-align: start;
+            background: #ffffff;
+            border: 1px solid #d9e3ec;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 7px 20px rgba(16, 48, 80, 0.09);
+            transition: transform 0.18s ease, box-shadow 0.18s ease;
+        }}
+
+        .news-card:hover {{
+            transform: translateY(-4px) scale(1.01);
+            box-shadow: 0 14px 28px rgba(16, 48, 80, 0.14);
+        }}
+
+        .news-visual {{
+            min-height: 150px;
+            padding: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #eaf2fa 0%, #dceaf7 100%);
+            border-bottom: 1px solid #dbe5ee;
+        }}
+
+        .news-visual svg {{
+            width: 100%;
+            max-width: 330px;
+            height: 135px;
+        }}
+
+        .news-body {{
+            padding: 0.95rem 1rem 1rem 1rem;
+        }}
+
+        .news-meta {{
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            color: #6a798a;
+            font-size: 0.76rem;
+            margin-bottom: 0.5rem;
+        }}
+
+        .news-badge {{
+            display: inline-block;
+            background: #173b65;
+            color: white;
+            border-radius: 999px;
+            padding: 0.2rem 0.55rem;
+            font-size: 0.68rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }}
+
+        .news-badge.alert {{
+            background: #e5252a;
+        }}
+
+        .news-badge.evolution {{
+            background: #2f6d4f;
+        }}
+
+        .news-title {{
+            color: #173b65;
+            font-size: 1.02rem;
+            line-height: 1.35;
+            font-weight: 800;
+            margin: 0 0 0.5rem 0;
+        }}
+
+        .news-summary {{
+            color: #3f5062;
+            font-size: 0.88rem;
+            line-height: 1.47;
+            margin: 0;
+            min-height: 5.2rem;
+        }}
+
+        .news-source {{
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            margin-top: 0.75rem;
+            color: #173b65;
+            font-size: 0.79rem;
+            font-weight: 700;
+        }}
+
+        .news-hint {{
+            color: #738194;
+            font-size: 0.76rem;
+            margin-top: 0.45rem;
+        }}
+
+        @media (max-width: 700px) {{
+            .news-shell {{
+                padding: 0.8rem 0.75rem 0.7rem 0.75rem;
+            }}
+
+            .news-card {{
+                flex-basis: 92%;
+            }}
+
+            .news-summary {{
+                min-height: auto;
+            }}
+        }}
 
         .section-help {{
             margin: 0;
