@@ -2302,7 +2302,7 @@ st.markdown(
         }}
 
         .module-nav-intro {{
-            margin: 1.15rem 0 .65rem;
+            margin: 1.15rem 0 .7rem;
         }}
 
         .module-nav-kicker {{
@@ -2321,29 +2321,28 @@ st.markdown(
         }}
 
         .module-nav-subtitle {{
-            margin: .15rem 0 0;
+            margin: .15rem 0 .7rem;
             color: var(--cma-muted);
             font-size: .91rem;
         }}
 
-        div[data-testid="stRadio"][aria-label="Navigation"] > div {{
-            display: grid !important;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 16px;
+        /* Navigation en vraies cartes-boutons Streamlit. */
+        div[data-testid="stHorizontalBlock"] div[data-testid="column"] .stButton > button {{
+            min-height: 148px;
             width: 100%;
-        }}
-
-        div[data-testid="stRadio"][aria-label="Navigation"] label {{
-            position: relative;
-            min-height: 132px;
-            margin: 0 !important;
-            padding: 20px 18px 18px 18px !important;
+            padding: 20px 18px;
             border: 1px solid #D7E1EC;
             border-radius: 18px;
             background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFD 100%);
-            box-shadow: 0 8px 22px rgba(18, 52, 86, .07);
-            cursor: pointer;
-            overflow: hidden;
+            color: var(--cma-blue);
+            box-shadow: 0 8px 22px rgba(18, 52, 86, .08);
+            white-space: pre-line;
+            text-align: left;
+            justify-content: flex-start;
+            align-items: flex-start;
+            font-size: 1rem;
+            font-weight: 850;
+            line-height: 1.42;
             transition:
                 transform .18s ease,
                 box-shadow .18s ease,
@@ -2351,89 +2350,33 @@ st.markdown(
                 background .18s ease;
         }}
 
-        div[data-testid="stRadio"][aria-label="Navigation"] label:hover {{
+        div[data-testid="stHorizontalBlock"] div[data-testid="column"] .stButton > button:hover {{
             transform: translateY(-4px) scale(1.012);
             border-color: #9DB4CB;
-            box-shadow: 0 14px 30px rgba(18, 52, 86, .15);
+            color: var(--cma-blue);
+            box-shadow: 0 14px 30px rgba(18, 52, 86, .16);
         }}
 
-        div[data-testid="stRadio"][aria-label="Navigation"] label::before {{
-            display: block;
-            margin-bottom: 12px;
-            font-size: 2rem;
-            line-height: 1;
-        }}
-
-        div[data-testid="stRadio"][aria-label="Navigation"] label:nth-child(1)::before {{
-            content: "🤝";
-        }}
-
-        div[data-testid="stRadio"][aria-label="Navigation"] label:nth-child(2)::before {{
-            content: "🗺️";
-        }}
-
-        div[data-testid="stRadio"][aria-label="Navigation"] label:nth-child(3)::before {{
-            content: "📄";
-        }}
-
-        div[data-testid="stRadio"][aria-label="Navigation"] label::after {{
-            display: block;
-            margin-top: 6px;
-            color: #65768A;
-            font-size: .78rem;
-            line-height: 1.35;
-            font-weight: 500;
-        }}
-
-        div[data-testid="stRadio"][aria-label="Navigation"] label:nth-child(1)::after {{
-            content: "Qualifier la situation et préparer le guide entreprise.";
-        }}
-
-        div[data-testid="stRadio"][aria-label="Navigation"] label:nth-child(2)::after {{
-            content: "Visualiser les communes et les zones concernées.";
-        }}
-
-        div[data-testid="stRadio"][aria-label="Navigation"] label:nth-child(3)::after {{
-            content: "Ouvrir les attestations officielles par commune.";
-        }}
-
-        div[data-testid="stRadio"][aria-label="Navigation"] label p {{
-            color: var(--cma-blue) !important;
-            font-size: 1.03rem !important;
-            font-weight: 900 !important;
-            line-height: 1.15 !important;
-        }}
-
-        div[data-testid="stRadio"][aria-label="Navigation"] label > div:first-child {{
-            position: absolute;
-            top: 16px;
-            right: 16px;
-        }}
-
-        div[data-testid="stRadio"][aria-label="Navigation"] label:has(input:checked) {{
+        div[data-testid="stHorizontalBlock"] div[data-testid="column"] .stButton > button[kind="primary"] {{
             border-color: var(--cma-blue);
-            background:
-                linear-gradient(135deg, rgba(23, 59, 101, .98), rgba(34, 82, 132, .96));
-            box-shadow: 0 16px 34px rgba(23, 59, 101, .23);
+            background: linear-gradient(135deg, #173B65 0%, #285F96 100%);
+            color: white;
+            box-shadow: 0 16px 34px rgba(23, 59, 101, .24);
             transform: translateY(-2px);
         }}
 
-        div[data-testid="stRadio"][aria-label="Navigation"] label:has(input:checked) p,
-        div[data-testid="stRadio"][aria-label="Navigation"] label:has(input:checked)::after {{
-            color: white !important;
-        }}
-
-        div[data-testid="stRadio"][aria-label="Navigation"] label:has(input:checked)::after {{
-            opacity: .82;
+        div[data-testid="stHorizontalBlock"] div[data-testid="column"] .stButton > button[kind="primary"]:hover {{
+            color: white;
+            border-color: var(--cma-blue);
         }}
 
         @media (max-width: 760px) {{
-            div[data-testid="stRadio"][aria-label="Navigation"] > div {{
-                grid-template-columns: 1fr;
+            div[data-testid="stHorizontalBlock"] {{
+                flex-direction: column;
             }}
 
-            div[data-testid="stRadio"][aria-label="Navigation"] label {{
-                min-height: 112px;
+            div[data-testid="stHorizontalBlock"] div[data-testid="column"] .stButton > button {{
+                min-height: 118px;
             }}
         }}
         .news-shell {{
@@ -2726,20 +2669,61 @@ st.markdown(
         <div class="module-nav-kicker">Accès rapide</div>
         <div class="module-nav-title">Choisissez votre espace de travail</div>
         <div class="module-nav-subtitle">
-            Les outils sont séparés pour alléger la consultation et accéder plus vite à l'essentiel.
+            Accédez directement au module dont vous avez besoin.
         </div>
     </div>
     """,
     unsafe_allow_html=True,
 )
 
-navigation = st.radio(
-    "Navigation",
-    ["Accompagnement", "Cartographie", "Attestations d'évacuation"],
-    horizontal=True,
-    label_visibility="collapsed",
-    key="navigation_principale",
-)
+if "navigation_principale" not in st.session_state:
+    st.session_state.navigation_principale = "Accompagnement"
+
+nav_col1, nav_col2, nav_col3 = st.columns(3)
+
+with nav_col1:
+    if st.button(
+        "🤝  ACCOMPAGNEMENT\\n\\nQualifier la situation et préparer le guide entreprise",
+        key="nav_accompagnement",
+        type=(
+            "primary"
+            if st.session_state.navigation_principale == "Accompagnement"
+            else "secondary"
+        ),
+        use_container_width=True,
+    ):
+        st.session_state.navigation_principale = "Accompagnement"
+        st.rerun()
+
+with nav_col2:
+    if st.button(
+        "🗺️  CARTOGRAPHIE\\n\\nVisualiser les communes et les zones concernées",
+        key="nav_cartographie",
+        type=(
+            "primary"
+            if st.session_state.navigation_principale == "Cartographie"
+            else "secondary"
+        ),
+        use_container_width=True,
+    ):
+        st.session_state.navigation_principale = "Cartographie"
+        st.rerun()
+
+with nav_col3:
+    if st.button(
+        "📄  ATTESTATIONS\\n\\nOuvrir les attestations officielles par commune",
+        key="nav_attestations",
+        type=(
+            "primary"
+            if st.session_state.navigation_principale == "Attestations d'évacuation"
+            else "secondary"
+        ),
+        use_container_width=True,
+    ):
+        st.session_state.navigation_principale = "Attestations d'évacuation"
+        st.rerun()
+
+navigation = st.session_state.navigation_principale
 
 if navigation == "Cartographie":
     render_carte_incendie()
