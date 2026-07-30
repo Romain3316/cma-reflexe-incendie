@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 import base64
@@ -2301,6 +2300,142 @@ st.markdown(
             font-size: 1.25rem;
             font-weight: 850;
         }}
+
+        .module-nav-intro {{
+            margin: 1.15rem 0 .65rem;
+        }}
+
+        .module-nav-kicker {{
+            color: var(--cma-red);
+            font-size: .76rem;
+            font-weight: 900;
+            letter-spacing: .09em;
+            text-transform: uppercase;
+        }}
+
+        .module-nav-title {{
+            margin: .15rem 0 0;
+            color: var(--cma-blue);
+            font-size: 1.2rem;
+            font-weight: 900;
+        }}
+
+        .module-nav-subtitle {{
+            margin: .15rem 0 0;
+            color: var(--cma-muted);
+            font-size: .91rem;
+        }}
+
+        div[data-testid="stRadio"][aria-label="Navigation"] > div {{
+            display: grid !important;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+            width: 100%;
+        }}
+
+        div[data-testid="stRadio"][aria-label="Navigation"] label {{
+            position: relative;
+            min-height: 132px;
+            margin: 0 !important;
+            padding: 20px 18px 18px 18px !important;
+            border: 1px solid #D7E1EC;
+            border-radius: 18px;
+            background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFD 100%);
+            box-shadow: 0 8px 22px rgba(18, 52, 86, .07);
+            cursor: pointer;
+            overflow: hidden;
+            transition:
+                transform .18s ease,
+                box-shadow .18s ease,
+                border-color .18s ease,
+                background .18s ease;
+        }}
+
+        div[data-testid="stRadio"][aria-label="Navigation"] label:hover {{
+            transform: translateY(-4px) scale(1.012);
+            border-color: #9DB4CB;
+            box-shadow: 0 14px 30px rgba(18, 52, 86, .15);
+        }}
+
+        div[data-testid="stRadio"][aria-label="Navigation"] label::before {{
+            display: block;
+            margin-bottom: 12px;
+            font-size: 2rem;
+            line-height: 1;
+        }}
+
+        div[data-testid="stRadio"][aria-label="Navigation"] label:nth-child(1)::before {{
+            content: "🤝";
+        }}
+
+        div[data-testid="stRadio"][aria-label="Navigation"] label:nth-child(2)::before {{
+            content: "🗺️";
+        }}
+
+        div[data-testid="stRadio"][aria-label="Navigation"] label:nth-child(3)::before {{
+            content: "📄";
+        }}
+
+        div[data-testid="stRadio"][aria-label="Navigation"] label::after {{
+            display: block;
+            margin-top: 6px;
+            color: #65768A;
+            font-size: .78rem;
+            line-height: 1.35;
+            font-weight: 500;
+        }}
+
+        div[data-testid="stRadio"][aria-label="Navigation"] label:nth-child(1)::after {{
+            content: "Qualifier la situation et préparer le guide entreprise.";
+        }}
+
+        div[data-testid="stRadio"][aria-label="Navigation"] label:nth-child(2)::after {{
+            content: "Visualiser les communes et les zones concernées.";
+        }}
+
+        div[data-testid="stRadio"][aria-label="Navigation"] label:nth-child(3)::after {{
+            content: "Ouvrir les attestations officielles par commune.";
+        }}
+
+        div[data-testid="stRadio"][aria-label="Navigation"] label p {{
+            color: var(--cma-blue) !important;
+            font-size: 1.03rem !important;
+            font-weight: 900 !important;
+            line-height: 1.15 !important;
+        }}
+
+        div[data-testid="stRadio"][aria-label="Navigation"] label > div:first-child {{
+            position: absolute;
+            top: 16px;
+            right: 16px;
+        }}
+
+        div[data-testid="stRadio"][aria-label="Navigation"] label:has(input:checked) {{
+            border-color: var(--cma-blue);
+            background:
+                linear-gradient(135deg, rgba(23, 59, 101, .98), rgba(34, 82, 132, .96));
+            box-shadow: 0 16px 34px rgba(23, 59, 101, .23);
+            transform: translateY(-2px);
+        }}
+
+        div[data-testid="stRadio"][aria-label="Navigation"] label:has(input:checked) p,
+        div[data-testid="stRadio"][aria-label="Navigation"] label:has(input:checked)::after {{
+            color: white !important;
+        }}
+
+        div[data-testid="stRadio"][aria-label="Navigation"] label:has(input:checked)::after {{
+            opacity: .82;
+        }}
+
+        @media (max-width: 760px) {{
+            div[data-testid="stRadio"][aria-label="Navigation"] > div {{
+                grid-template-columns: 1fr;
+            }}
+
+            div[data-testid="stRadio"][aria-label="Navigation"] label {{
+                min-height: 112px;
+            }}
+        }}
         .news-shell {{
             margin: 0.85rem 0 1.35rem 0;
             padding: 1rem 1rem 0.8rem 1rem;
@@ -2584,6 +2719,19 @@ st.markdown(
 
 # Les actualités restent visibles en haut de l'application, avant les outils.
 render_actualites()
+
+st.markdown(
+    """
+    <div class="module-nav-intro">
+        <div class="module-nav-kicker">Accès rapide</div>
+        <div class="module-nav-title">Choisissez votre espace de travail</div>
+        <div class="module-nav-subtitle">
+            Les outils sont séparés pour alléger la consultation et accéder plus vite à l'essentiel.
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
 navigation = st.radio(
     "Navigation",
