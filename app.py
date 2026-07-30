@@ -413,7 +413,7 @@ def get_actualite_badge_class(badge: str) -> str:
 
 
 def render_actualites() -> None:
-    """Affiche un carrousel illustré dans l'interface Streamlit uniquement."""
+    """Affiche un carrousel HTML propre dans l'interface Streamlit uniquement."""
     actualites_actives = [
         item for item in ACTUALITES if item.get("active", True)
     ]
@@ -425,38 +425,42 @@ def render_actualites() -> None:
     for actualite in actualites_actives:
         badge = actualite.get("badge", "Actualité")
         badge_class = get_actualite_badge_class(badge)
-        cards_html.append(
-            f"""
-            <article class="news-card">
-                <div class="news-body">
-                    <div class="news-meta">
-                        <span class="news-badge {badge_class}">{badge}</span>
-                        <span>{actualite.get("date", "")}</span>
-                    </div>
-                    <div class="news-title">{actualite.get("titre", "")}</div>
-                    <p class="news-summary">{actualite.get("resume", "")}</p>
-                    <div class="news-source">Source : {actualite.get("source", "")}</div>
-                </div>
-            </article>
-            """
-        )
+
+        card_html = f"""
+<article class="news-card">
+  <div class="news-body">
+    <div class="news-meta">
+      <span class="news-badge {badge_class}">{badge}</span>
+      <span>{actualite.get("date", "")}</span>
+    </div>
+    <div class="news-title">{actualite.get("titre", "")}</div>
+    <p class="news-summary">{actualite.get("resume", "")}</p>
+    <div class="news-source">Source : {actualite.get("source", "")}</div>
+  </div>
+</article>
+"""
+        cards_html.append(textwrap.dedent(card_html).strip())
+
+    plural = "s" if len(actualites_actives) > 1 else ""
+
+    carousel_html = f"""
+<section class="news-shell">
+  <div class="news-heading-row">
+    <div class="news-heading">À la une pour les conseillers</div>
+    <div class="news-count">{len(actualites_actives)} actualité{plural}</div>
+  </div>
+  <div class="news-carousel">
+    {''.join(cards_html)}
+  </div>
+  <div class="news-hint">
+    Faites défiler horizontalement pour consulter les informations.
+    Cet espace n'apparaît pas dans le PDF remis à l'entreprise.
+  </div>
+</section>
+"""
 
     st.markdown(
-        f"""
-        <section class="news-shell">
-            <div class="news-heading-row">
-                <div class="news-heading">À la une pour les conseillers</div>
-                <div class="news-count">{len(actualites_actives)} actualité{"s" if len(actualites_actives) > 1 else ""}</div>
-            </div>
-            <div class="news-carousel">
-                {''.join(cards_html)}
-            </div>
-            <div class="news-hint">
-                Faites défiler horizontalement pour consulter les informations.
-                Cet espace n'apparaît pas dans le PDF remis à l'entreprise.
-            </div>
-        </section>
-        """,
+        textwrap.dedent(carousel_html).strip(),
         unsafe_allow_html=True,
     )
 
