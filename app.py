@@ -2252,7 +2252,7 @@ st.markdown(
             max-width: 680px;
             margin: 0;
             color: #EAF0F7;
-            font-size: 1rem;
+            font-size: .97rem;
             line-height: 1.5;
         }}
 
@@ -2328,7 +2328,7 @@ st.markdown(
 
         /* Navigation en vraies cartes-boutons Streamlit. */
         div[data-testid="stHorizontalBlock"] div[data-testid="column"] .stButton > button {{
-            min-height: 148px;
+            min-height: 132px;
             width: 100%;
             padding: 20px 18px;
             border: 1px solid #D7E1EC;
@@ -2357,17 +2357,21 @@ st.markdown(
             box-shadow: 0 14px 30px rgba(18, 52, 86, .16);
         }}
 
-        div[data-testid="stHorizontalBlock"] div[data-testid="column"] .stButton > button[kind="primary"] {{
-            border-color: var(--cma-blue);
-            background: linear-gradient(135deg, #173B65 0%, #285F96 100%);
-            color: white;
-            box-shadow: 0 16px 34px rgba(23, 59, 101, .24);
+        /* La carte active est forcée en bleu CMA, indépendamment du thème Streamlit. */
+        div[data-testid="stHorizontalBlock"] div[data-testid="column"] .stButton > button[kind="primary"],
+        div[data-testid="stHorizontalBlock"] div[data-testid="column"] .stButton > button[data-testid="stBaseButton-primary"] {{
+            border-color: #173B65 !important;
+            background: linear-gradient(135deg, #173B65 0%, #285F96 100%) !important;
+            color: white !important;
+            box-shadow: 0 16px 34px rgba(23, 59, 101, .24) !important;
             transform: translateY(-2px);
         }}
 
-        div[data-testid="stHorizontalBlock"] div[data-testid="column"] .stButton > button[kind="primary"]:hover {{
-            color: white;
-            border-color: var(--cma-blue);
+        div[data-testid="stHorizontalBlock"] div[data-testid="column"] .stButton > button[kind="primary"]:hover,
+        div[data-testid="stHorizontalBlock"] div[data-testid="column"] .stButton > button[data-testid="stBaseButton-primary"]:hover {{
+            color: white !important;
+            border-color: #173B65 !important;
+            background: linear-gradient(135deg, #173B65 0%, #285F96 100%) !important;
         }}
 
         @media (max-width: 760px) {{
@@ -2683,7 +2687,7 @@ nav_col1, nav_col2, nav_col3 = st.columns(3)
 
 with nav_col1:
     if st.button(
-        "🤝  ACCOMPAGNEMENT\\n\\nQualifier la situation et préparer le guide entreprise",
+        "🤝  ACCOMPAGNEMENT\nQualifier la situation et préparer le guide entreprise",
         key="nav_accompagnement",
         type=(
             "primary"
@@ -2697,7 +2701,7 @@ with nav_col1:
 
 with nav_col2:
     if st.button(
-        "🗺️  CARTOGRAPHIE\\n\\nVisualiser les communes et les zones concernées",
+        "🗺️  CARTOGRAPHIE\nVisualiser les communes et les zones concernées",
         key="nav_cartographie",
         type=(
             "primary"
@@ -2711,7 +2715,7 @@ with nav_col2:
 
 with nav_col3:
     if st.button(
-        "📄  ATTESTATIONS\\n\\nOuvrir les attestations officielles par commune",
+        "📄  ATTESTATIONS\nOuvrir les attestations officielles par commune",
         key="nav_attestations",
         type=(
             "primary"
