@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 import base64
@@ -54,18 +53,19 @@ PREFECTURE_EVACUATION_URL = (
 )
 
 # Actualités visibles uniquement dans l'interface collaborateurs.
+# Pour ajouter, masquer ou modifier une actualité, intervenir dans cette liste.
 ACTUALITES = [
     {
         "date": "30 juillet 2026",
-        "badge": "Aide d'urgence",
+        "badge": "Dispositif d'aide",
         "titre": (
-            "Incendies en Gironde et dans les Landes : le Gouvernement annonce "
-            "une aide d'urgence rehaussée pour certains travailleurs indépendants"
+            "Aide d'urgence rehaussée pour certains travailleurs indépendants"
         ),
         "resume": (
-            "Une nouvelle annonce concerne l'accompagnement de certains travailleurs "
-            "indépendants touchés par les incendies. Consultez l'article avant l'appel "
-            "afin de vérifier le public concerné, les conditions et les modalités de demande."
+            "Le Gouvernement annonce un renforcement de l'aide d'urgence destinée "
+            "à certains travailleurs indépendants touchés par les incendies en Gironde "
+            "et dans les Landes. Vérifier dans l'article le public concerné, les conditions "
+            "d'éligibilité et les modalités de demande avant d'orienter l'entreprise."
         ),
         "source": "Sud Ouest",
         "url": (
@@ -73,6 +73,29 @@ ACTUALITES = [
             "incendies-en-gironde-et-dans-les-landes-le-gouvernement-annonce-"
             "une-aide-d-urgence-rehaussee-pour-certains-travailleurs-independants-"
             "30109577.php"
+        ),
+        "active": True,
+    },
+    {
+        "date": "30 juillet 2026",
+        "badge": "Évolution de situation",
+        "titre": (
+            "Réintégration dans 9 communes et réouverture de l'autoroute A63"
+        ),
+        "resume": (
+            "Après évaluation des conditions de sécurité, la Préfète de la Gironde "
+            "a autorisé la réintégration à Mios, Le Barp, Cestas, Saint-Jean-d'Illac, "
+            "Martignas-sur-Jalle, Saint-Médard-en-Jalles, Saint-Aubin-de-Médoc, "
+            "Salaunes et Sainte-Hélène. L'autoroute A63 rouvre à la circulation à 14 h. "
+            "Pour les appels, vérifier que la reprise est réellement possible : accès "
+            "aux locaux, fumées, réseaux, dommages et disponibilité des salariés."
+        ),
+        "source": "Préfecture de la Gironde",
+        "url": (
+            "https://www.gironde.gouv.fr/Actualites/Communiques-de-presse/"
+            "Communiques-de-presse-2026/Juillet-2026/"
+            "Incendie-de-Saumos-Reintegration-dans-9-nouvelles-communes-"
+            "et-reouverture-de-l-autoroute-A63"
         ),
         "active": True,
     },
@@ -402,8 +425,10 @@ def render_actualites() -> None:
             unsafe_allow_html=True,
         )
         st.link_button(
-            "Lire l'actualité", actualite["url"],
-            use_container_width=True, key=f"actualite_link_{index}"
+            f"Consulter la source — {actualite.get('source', 'Actualité')}",
+            actualite["url"],
+            use_container_width=True,
+            key=f"actualite_link_{index}",
         )
     st.caption("Cet encart est réservé aux collaborateurs et n'apparaît pas dans le rapport PDF.")
 
