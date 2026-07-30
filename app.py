@@ -80,29 +80,101 @@ CARTE_FAQ_URL = (
 # - "evacuee" : évacuation maintenue selon la dernière situation consolidée ;
 # - "reintegree" : retour autorisé par la Préfecture.
 # Attestations officielles par commune.
-# Remplacer "url" par le lien PDF direct dès qu'il est stabilisé.
-# "direct": True = téléchargement/ouverture directe du PDF.
-# "direct": False = ouverture de la page officielle centralisée.
+# Les URL ci-dessous pointent directement vers les PDF publiés par
+# la Préfecture de la Gironde.
 ATTESTATIONS_COMMUNES = {
-    "Andernos-les-Bains": {"url": PORTAIL_INCENDIE_GIRONDE_URL, "direct": False},
-    "Arès": {"url": PORTAIL_INCENDIE_GIRONDE_URL, "direct": False},
-    "Audenge": {"url": PORTAIL_INCENDIE_GIRONDE_URL, "direct": False},
-    "Biganos": {"url": PORTAIL_INCENDIE_GIRONDE_URL, "direct": False},
-    "Cestas": {"url": PORTAIL_INCENDIE_GIRONDE_URL, "direct": False},
-    "Lanton": {"url": PORTAIL_INCENDIE_GIRONDE_URL, "direct": False},
-    "Le Barp": {"url": PORTAIL_INCENDIE_GIRONDE_URL, "direct": False},
-    "Le Porge": {"url": PORTAIL_INCENDIE_GIRONDE_URL, "direct": False},
-    "Le Temple": {"url": PORTAIL_INCENDIE_GIRONDE_URL, "direct": False},
-    "Lège-Cap-Ferret": {"url": PORTAIL_INCENDIE_GIRONDE_URL, "direct": False},
-    "Marcheprime": {"url": PORTAIL_INCENDIE_GIRONDE_URL, "direct": False},
-    "Martignas-sur-Jalle": {"url": PORTAIL_INCENDIE_GIRONDE_URL, "direct": False},
-    "Mios": {"url": PORTAIL_INCENDIE_GIRONDE_URL, "direct": False},
-    "Salaunes": {"url": PORTAIL_INCENDIE_GIRONDE_URL, "direct": False},
-    "Saumos": {"url": PORTAIL_INCENDIE_GIRONDE_URL, "direct": False},
-    "Saint-Aubin-de-Médoc": {"url": PORTAIL_INCENDIE_GIRONDE_URL, "direct": False},
-    "Saint-Jean-d'Illac": {"url": PORTAIL_INCENDIE_GIRONDE_URL, "direct": False},
-    "Saint-Médard-en-Jalles": {"url": PORTAIL_INCENDIE_GIRONDE_URL, "direct": False},
-    "Sainte-Hélène": {"url": PORTAIL_INCENDIE_GIRONDE_URL, "direct": False},
+    "Andernos-les-Bains": {
+        "url": "https://www.gironde.gouv.fr/contenu/telechargement/87859/661083/file/Attestation+-+Andernos.pdf",
+        "direct": True,
+    },
+    "Arès": {
+        "url": "https://www.gironde.gouv.fr/contenu/telechargement/87860/661088/file/Attestation+-+Ar%C3%A8s.pdf",
+        "direct": True,
+    },
+    "Audenge": {
+        "url": "https://www.gironde.gouv.fr/contenu/telechargement/87861/661093/file/Attestation+-+Audenge.pdf",
+        "direct": True,
+    },
+    "Biganos": {
+        "url": "https://www.gironde.gouv.fr/contenu/telechargement/87862/661098/file/Attestation+-+Biganos.pdf",
+        "direct": True,
+    },
+    "Le Barp": {
+        "url": "https://www.gironde.gouv.fr/contenu/telechargement/87863/661103/file/Attestation+-+Le+Barp.pdf",
+        "direct": True,
+    },
+    "Cestas": {
+        "url": "https://www.gironde.gouv.fr/contenu/telechargement/87864/661108/file/Attestation+-+Cestas.pdf",
+        "direct": True,
+    },
+    "Eysines": {
+        "url": "https://www.gironde.gouv.fr/contenu/telechargement/87865/661113/file/Attestation+-+Eysines.pdf",
+        "direct": True,
+    },
+    "Le Haillan": {
+        "url": "https://www.gironde.gouv.fr/contenu/telechargement/87867/661123/file/Attestation+-+Le+Haillan.pdf",
+        "direct": True,
+    },
+    "Lacanau Océan": {
+        "url": "https://www.gironde.gouv.fr/contenu/telechargement/87866/661118/file/Attestation+-+Lacanau+Oc%C3%A9an.pdf",
+        "direct": True,
+    },
+    "Lacanau Sud": {
+        "url": "https://www.gironde.gouv.fr/contenu/telechargement/87868/661128/file/Attestation+-+Sud+Lacanau.pdf",
+        "direct": True,
+    },
+    "Lège-Cap-Ferret": {
+        "url": "https://www.gironde.gouv.fr/contenu/telechargement/87870/661138/file/Attestation+-+L%C3%A8ge+-+Cap-Ferret.pdf",
+        "direct": True,
+    },
+    "Marcheprime": {
+        "url": "https://www.gironde.gouv.fr/contenu/telechargement/87871/661143/file/Attestation+-+Marcheprime.pdf",
+        "direct": True,
+    },
+    "Martignas-sur-Jalle": {
+        "url": "https://www.gironde.gouv.fr/contenu/telechargement/87872/661148/file/Attestation+-+Martignas-sur-Jalles.pdf",
+        "direct": True,
+    },
+    "Mérignac extra-rocade": {
+        "url": "https://www.gironde.gouv.fr/contenu/telechargement/87873/661153/file/Attestation+-+M%C3%A9rignac+%28extra-rocade%29.pdf",
+        "direct": True,
+    },
+    "Mios": {
+        "url": "https://www.gironde.gouv.fr/contenu/telechargement/87874/661158/file/Attestation+-+Mios.pdf",
+        "direct": True,
+    },
+    "Le Porge": {
+        "url": "https://www.gironde.gouv.fr/contenu/telechargement/87875/661163/file/Attestation+-+Le+Porge.pdf",
+        "direct": True,
+    },
+    "Saint-Aubin-de-Médoc": {
+        "url": "https://www.gironde.gouv.fr/contenu/telechargement/87876/661168/file/Attestation+-+Saint-Aubin-du-M%C3%A9doc.pdf",
+        "direct": True,
+    },
+    "Saint-Jean-d'Illac": {
+        "url": "https://www.gironde.gouv.fr/contenu/telechargement/87877/661173/file/Attestation+-+Saint-Jean-d%27Illac.pdf",
+        "direct": True,
+    },
+    "Saint-Médard-en-Jalles": {
+        "url": "https://www.gironde.gouv.fr/contenu/telechargement/87878/661178/file/Attestation+-+Saint-M%C3%A9dard-en-Jalles.pdf",
+        "direct": True,
+    },
+    "Sainte-Hélène": {
+        "url": "https://www.gironde.gouv.fr/contenu/telechargement/87879/661183/file/Attestation+-+Sainte-H%C3%A9l%C3%A8ne.pdf",
+        "direct": True,
+    },
+    "Salaunes": {
+        "url": "https://www.gironde.gouv.fr/contenu/telechargement/87884/661208/file/Attestation+-+Salaunes.pdf",
+        "direct": True,
+    },
+    "Saumos": {
+        "url": "https://www.gironde.gouv.fr/contenu/telechargement/87881/661193/file/Attestation+-+Saumos.pdf",
+        "direct": True,
+    },
+    "Le Temple": {
+        "url": "https://www.gironde.gouv.fr/contenu/telechargement/87882/661198/file/Attestation+-+Le+Temple.pdf",
+        "direct": True,
+    },
 }
 
 
@@ -648,13 +720,18 @@ def render_attestations_evacuation() -> None:
                    border-radius:9px;
                    margin:6px 0 10px 0;
                ">
-                Ouvrir l'attestation officielle — {commune}
+                Ouvrir / télécharger l'attestation — {commune}
             </a>
             """,
             unsafe_allow_html=True,
         )
 
-        if not attestation.get("direct"):
+        if attestation.get("direct"):
+            st.caption(
+                "Le document s'ouvre dans un nouvel onglet. Selon les réglages du navigateur, "
+                "le PDF peut s'afficher ou se télécharger automatiquement."
+            )
+        else:
             st.info(
                 "Les liens directs vers chaque PDF pourront être renseignés "
                 "dans ATTESTATIONS_COMMUNES dès qu'ils sont stabilisés."
