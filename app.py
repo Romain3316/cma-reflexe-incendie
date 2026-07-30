@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 
 import base64
@@ -124,9 +125,9 @@ ATTESTATIONS_COMMUNES = {
         "direct": True,
     },
     "Lanton": {
-    "url": "https://www.gironde.gouv.fr/contenu/telechargement/87869/661133/file/Attestation+-+Lanton.pdf",
-    "direct": True,
-},
+        "url": "https://www.gironde.gouv.fr/contenu/telechargement/87869/661133/file/Attestation+-+Lanton.pdf",
+        "direct": True,
+    },
     "Lège-Cap-Ferret": {
         "url": "https://www.gironde.gouv.fr/contenu/telechargement/87870/661138/file/Attestation+-+L%C3%A8ge+-+Cap-Ferret.pdf",
         "direct": True,
@@ -2581,20 +2582,24 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+# Les actualités restent visibles en haut de l'application, avant les outils.
+render_actualites()
+
 navigation = st.radio(
     "Navigation",
-    ["Accompagnement", "Attestations d'évacuation"],
+    ["Accompagnement", "Cartographie", "Attestations d'évacuation"],
     horizontal=True,
     label_visibility="collapsed",
     key="navigation_principale",
 )
 
+if navigation == "Cartographie":
+    render_carte_incendie()
+    st.stop()
+
 if navigation == "Attestations d'évacuation":
     render_attestations_evacuation()
     st.stop()
-
-render_actualites()
-render_carte_incendie()
 
 st.markdown(
     """
@@ -2763,8 +2768,9 @@ st.markdown(
     <div class="section-card">
         <div class="section-title">4. Consulter la feuille de route</div>
         <p class="section-help">
-            Les cases peuvent être cochées pendant l'échange. Leur état n'est pas conservé
-            après fermeture ou rechargement de la page.
+            Ouvrez uniquement la fiche dont vous avez besoin, puis naviguez entre
+            les actions, les documents et les points de vigilance.
+            Leur état n'est pas conservé après fermeture ou rechargement de la page.
         </p>
     </div>
     """,
@@ -2773,7 +2779,31 @@ st.markdown(
 
 for nom in selected:
     fiche = ORGANISMES[nom]
-    with st.expander(f"{fiche['icone']} {nom}", expanded=True):
+
+    todo_count = len(fiche["todo"])
+    docs_count = len(fiche["documents"])
+    vigilance_count = len(fiche["vigilance"])
+
+    completed_todo = sum(
+        bool(st.session_state.get(f"todo_{nom}_{i}", False))
+        for i in range(todo_count)
+    )
+    completed_docs = sum(
+        bool(st.session_state.get(f"doc_{nom}_{i}", False))
+        for i in range(docs_count)
+    )
+    completed_total = completed_todo + completed_docs
+    trackable_total = todo_count + docs_count
+    progress_value = (
+        completed_total / trackable_total if trackable_total else 0.0
+    )
+
+    expander_label = (
+        f"{fiche['icone']} {nom}  ·  "
+        f"{completed_total}/{trackable_total} éléments traités"
+    )
+
+    with st.expander(expander_label, expanded=False):
         st.markdown(
             f"""
             <div class="organism-heading">{fiche['icone']} {html.escape(nom)}</div>
@@ -2784,36 +2814,54 @@ for nom in selected:
             unsafe_allow_html=True,
         )
 
-        todo_col, docs_col = st.columns(2)
+        s1, s2, s3 = st.columns(3)
+        s1.metric("Actions", todo_count)
+        s2.metric("Documents", docs_count)
+        s3.metric("Vigilances", vigilance_count)
 
-        with todo_col:
-            st.markdown(
-                '<div class="mini-title">To-do list</div>',
-                unsafe_allow_html=True,
-            )
-            for i, action in enumerate(fiche["todo"]):
-                st.checkbox(
-                    action,
-                    key=f"todo_{nom}_{i}",
-                )
-
-        with docs_col:
-            st.markdown(
-                '<div class="mini-title">Documents à préparer</div>',
-                unsafe_allow_html=True,
-            )
-            for i, document in enumerate(fiche["documents"]):
-                st.checkbox(
-                    document,
-                    key=f"doc_{nom}_{i}",
-                )
-
-        st.markdown(
-            '<div class="mini-title">Points de vigilance</div>',
-            unsafe_allow_html=True,
+        st.progress(
+            progress_value,
+            text=f"Progression : {completed_total} sur {trackable_total}",
         )
-        for point in fiche["vigilance"]:
-            st.warning(point, icon="⚠️")
+
+        todo_tab, docs_tab, vigilance_tab = st.tabs(
+            [
+                f"📋 Actions ({todo_count})",
+                f"📄 Documents ({docs_count})",
+                f"⚠️ Vigilance ({vigilance_count})",
+            ]
+        )
+
+        with todo_tab:
+            if fiche["todo"]:
+                for i, action in enumerate(fiche["todo"]):
+                    st.checkbox(
+                        action,
+                        key=f"todo_{nom}_{i}",
+                    )
+            else:
+                st.caption("Aucune action particulière à afficher.")
+
+        with docs_tab:
+            if fiche["documents"]:
+                for i, document in enumerate(fiche["documents"]):
+                    st.checkbox(
+                        document,
+                        key=f"doc_{nom}_{i}",
+                    )
+            else:
+                st.caption("Aucun document particulier à préparer.")
+
+        with vigilance_tab:
+            if fiche["vigilance"]:
+                with st.expander(
+                    f"Afficher les {vigilance_count} points de vigilance",
+                    expanded=False,
+                ):
+                    for point in fiche["vigilance"]:
+                        st.warning(point, icon="⚠️")
+            else:
+                st.caption("Aucun point de vigilance particulier.")
 
         if fiche.get("action_url"):
             st.link_button(
