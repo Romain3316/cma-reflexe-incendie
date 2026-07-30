@@ -111,21 +111,21 @@ ACTUALITES = [
         "date": "30 juillet 2026",
         "badge": "Dispositif d'aide",
         "titre": (
-            "Aide d'urgence rehaussée pour certains travailleurs indépendants"
+            "Urssaf et CPSTI : mesures d'urgence renforcées pour les victimes "
+            "des incendies en Gironde et dans les Landes"
         ),
         "resume": (
-            "Le Gouvernement annonce un renforcement de l'aide d'urgence destinée "
-            "à certains travailleurs indépendants touchés par les incendies en Gironde "
-            "et dans les Landes. Vérifier dans l'article le public concerné, les conditions "
-            "d'éligibilité et les modalités de demande avant d'orienter l'entreprise."
+            "Tous les professionnels touchés peuvent demander un délai de paiement "
+            "de leurs cotisations et, en cas de baisse d'activité anticipée, une "
+            "réduction de leurs cotisations provisionnelles. Le CPSTI prévoit une aide "
+            "pouvant aller jusqu'à 2 000 € pour les indépendants situés en zone "
+            "d'évacuation et empêchés d'exercer, et jusqu'à 8 000 € en cas de "
+            "destruction directe de l'entreprise ou de l'habitation principale. "
+            "Les dossiers complets et éligibles doivent être instruits rapidement, "
+            "avec un objectif de mise en paiement sous 15 jours."
         ),
-        "source": "Sud Ouest",
-        "url": (
-            "https://www.sudouest.fr/economie/"
-            "incendies-en-gironde-et-dans-les-landes-le-gouvernement-annonce-"
-            "une-aide-d-urgence-rehaussee-pour-certains-travailleurs-independants-"
-            "30109577.php"
-        ),
+        "source": "Urssaf / CPSTI — communiqué officiel",
+        "document": "CP_incendies_30_07_2026.pdf",
         "active": True,
     },
     {
@@ -519,12 +519,26 @@ def render_actualites() -> None:
     cols = st.columns(len(actualites_actives))
     for index, (column, actualite) in enumerate(zip(cols, actualites_actives)):
         with column:
-            st.link_button(
-                f"Consulter — {actualite.get('source', 'Source')}",
-                actualite["url"],
-                use_container_width=True,
-                key=f"actualite_link_{index}",
-            )
+            if actualite.get("document"):
+                document_path = Path(__file__).resolve().parent / actualite["document"]
+                if document_path.exists():
+                    st.download_button(
+                        label=f"Télécharger — {actualite.get('source', 'Source')}",
+                        data=document_path.read_bytes(),
+                        file_name=actualite["document"],
+                        mime="application/pdf",
+                        use_container_width=True,
+                        key=f"actualite_download_{index}",
+                    )
+                else:
+                    st.warning("Le document source n'est pas disponible dans le déploiement.")
+            elif actualite.get("url"):
+                st.link_button(
+                    f"Consulter — {actualite.get('source', 'Source')}",
+                    actualite["url"],
+                    use_container_width=True,
+                    key=f"actualite_link_{index}",
+                )
 
 
 # ============================================================
