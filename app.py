@@ -10,6 +10,9 @@ from pathlib import Path
 from typing import Any
 
 import streamlit as st
+import folium
+from folium.plugins import Fullscreen
+from streamlit_folium import st_folium
 from reportlab.lib.colors import HexColor, white
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfbase.pdfmetrics import stringWidth
@@ -54,6 +57,55 @@ PREFECTURE_EVACUATION_URL = (
 
 # Actualités visibles uniquement dans l'interface collaborateurs.
 # Pour ajouter, masquer ou modifier une actualité, intervenir dans cette liste.
+# Situation cartographique issue des communiqués et de la FAQ de la
+# Préfecture de la Gironde. Mettre à jour à chaque nouveau communiqué.
+CARTE_SITUATION_DATE = "30 juillet 2026 – communiqué de réintégration"
+CARTE_SOURCE_URL = (
+    "https://www.gironde.gouv.fr/Actualites/Communiques-de-presse/"
+    "Communiques-de-presse-2026/Juillet-2026/"
+    "Incendie-de-Saumos-Reintegration-dans-9-nouvelles-communes-"
+    "et-reouverture-de-l-autoroute-A63"
+)
+CARTE_FAQ_URL = (
+    "https://www.gironde.gouv.fr/Actualites/Breves/"
+    "Incendie-Foire-aux-questions/Foire-aux-questions-incendie"
+)
+
+# Coordonnées des centres-bourgs, suffisantes pour une carte d'aide aux appels.
+# Statuts :
+# - "evacuee" : évacuation maintenue selon la dernière situation consolidée ;
+# - "reintegree" : retour autorisé par la Préfecture.
+COMMUNES_INCENDIE = [
+    # Évacuation maintenue
+    {"commune": "Arès", "lat": 44.7658, "lon": -1.1397, "statut": "evacuee"},
+    {"commune": "Andernos-les-Bains", "lat": 44.7424, "lon": -1.1033, "statut": "evacuee"},
+    {"commune": "Audenge", "lat": 44.6843, "lon": -1.0133, "statut": "evacuee"},
+    {"commune": "Biganos", "lat": 44.6447, "lon": -0.9772, "statut": "evacuee"},
+    {"commune": "Lanton", "lat": 44.7044, "lon": -1.0357, "statut": "evacuee"},
+    {"commune": "Lège-Cap-Ferret", "lat": 44.7933, "lon": -1.1469, "statut": "evacuee"},
+    {"commune": "Marcheprime", "lat": 44.6929, "lon": -0.8558, "statut": "evacuee"},
+    {"commune": "Le Porge", "lat": 44.8734, "lon": -1.0922, "statut": "evacuee"},
+    {"commune": "Saumos", "lat": 44.9124, "lon": -0.9958, "statut": "evacuee"},
+    {"commune": "Le Temple", "lat": 44.8790, "lon": -0.9899, "statut": "evacuee"},
+
+    # Réintégration autorisée le 30 juillet 2026
+    {"commune": "Mios", "lat": 44.6057, "lon": -0.9378, "statut": "reintegree"},
+    {"commune": "Le Barp", "lat": 44.6081, "lon": -0.7697, "statut": "reintegree"},
+    {"commune": "Cestas", "lat": 44.7449, "lon": -0.6813, "statut": "reintegree"},
+    {"commune": "Saint-Jean-d'Illac", "lat": 44.8117, "lon": -0.7829, "statut": "reintegree"},
+    {"commune": "Martignas-sur-Jalle", "lat": 44.8409, "lon": -0.7732, "statut": "reintegree"},
+    {"commune": "Saint-Médard-en-Jalles", "lat": 44.8953, "lon": -0.7174, "statut": "reintegree"},
+    {"commune": "Saint-Aubin-de-Médoc", "lat": 44.9111, "lon": -0.7245, "statut": "reintegree"},
+    {"commune": "Salaunes", "lat": 44.9367, "lon": -0.8308, "statut": "reintegree"},
+    {"commune": "Sainte-Hélène", "lat": 44.9657, "lon": -0.8848, "statut": "reintegree"},
+
+    # Réintégration autorisée précédemment
+    {"commune": "Eysines", "lat": 44.8845, "lon": -0.6510, "statut": "reintegree"},
+    {"commune": "Mérignac", "lat": 44.8386, "lon": -0.6436, "statut": "reintegree"},
+    {"commune": "Le Haillan", "lat": 44.8716, "lon": -0.6794, "statut": "reintegree"},
+]
+
+
 ACTUALITES = [
     {
         "date": "30 juillet 2026",
@@ -472,6 +524,147 @@ def render_actualites() -> None:
                 actualite["url"],
                 use_container_width=True,
                 key=f"actualite_link_{index}",
+            )
+
+
+# ============================================================
+# CARTE INTERACTIVE DES ÉVACUATIONS
+# ============================================================
+
+def render_carte_incendie() -> None:
+    """Affiche une carte opérationnelle dans l'interface collaborateurs."""
+    evacuees = [
+        item for item in COMMUNES_INCENDIE if item["statut"] == "evacuee"
+    ]
+    reintegrees = [
+        item for item in COMMUNES_INCENDIE if item["statut"] == "reintegree"
+    ]
+
+    with st.expander("Carte interactive — évacuations et réintégrations", expanded=True):
+        col1, col2, col3 = st.columns([1, 1, 2])
+        col1.metric("Encore évacuées", len(evacuees))
+        col2.metric("Réintégrées", len(reintegrees))
+        col3.info(
+            "Carte d'aide aux appels. Avant tout déplacement, vérifier la dernière "
+            "consigne de la Préfecture ou de la commune."
+        )
+
+        carte = folium.Map(
+            location=[44.80, -0.90],
+            zoom_start=9,
+            tiles="OpenStreetMap",
+            control_scale=True,
+            prefer_canvas=True,
+        )
+
+        Fullscreen(
+            position="topright",
+            title="Afficher en plein écran",
+            title_cancel="Quitter le plein écran",
+            force_separate_button=True,
+        ).add_to(carte)
+
+        for item in COMMUNES_INCENDIE:
+            est_evacuee = item["statut"] == "evacuee"
+            couleur = "#d71920" if est_evacuee else "#238636"
+            statut_label = (
+                "Évacuation maintenue"
+                if est_evacuee
+                else "Réintégration autorisée"
+            )
+            conseil = (
+                "Ne pas encourager de déplacement. Vérifier les consignes officielles."
+                if est_evacuee
+                else "Vérifier que l'accès aux locaux et la reprise sont réellement possibles."
+            )
+
+            popup_html = f"""
+            <div style="font-family:Arial,sans-serif;min-width:230px">
+                <div style="font-size:16px;font-weight:700;color:#173b65">
+                    {item["commune"]}
+                </div>
+                <div style="margin-top:6px;font-weight:700;color:{couleur}">
+                    {statut_label}
+                </div>
+                <div style="margin-top:7px;font-size:12px;line-height:1.35">
+                    {conseil}
+                </div>
+                <div style="margin-top:7px;font-size:11px;color:#64748b">
+                    Situation consolidée : {CARTE_SITUATION_DATE}
+                </div>
+            </div>
+            """
+
+            folium.CircleMarker(
+                location=[item["lat"], item["lon"]],
+                radius=9,
+                color="#ffffff",
+                weight=2,
+                fill=True,
+                fill_color=couleur,
+                fill_opacity=0.92,
+                tooltip=f'{item["commune"]} — {statut_label}',
+                popup=folium.Popup(popup_html, max_width=300),
+            ).add_to(carte)
+
+        # Légende HTML fixe
+        legend_html = """
+        <div style="
+            position: fixed;
+            bottom: 25px;
+            left: 25px;
+            z-index: 9999;
+            background: white;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 10px 12px;
+            box-shadow: 0 3px 12px rgba(0,0,0,.15);
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+        ">
+            <div style="font-weight:700;margin-bottom:7px;color:#173b65">
+                Situation des communes
+            </div>
+            <div style="margin-bottom:5px">
+                <span style="display:inline-block;width:11px;height:11px;
+                border-radius:50%;background:#d71920;margin-right:6px"></span>
+                Évacuation maintenue
+            </div>
+            <div>
+                <span style="display:inline-block;width:11px;height:11px;
+                border-radius:50%;background:#238636;margin-right:6px"></span>
+                Réintégration autorisée
+            </div>
+        </div>
+        """
+        carte.get_root().html.add_child(folium.Element(legend_html))
+
+        st_folium(
+            carte,
+            width=None,
+            height=500,
+            returned_objects=[],
+            use_container_width=True,
+            key="carte_incendie_gironde",
+        )
+
+        st.caption(
+            f"Dernière situation intégrée : {CARTE_SITUATION_DATE}. "
+            "Les points correspondent aux centres-bourgs et non aux limites administratives."
+        )
+
+        source_col1, source_col2 = st.columns(2)
+        with source_col1:
+            st.link_button(
+                "Communiqué officiel de réintégration",
+                CARTE_SOURCE_URL,
+                use_container_width=True,
+            )
+        with source_col2:
+            st.link_button(
+                "FAQ incendie de la Préfecture",
+                CARTE_FAQ_URL,
+                use_container_width=True,
             )
 
 
@@ -2165,6 +2358,7 @@ st.markdown(
 )
 
 render_actualites()
+render_carte_incendie()
 
 st.markdown(
     """
