@@ -123,6 +123,10 @@ ATTESTATIONS_COMMUNES = {
         "url": "https://www.gironde.gouv.fr/contenu/telechargement/87868/661128/file/Attestation+-+Sud+Lacanau.pdf",
         "direct": True,
     },
+    "Lanton": {
+    "url": "https://www.gironde.gouv.fr/contenu/telechargement/87869/661133/file/Attestation+-+Lanton.pdf",
+    "direct": True,
+},
     "Lège-Cap-Ferret": {
         "url": "https://www.gironde.gouv.fr/contenu/telechargement/87870/661138/file/Attestation+-+L%C3%A8ge+-+Cap-Ferret.pdf",
         "direct": True,
