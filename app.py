@@ -66,6 +66,10 @@ CARTE_SOURCE_URL = (
     "Incendie-de-Saumos-Reintegration-dans-9-nouvelles-communes-"
     "et-reouverture-de-l-autoroute-A63"
 )
+PORTAIL_INCENDIE_GIRONDE_URL = (
+    "https://www.gironde.gouv.fr/Actualites/Incendie-en-Gironde-toutes-les-informations-utile"
+)
+
 CARTE_FAQ_URL = (
     "https://www.gironde.gouv.fr/Actualites/Breves/"
     "Incendie-Foire-aux-questions/Foire-aux-questions-incendie"
@@ -75,6 +79,33 @@ CARTE_FAQ_URL = (
 # Statuts :
 # - "evacuee" : évacuation maintenue selon la dernière situation consolidée ;
 # - "reintegree" : retour autorisé par la Préfecture.
+# Attestations officielles par commune.
+# Remplacer "url" par le lien PDF direct dès qu'il est stabilisé.
+# "direct": True = téléchargement/ouverture directe du PDF.
+# "direct": False = ouverture de la page officielle centralisée.
+ATTESTATIONS_COMMUNES = {
+    "Andernos-les-Bains": {"url": PORTAIL_INCENDIE_GIRONDE_URL, "direct": False},
+    "Arès": {"url": PORTAIL_INCENDIE_GIRONDE_URL, "direct": False},
+    "Audenge": {"url": PORTAIL_INCENDIE_GIRONDE_URL, "direct": False},
+    "Biganos": {"url": PORTAIL_INCENDIE_GIRONDE_URL, "direct": False},
+    "Cestas": {"url": PORTAIL_INCENDIE_GIRONDE_URL, "direct": False},
+    "Lanton": {"url": PORTAIL_INCENDIE_GIRONDE_URL, "direct": False},
+    "Le Barp": {"url": PORTAIL_INCENDIE_GIRONDE_URL, "direct": False},
+    "Le Porge": {"url": PORTAIL_INCENDIE_GIRONDE_URL, "direct": False},
+    "Le Temple": {"url": PORTAIL_INCENDIE_GIRONDE_URL, "direct": False},
+    "Lège-Cap-Ferret": {"url": PORTAIL_INCENDIE_GIRONDE_URL, "direct": False},
+    "Marcheprime": {"url": PORTAIL_INCENDIE_GIRONDE_URL, "direct": False},
+    "Martignas-sur-Jalle": {"url": PORTAIL_INCENDIE_GIRONDE_URL, "direct": False},
+    "Mios": {"url": PORTAIL_INCENDIE_GIRONDE_URL, "direct": False},
+    "Salaunes": {"url": PORTAIL_INCENDIE_GIRONDE_URL, "direct": False},
+    "Saumos": {"url": PORTAIL_INCENDIE_GIRONDE_URL, "direct": False},
+    "Saint-Aubin-de-Médoc": {"url": PORTAIL_INCENDIE_GIRONDE_URL, "direct": False},
+    "Saint-Jean-d'Illac": {"url": PORTAIL_INCENDIE_GIRONDE_URL, "direct": False},
+    "Saint-Médard-en-Jalles": {"url": PORTAIL_INCENDIE_GIRONDE_URL, "direct": False},
+    "Sainte-Hélène": {"url": PORTAIL_INCENDIE_GIRONDE_URL, "direct": False},
+}
+
+
 COMMUNES_INCENDIE = [
     # Évacuation maintenue
     {"commune": "Arès", "lat": 44.7658, "lon": -1.1397, "statut": "evacuee"},
@@ -125,7 +156,24 @@ ACTUALITES = [
             "avec un objectif de mise en paiement sous 15 jours."
         ),
         "source": "Urssaf / CPSTI — communiqué officiel",
-        "document": "CP_incendies_30_07_2026.pdf",
+        "url": "https://www.gironde.gouv.fr/Actualites/Incendie-en-Gironde-toutes-les-informations-utile",
+        "active": True,
+    },
+    {
+        "date": "30 juillet 2026",
+        "badge": "Source officielle",
+        "titre": (
+            "La Préfecture centralise les informations utiles et les attestations "
+            "d'évacuation par commune"
+        ),
+        "resume": (
+            "Une page officielle unique regroupe les informations pratiques liées à "
+            "l'incendie en Gironde. Elle permet notamment d'accéder aux attestations "
+            "d'évacuation publiées pour les communes concernées. Utiliser cette page "
+            "comme source de référence avant toute transmission à une entreprise."
+        ),
+        "source": "Préfecture de la Gironde",
+        "url": "https://www.gironde.gouv.fr/Actualites/Incendie-en-Gironde-toutes-les-informations-utile",
         "active": True,
     },
     {
@@ -519,26 +567,107 @@ def render_actualites() -> None:
     cols = st.columns(len(actualites_actives))
     for index, (column, actualite) in enumerate(zip(cols, actualites_actives)):
         with column:
-            if actualite.get("document"):
-                document_path = Path(__file__).resolve().parent / actualite["document"]
-                if document_path.exists():
-                    st.download_button(
-                        label=f"Télécharger — {actualite.get('source', 'Source')}",
-                        data=document_path.read_bytes(),
-                        file_name=actualite["document"],
-                        mime="application/pdf",
-                        use_container_width=True,
-                        key=f"actualite_download_{index}",
-                    )
-                else:
-                    st.warning("Le document source n'est pas disponible dans le déploiement.")
-            elif actualite.get("url"):
+            if actualite.get("url"):
                 st.link_button(
                     f"Consulter — {actualite.get('source', 'Source')}",
                     actualite["url"],
                     use_container_width=True,
                     key=f"actualite_link_{index}",
                 )
+
+
+# ============================================================
+# ATTESTATIONS OFFICIELLES D'ÉVACUATION
+# ============================================================
+
+def render_attestations_evacuation() -> None:
+    """Page dédiée aux attestations officielles d'évacuation."""
+    st.markdown(
+        """
+        <div class="section-card">
+            <div class="section-title">Attestations officielles d'évacuation</div>
+            <p class="section-help">
+                Sélectionnez une commune pour ouvrir l'attestation officielle
+                dans un nouvel onglet.
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    commune = st.selectbox(
+        "Commune concernée",
+        options=sorted(ATTESTATIONS_COMMUNES.keys()),
+        index=None,
+        placeholder="Sélectionner une commune",
+        key="commune_attestation_evacuation",
+    )
+
+    if commune:
+        attestation = ATTESTATIONS_COMMUNES[commune]
+        url = attestation["url"]
+        message = (
+            "Le lien mène directement au document officiel."
+            if attestation.get("direct")
+            else "Le lien ouvre la page officielle de la Préfecture. "
+                 "Sélectionnez ensuite l'attestation correspondant à la commune."
+        )
+
+        st.markdown(
+            f"""
+            <div style="
+                background:#eef5fb;
+                border:1px solid #cbdceb;
+                border-left:5px solid #173b65;
+                border-radius:12px;
+                padding:14px 16px;
+                margin:10px 0 14px 0;
+            ">
+                <div style="font-weight:800;color:#173b65;font-size:1rem;">
+                    {commune}
+                </div>
+                <div style="color:#43566b;margin-top:5px;font-size:.9rem;">
+                    {message}
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        st.markdown(
+            f"""
+            <a href="{url}" target="_blank" rel="noopener noreferrer"
+               style="
+                   display:block;
+                   text-align:center;
+                   background:#173b65;
+                   color:white;
+                   text-decoration:none;
+                   font-weight:750;
+                   padding:12px 16px;
+                   border-radius:9px;
+                   margin:6px 0 10px 0;
+               ">
+                Ouvrir l'attestation officielle — {commune}
+            </a>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        if not attestation.get("direct"):
+            st.info(
+                "Les liens directs vers chaque PDF pourront être renseignés "
+                "dans ATTESTATIONS_COMMUNES dès qu'ils sont stabilisés."
+            )
+    else:
+        st.info("Choisissez une commune pour afficher le lien correspondant.")
+
+    st.markdown("---")
+    st.link_button(
+        "Consulter toutes les informations officielles sur l'incendie",
+        PORTAIL_INCENDIE_GIRONDE_URL,
+        use_container_width=True,
+    )
 
 
 # ============================================================
@@ -2370,6 +2499,18 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
+
+navigation = st.radio(
+    "Navigation",
+    ["Accompagnement", "Attestations d'évacuation"],
+    horizontal=True,
+    label_visibility="collapsed",
+    key="navigation_principale",
+)
+
+if navigation == "Attestations d'évacuation":
+    render_attestations_evacuation()
+    st.stop()
 
 render_actualites()
 render_carte_incendie()
