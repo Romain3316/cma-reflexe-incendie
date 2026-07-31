@@ -59,13 +59,8 @@ PREFECTURE_EVACUATION_URL = (
 # Pour ajouter, masquer ou modifier une actualité, intervenir dans cette liste.
 # Situation cartographique issue des communiqués et de la FAQ de la
 # Préfecture de la Gironde. Mettre à jour à chaque nouveau communiqué.
-CARTE_SITUATION_DATE = "30 juillet 2026 – communiqué de réintégration"
-CARTE_SOURCE_URL = (
-    "https://www.gironde.gouv.fr/Actualites/Communiques-de-presse/"
-    "Communiques-de-presse-2026/Juillet-2026/"
-    "Incendie-de-Saumos-Reintegration-dans-9-nouvelles-communes-"
-    "et-reouverture-de-l-autoroute-A63"
-)
+CARTE_SITUATION_DATE = "31 juillet 2026 à 12 h – nouvelles réintégrations"
+CARTE_SOURCE_URL = "https://www.gironde.gouv.fr/Actualites/Communiques-de-presse/Communiques-de-presse-2026/Juillet-2026/Incendie-de-Saumos-Reintegration-autorisee-dans-de-nouvelles-communes"
 PORTAIL_INCENDIE_GIRONDE_URL = (
     "https://www.gironde.gouv.fr/Actualites/Incendie-en-Gironde-toutes-les-informations-utile"
 )
@@ -78,7 +73,8 @@ CARTE_FAQ_URL = (
 # Coordonnées des centres-bourgs, suffisantes pour une carte d'aide aux appels.
 # Statuts :
 # - "evacuee" : évacuation maintenue selon la dernière situation consolidée ;
-# - "reintegree" : retour autorisé par la Préfecture.
+# - "reintegree" : retour autorisé par la Préfecture ;
+# - "reintegree_partielle" : retour autorisé avec exclusions territoriales.
 # Attestations officielles par commune.
 # Les URL ci-dessous pointent directement vers les PDF publiés par
 # la Préfecture de la Gironde.
@@ -186,9 +182,31 @@ COMMUNES_INCENDIE = [
     # Évacuation maintenue
     {"commune": "Arès", "lat": 44.7658, "lon": -1.1397, "statut": "evacuee"},
     {"commune": "Andernos-les-Bains", "lat": 44.7424, "lon": -1.1033, "statut": "evacuee"},
-    {"commune": "Audenge", "lat": 44.6843, "lon": -1.0133, "statut": "evacuee"},
-    {"commune": "Biganos", "lat": 44.6447, "lon": -0.9772, "statut": "evacuee"},
+    {
+        "commune": "Audenge",
+        "lat": 44.6843,
+        "lon": -1.0133,
+        "statut": "reintegree_partielle",
+        "precision": "Retour autorisé sauf dans les quartiers de Lubec et de La Pointe.",
+    },
+    {
+        "commune": "Biganos",
+        "lat": 44.6447,
+        "lon": -0.9772,
+        "statut": "reintegree",
+        "precision": "Réintégration autorisée à compter du 31 juillet 2026 à 12 h.",
+    },
     {"commune": "Lanton", "lat": 44.7044, "lon": -1.0357, "statut": "evacuee"},
+    {
+        "commune": "Lacanau – structures touristiques",
+        "lat": 44.9778,
+        "lon": -1.0785,
+        "statut": "reintegree_partielle",
+        "precision": (
+            "Retour autorisé uniquement dans les campings, résidences de tourisme, "
+            "villages vacances et parcs de loisirs de Lacanau."
+        ),
+    },
     {"commune": "Lège-Cap-Ferret", "lat": 44.7933, "lon": -1.1469, "statut": "evacuee"},
     {"commune": "Marcheprime", "lat": 44.6929, "lon": -0.8558, "statut": "evacuee"},
     {"commune": "Le Porge", "lat": 44.8734, "lon": -1.0922, "statut": "evacuee"},
@@ -780,12 +798,18 @@ def render_carte_incendie() -> None:
     reintegrees = [
         item for item in COMMUNES_INCENDIE if item["statut"] == "reintegree"
     ]
+    reintegrees_partielles = [
+        item
+        for item in COMMUNES_INCENDIE
+        if item["statut"] == "reintegree_partielle"
+    ]
 
     with st.expander("Carte interactive — évacuations et réintégrations", expanded=True):
-        col1, col2, col3 = st.columns([1, 1, 2])
+        col1, col2, col3, col4 = st.columns([1, 1, 1.15, 2])
         col1.metric("Encore évacuées", len(evacuees))
         col2.metric("Réintégrées", len(reintegrees))
-        col3.info(
+        col3.metric("Retours partiels", len(reintegrees_partielles))
+        col4.info(
             "Carte d'aide aux appels. Avant tout déplacement, vérifier la dernière "
             "consigne de la Préfecture ou de la commune."
         )
@@ -806,18 +830,28 @@ def render_carte_incendie() -> None:
         ).add_to(carte)
 
         for item in COMMUNES_INCENDIE:
-            est_evacuee = item["statut"] == "evacuee"
-            couleur = "#d71920" if est_evacuee else "#238636"
-            statut_label = (
-                "Évacuation maintenue"
-                if est_evacuee
-                else "Réintégration autorisée"
-            )
-            conseil = (
-                "Ne pas encourager de déplacement. Vérifier les consignes officielles."
-                if est_evacuee
-                else "Vérifier que l'accès aux locaux et la reprise sont réellement possibles."
-            )
+            statut = item["statut"]
+
+            if statut == "evacuee":
+                couleur = "#d71920"
+                statut_label = "Évacuation maintenue"
+                conseil = (
+                    "Ne pas encourager de déplacement. Vérifier les consignes officielles."
+                )
+            elif statut == "reintegree_partielle":
+                couleur = "#e69f00"
+                statut_label = "Réintégration partielle"
+                conseil = item.get(
+                    "precision",
+                    "Le retour est autorisé uniquement dans certains secteurs.",
+                )
+            else:
+                couleur = "#238636"
+                statut_label = "Réintégration autorisée"
+                conseil = item.get(
+                    "precision",
+                    "Vérifier que l'accès aux locaux et la reprise sont réellement possibles.",
+                )
 
             popup_html = f"""
             <div style="font-family:Arial,sans-serif;min-width:230px">
@@ -871,10 +905,15 @@ def render_carte_incendie() -> None:
                 border-radius:50%;background:#d71920;margin-right:6px"></span>
                 Évacuation maintenue
             </div>
-            <div>
+            <div style="margin-bottom:5px">
                 <span style="display:inline-block;width:11px;height:11px;
                 border-radius:50%;background:#238636;margin-right:6px"></span>
                 Réintégration autorisée
+            </div>
+            <div>
+                <span style="display:inline-block;width:11px;height:11px;
+                border-radius:50%;background:#e69f00;margin-right:6px"></span>
+                Réintégration partielle / secteurs exclus
             </div>
         </div>
         """
