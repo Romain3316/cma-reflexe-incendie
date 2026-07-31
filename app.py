@@ -215,6 +215,23 @@ COMMUNES_INCENDIE = [
 
 ACTUALITES = [
     {
+        "date": "31 juillet 2026",
+        "badge": "À la une",
+        "titre": (
+            "Incendie de Saumos : réintégration autorisée dans de nouvelles communes"
+        ),
+        "resume": (
+            "Après une nouvelle évaluation des conditions de sécurité, la Préfecture "
+            "de la Gironde autorise la réintégration dans de nouvelles communes. "
+            "Consulter le communiqué officiel pour connaître précisément les secteurs "
+            "concernés, les modalités de retour et les éventuelles restrictions encore "
+            "en vigueur."
+        ),
+        "source": "Préfecture de la Gironde — communiqué officiel",
+        "url": "https://www.gironde.gouv.fr/Actualites/Communiques-de-presse/Communiques-de-presse-2026/Juillet-2026/Incendie-de-Saumos-Reintegration-autorisee-dans-de-nouvelles-communes",
+        "active": True,
+    },
+    {
         "date": "30 juillet 2026",
         "badge": "Dispositif d'aide",
         "titre": (
