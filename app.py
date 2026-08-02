@@ -60,6 +60,16 @@ PREFECTURE_WEEKEND_URL = (
     "Communiques-de-presse-2026/Juillet-2026/"
     "Incendie-de-Saumos-point-de-situation-ce-samedi-1er-aout-a-20h"
 )
+LEGE_PORGE_REINTEGRATION_URL = (
+    "https://www.gironde.gouv.fr/Actualites/Communiques-de-presse/"
+    "Communiques-de-presse-2026/Aout-2026/"
+    "Incendie-de-Saumos-Reintegration-autorisee-dans-les-communes-"
+    "de-Lege-Cap-Ferret-et-du-Porge"
+)
+PREFECTURE_FAQ_ENTREPRISES_URL = (
+    "https://www.gironde.gouv.fr/Actualites/Breves/"
+    "Incendie-Foire-aux-questions/Foire-aux-questions-incendie"
+)
 CMA_FONDS_URL = (
     "https://www.artisanat.fr/magazine/actus/"
     "entreprises-impactees-incendies-cma-se-mobilisent-cotes-artisans"
@@ -78,8 +88,8 @@ MINISTERE_MESURES_URL = (
 # Pour ajouter, masquer ou modifier une actualité, intervenir dans cette liste.
 # Situation cartographique issue des communiqués et de la FAQ de la
 # Préfecture de la Gironde. Mettre à jour à chaque nouveau communiqué.
-CARTE_SITUATION_DATE = "1er août 2026 à 20 h – nouvelles réintégrations"
-CARTE_SOURCE_URL = PREFECTURE_WEEKEND_URL
+CARTE_SITUATION_DATE = "3 août 2026 – réintégrations progressives du Porge et de Lège-Cap-Ferret"
+CARTE_SOURCE_URL = LEGE_PORGE_REINTEGRATION_URL
 PORTAIL_INCENDIE_GIRONDE_URL = (
     "https://www.gironde.gouv.fr/Actualites/Incendie-en-Gironde-toutes-les-informations-utile"
 )
@@ -204,7 +214,7 @@ COMMUNES_INCENDIE = [
         "lat": 44.7658,
         "lon": -1.1397,
         "statut": "reintegree",
-        "precision": "Réintégration autorisée à compter du 1er août 2026.",
+        "precision": "Réintégration autorisée depuis le 1er août 2026.",
     },
     {"commune": "Andernos-les-Bains", "lat": 44.7424, "lon": -1.1033, "statut": "evacuee"},
     {
@@ -213,8 +223,8 @@ COMMUNES_INCENDIE = [
         "lon": -1.0133,
         "statut": "reintegree",
         "precision": (
-            "Réintégration autorisée dans toute la commune, y compris "
-            "les quartiers de Lubec et de La Pointe."
+            "Toute la commune est réintégrée, y compris les quartiers "
+            "de Lubec et de La Pointe."
         ),
     },
     {
@@ -235,28 +245,48 @@ COMMUNES_INCENDIE = [
             "villages vacances et parcs de loisirs de Lacanau."
         ),
     },
-    {"commune": "Lège-Cap-Ferret", "lat": 44.7933, "lon": -1.1469, "statut": "evacuee"},
+    {
+        "commune": "Lège-Cap-Ferret",
+        "lat": 44.7933,
+        "lon": -1.1469,
+        "statut": "reintegree_partielle",
+        "precision": (
+            "Réintégration progressive à compter du 3 août, selon les secteurs. "
+            "Les campings et certaines zones restent exclus. Vérifier le communiqué "
+            "avant tout déplacement."
+        ),
+    },
     {
         "commune": "Marcheprime",
         "lat": 44.6929,
         "lon": -0.8558,
         "statut": "reintegree",
-        "precision": "Réintégration autorisée à compter du 1er août 2026.",
+        "precision": "Réintégration autorisée depuis le 1er août 2026.",
     },
-    {"commune": "Le Porge", "lat": 44.8734, "lon": -1.0922, "statut": "evacuee"},
+    {
+        "commune": "Le Porge",
+        "lat": 44.8734,
+        "lon": -1.0922,
+        "statut": "reintegree_partielle",
+        "precision": (
+            "Réintégration progressive à compter du 3 août, selon les secteurs. "
+            "Les campings et certaines zones restent exclus. Vérifier le communiqué "
+            "avant tout déplacement."
+        ),
+    },
     {
         "commune": "Saumos",
         "lat": 44.9124,
         "lon": -0.9958,
         "statut": "reintegree",
-        "precision": "Réintégration autorisée à compter du 1er août 2026.",
+        "precision": "Réintégration autorisée depuis le 1er août 2026.",
     },
     {
         "commune": "Le Temple",
         "lat": 44.8790,
         "lon": -0.9899,
         "statut": "reintegree",
-        "precision": "Réintégration autorisée à compter du 1er août 2026.",
+        "precision": "Réintégration autorisée depuis le 1er août 2026.",
     },
 
     # Réintégration autorisée le 30 juillet 2026
@@ -279,12 +309,42 @@ COMMUNES_INCENDIE = [
 
 ACTUALITES = [
     {
+        "date": "3 août 2026",
+        "badge": "Réintégration",
+        "titre": "Réintégration progressive du Porge et de Lège-Cap-Ferret",
+        "resume": (
+            "La Préfecture annonce une réintégration progressive à compter du lundi "
+            "3 août, selon les secteurs. Les entreprises peuvent envisager une reprise "
+            "progressive, sous réserve de vérifier l'accès effectif aux locaux et les "
+            "restrictions qui restent applicables. Les campings et certains secteurs "
+            "demeurent exclus."
+        ),
+        "source": "Préfecture de la Gironde",
+        "url": LEGE_PORGE_REINTEGRATION_URL,
+        "active": True,
+        "featured": True,
+    },
+    {
+        "date": "2 août 2026",
+        "badge": "FAQ officielle",
+        "titre": "Une FAQ regroupe les démarches et contacts utiles",
+        "resume": (
+            "La Préfecture met à disposition une foire aux questions consacrée aux "
+            "incendies, avec les principales démarches, les contacts d'urgence et une "
+            "rubrique spécifique pour les entreprises, autoentrepreneurs et travailleurs "
+            "indépendants."
+        ),
+        "source": "Préfecture de la Gironde",
+        "url": PREFECTURE_FAQ_ENTREPRISES_URL,
+        "active": True,
+    },
+    {
         "date": "1er août 2026",
         "badge": "Aide CMA",
-        "titre": "Jusqu’à 1 500 € d’aide d’urgence pour les artisans sinistrés",
+        "titre": "Jusqu'à 1 500 € d'aide d'urgence pour les artisans sinistrés",
         "resume": (
             "Le réseau des CMA mobilise son Fonds de calamités et des catastrophes "
-            "naturelles. Une aide d’urgence pouvant atteindre 1 500 € peut être accordée "
+            "naturelles. Une aide d'urgence pouvant atteindre 1 500 € peut être accordée "
             "aux entreprises artisanales dont les locaux, équipements ou matériels ont "
             "été endommagés ou détruits. La demande doit être déposée auprès de la CMA "
             "compétente dans un délai maximal de trois mois après le sinistre."
@@ -292,18 +352,17 @@ ACTUALITES = [
         "source": "CMA France",
         "url": CMA_FONDS_URL,
         "active": True,
-        "featured": True,
     },
     {
         "date": "1er août 2026",
         "badge": "Assurances",
-        "titre": "Les expertises d’assurance doivent être accélérées",
+        "titre": "Les expertises d'assurance doivent être accélérées",
         "resume": (
             "France Assureurs, les compagnies et les experts se sont engagés auprès "
-            "de la Préfecture à accélérer les passages d’expertise et à suivre chaque "
-            "semaine l’avancement des dossiers. Pour les entreprises en attente, "
-            "conseiller une relance écrite de l’assureur en rappelant cet engagement. "
-            "Le délai exceptionnel de déclaration des sinistres reste fixé au 31 août 2026."
+            "de la Préfecture à accélérer les passages d'expertise et à suivre chaque "
+            "semaine l'avancement des dossiers. Pour les entreprises en attente, "
+            "conseiller une relance écrite de l'assureur. Le délai exceptionnel de "
+            "déclaration des sinistres reste fixé au 31 août 2026."
         ),
         "source": "Préfecture de la Gironde",
         "url": PREFECTURE_WEEKEND_URL,
@@ -312,13 +371,12 @@ ACTUALITES = [
     {
         "date": "1er août 2026",
         "badge": "Réintégration",
-        "titre": "Retour autorisé à Arès, Marcheprime, Saumos, Le Temple et dans tout Audenge",
+        "titre": "Arès, Marcheprime, Saumos, Le Temple et Audenge réintégrés",
         "resume": (
             "La Préfecture autorise la réintégration à Arès, Marcheprime, Saumos "
-            "et Le Temple, ainsi que dans les quartiers de Lubec et de La Pointe à Audenge. "
-            "Audenge est donc entièrement réintégrée. Lors des rappels, vérifier malgré "
-            "tout l’accès réel aux locaux, les réseaux, les dommages, les fumées et la "
-            "possibilité effective de reprendre l’activité."
+            "et Le Temple, ainsi que dans les quartiers de Lubec et de La Pointe à "
+            "Audenge. Audenge est donc entièrement réintégrée. Vérifier malgré tout "
+            "l'accès réel aux locaux et la possibilité effective de reprendre l'activité."
         ),
         "source": "Préfecture de la Gironde",
         "url": PREFECTURE_WEEKEND_URL,
@@ -329,13 +387,12 @@ ACTUALITES = [
         "badge": "Mesures entreprises",
         "titre": "Activité partielle, CFE, Urssaf et assurances : les mesures de référence",
         "resume": (
-            "La page officielle du ministère centralise les principales mesures : "
-            "activité partielle pour les entreprises empêchées ou affectées, reports "
-            "de cotisations Urssaf avec remise des majorations, modulation des cotisations "
-            "provisionnelles, accompagnement fiscal et dégrèvement possible de CFE pour "
-            "les locaux devenus inutilisables."
+            "La page du ministère centralise les principales mesures : activité "
+            "partielle, reports de cotisations Urssaf, remise des majorations, "
+            "modulation des cotisations provisionnelles, accompagnement fiscal et "
+            "dégrèvement possible de CFE pour les locaux devenus inutilisables."
         ),
-        "source": "Ministère de l’Économie",
+        "source": "Ministère de l'Économie",
         "url": MINISTERE_MESURES_URL,
         "active": True,
     },
@@ -345,9 +402,9 @@ ACTUALITES = [
         "titre": "Aide CPSTI renforcée pour les travailleurs indépendants",
         "resume": (
             "Le CPSTI prévoit une aide pouvant atteindre 2 000 € pour les indépendants "
-            "empêchés d’exercer dans une zone évacuée et jusqu’à 8 000 € lorsque "
-            "l’entreprise ou l’habitation principale a été directement touchée. "
-            "La demande est à transmettre à l’Urssaf avec les justificatifs via la "
+            "empêchés d'exercer dans une zone évacuée et jusqu'à 8 000 € lorsque "
+            "l'entreprise ou l'habitation principale a été directement touchée. "
+            "La demande est à transmettre à l'Urssaf avec les justificatifs via la "
             "messagerie sécurisée, rubrique « situation exceptionnelle »."
         ),
         "source": "Urssaf / CPSTI",
@@ -681,22 +738,22 @@ def render_actualites() -> None:
     )
     secondaires = [item for item in actualites_actives if item is not featured]
 
-    secondary_cards = []
+    cards = []
     for actualite in secondaires:
-        secondary_cards.append(
+        cards.append(
             f"""
-            <article class="secondary-news-card">
+            <article class="compact-news-card">
                 <div class="news-meta">
                     <span class="news-badge">{html.escape(actualite.get("badge", "Actualité"))}</span>
                     <span>{html.escape(actualite.get("date", ""))}</span>
                 </div>
-                <div class="secondary-news-title">
+                <div class="compact-news-title">
                     {html.escape(actualite.get("titre", ""))}
                 </div>
-                <div class="secondary-news-summary">
+                <div class="compact-news-summary">
                     {html.escape(actualite.get("resume", ""))}
                 </div>
-                <div class="secondary-news-source">
+                <div class="compact-news-source">
                     Source : {html.escape(actualite.get("source", ""))}
                 </div>
             </article>
@@ -710,7 +767,7 @@ def render_actualites() -> None:
                 <div class="briefing-kicker">Briefing collaborateurs</div>
                 <div class="briefing-title">Les informations à connaître avant les appels</div>
             </div>
-            <div class="briefing-date">{len(actualites_actives)} actualités actives</div>
+            <div class="briefing-count">{len(actualites_actives)} actualités actives</div>
         </div>
 
         <article class="featured-news">
@@ -722,27 +779,27 @@ def render_actualites() -> None:
             <div class="featured-summary">{html.escape(featured.get("resume", ""))}</div>
         </article>
 
-        <div class="secondary-news-grid">
-            {''.join(secondary_cards)}
+        <div class="news-strip">
+            {''.join(cards)}
         </div>
     </section>
     """
 
     st.markdown(textwrap.dedent(briefing_html).strip(), unsafe_allow_html=True)
 
-    st.markdown("#### Accéder aux sources")
-    button_cols = st.columns(min(3, len(actualites_actives)))
-    for index, actualite in enumerate(actualites_actives):
-        with button_cols[index % len(button_cols)]:
-            st.link_button(
-                f"{actualite.get('badge', 'Actualité')} — {actualite.get('source', 'Source')}",
-                actualite["url"],
-                use_container_width=True,
-                key=f"actualite_link_{index}",
-            )
+    with st.expander("Accéder aux sources officielles", expanded=False):
+        source_cols = st.columns(2)
+        for index, actualite in enumerate(actualites_actives):
+            with source_cols[index % 2]:
+                st.link_button(
+                    f"{actualite.get('badge', 'Actualité')} — {actualite.get('source', 'Source')}",
+                    actualite["url"],
+                    use_container_width=True,
+                    key=f"actualite_link_{index}",
+                )
 
     st.caption(
-        "Ce briefing est réservé aux collaborateurs et n’apparaît pas dans le PDF remis à l’entreprise."
+        "Ce briefing est réservé aux collaborateurs et n'apparaît pas dans le PDF remis à l'entreprise."
     )
 
 
@@ -2238,12 +2295,12 @@ st.markdown(
             }}
         }}
         .briefing-shell {{
-            margin: 1rem 0 1.35rem 0;
+            margin: 1rem 0 1.35rem;
             padding: 1.05rem;
             border: 1px solid #D9E4EE;
             border-radius: 20px;
             background:
-                radial-gradient(circle at top right, rgba(229, 37, 42, .08), transparent 30%),
+                radial-gradient(circle at top right, rgba(229, 37, 42, .09), transparent 28%),
                 linear-gradient(180deg, #F9FBFD 0%, #EEF4F9 100%);
             box-shadow: 0 14px 34px rgba(17, 52, 86, .10);
         }}
@@ -2271,31 +2328,34 @@ st.markdown(
             margin-top: .15rem;
         }}
 
-        .briefing-date {{
+        .briefing-count {{
             color: #607084;
-            font-size: .78rem;
+            background: white;
+            border: 1px solid #D6E1EC;
+            border-radius: 999px;
+            padding: .25rem .65rem;
+            font-size: .76rem;
             white-space: nowrap;
         }}
 
         .featured-news {{
             position: relative;
             overflow: hidden;
-            min-height: 210px;
-            padding: 1.35rem 1.45rem;
+            min-height: 190px;
+            padding: 1.3rem 1.4rem;
             border-radius: 17px;
             color: white;
-            background:
-                linear-gradient(135deg, rgba(20, 51, 86, .98), rgba(34, 84, 134, .96));
+            background: linear-gradient(135deg, #173B65 0%, #28639C 100%);
             box-shadow: 0 14px 30px rgba(23, 59, 101, .22);
         }}
 
         .featured-news::after {{
             content: "";
             position: absolute;
-            width: 210px;
-            height: 210px;
-            right: -65px;
-            top: -70px;
+            width: 220px;
+            height: 220px;
+            right: -70px;
+            top: -85px;
             border-radius: 50%;
             background: rgba(255, 255, 255, .07);
         }}
@@ -2304,17 +2364,15 @@ st.markdown(
             display: flex;
             align-items: center;
             gap: .5rem;
-            margin-bottom: .85rem;
+            margin-bottom: .8rem;
             font-size: .78rem;
-            opacity: .9;
+            opacity: .92;
         }}
 
         .featured-badge {{
-            display: inline-flex;
             padding: .28rem .65rem;
             border-radius: 999px;
             background: var(--cma-red);
-            color: white;
             font-size: .68rem;
             font-weight: 900;
             letter-spacing: .04em;
@@ -2324,7 +2382,7 @@ st.markdown(
         .featured-title {{
             position: relative;
             z-index: 2;
-            max-width: 82%;
+            max-width: 85%;
             font-size: 1.35rem;
             line-height: 1.25;
             font-weight: 900;
@@ -2334,63 +2392,66 @@ st.markdown(
         .featured-summary {{
             position: relative;
             z-index: 2;
-            max-width: 90%;
-            color: rgba(255, 255, 255, .88);
-            font-size: .91rem;
-            line-height: 1.52;
+            max-width: 92%;
+            color: rgba(255, 255, 255, .89);
+            font-size: .9rem;
+            line-height: 1.5;
         }}
 
-        .secondary-news-grid {{
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+        .news-strip {{
+            display: flex;
             gap: .8rem;
-            margin-top: .85rem;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scrollbar-width: thin;
+            padding: .85rem .1rem .45rem;
         }}
 
-        .secondary-news-card {{
-            min-height: 185px;
-            padding: 1rem;
-            border-radius: 15px;
+        .compact-news-card {{
+            flex: 0 0 315px;
+            scroll-snap-align: start;
+            min-height: 180px;
+            padding: .95rem;
             border: 1px solid #DCE5EE;
+            border-radius: 15px;
             background: white;
             box-shadow: 0 7px 20px rgba(18, 52, 86, .07);
-            transition: transform .18s ease, box-shadow .18s ease;
         }}
 
-        .secondary-news-card:hover {{
-            transform: translateY(-3px);
-            box-shadow: 0 12px 24px rgba(18, 52, 86, .13);
-        }}
-
-        .secondary-news-title {{
+        .compact-news-title {{
             color: var(--cma-blue);
-            font-size: .96rem;
+            font-size: .93rem;
             line-height: 1.32;
             font-weight: 850;
-            margin: .5rem 0 .45rem;
+            margin: .5rem 0 .4rem;
         }}
 
-        .secondary-news-summary {{
+        .compact-news-summary {{
             color: #485A6E;
-            font-size: .82rem;
-            line-height: 1.45;
+            font-size: .8rem;
+            line-height: 1.43;
         }}
 
-        .secondary-news-source {{
-            margin-top: .65rem;
+        .compact-news-source {{
+            margin-top: .6rem;
             color: #697A8D;
-            font-size: .73rem;
+            font-size: .71rem;
             font-weight: 700;
         }}
 
         @media (max-width: 760px) {{
-            .secondary-news-grid {{
-                grid-template-columns: 1fr;
+            .briefing-head {{
+                align-items: flex-start;
+                flex-direction: column;
             }}
 
             .featured-title,
             .featured-summary {{
                 max-width: 100%;
+            }}
+
+            .compact-news-card {{
+                flex-basis: 88%;
             }}
         }}
 
