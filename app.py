@@ -55,34 +55,12 @@ PREFECTURE_EVACUATION_URL = (
     "Incendie-Foire-aux-questions/Foire-aux-questions-incendie"
 )
 
-PREFECTURE_WEEKEND_URL = (
-    "https://www.gironde.gouv.fr/Actualites/Communiques-de-presse/"
-    "Communiques-de-presse-2026/Juillet-2026/"
-    "Incendie-de-Saumos-point-de-situation-ce-samedi-1er-aout-a-20h"
-)
-LEGE_PORGE_REINTEGRATION_URL = (
-    "https://www.gironde.gouv.fr/Actualites/Communiques-de-presse/"
-    "Communiques-de-presse-2026/Aout-2026/"
-    "Incendie-de-Saumos-Reintegration-autorisee-dans-les-communes-"
-    "de-Lege-Cap-Ferret-et-du-Porge"
-)
-PREFECTURE_FAQ_ENTREPRISES_URL = (
-    "https://www.gironde.gouv.fr/Actualites/Breves/"
-    "Incendie-Foire-aux-questions/Foire-aux-questions-incendie"
-)
-CMA_FONDS_URL = (
-    "https://www.artisanat.fr/magazine/actus/"
-    "entreprises-impactees-incendies-cma-se-mobilisent-cotes-artisans"
-)
-URSSAF_CPSTI_URL = (
-    "https://www.urssaf.org/accueil/espace-medias/"
-    "communiques-et-dossiers-de-press/communiques-de-presse/2026/"
-    "incendies-le-cpsti-et-l-urssaf-m.html"
-)
-MINISTERE_MESURES_URL = (
-    "https://www.economie.gouv.fr/actualites/"
-    "incendies-les-mesures-pour-accompagner-les-sinistres-et-les-entreprises"
-)
+PREFECTURE_WEEKEND_URL = "https://www.gironde.gouv.fr/Actualites/Communiques-de-presse/Communiques-de-presse-2026/Juillet-2026/Incendie-de-Saumos-point-de-situation-ce-samedi-1er-aout-a-20h"
+LEGE_PORGE_REINTEGRATION_URL = "https://www.gironde.gouv.fr/Actualites/Communiques-de-presse/Communiques-de-presse-2026/Aout-2026/Incendie-de-Saumos-Reintegration-autorisee-dans-les-communes-de-Lege-Cap-Ferret-et-du-Porge"
+PREFECTURE_FAQ_ENTREPRISES_URL = "https://www.gironde.gouv.fr/Actualites/Breves/Incendie-Foire-aux-questions/Foire-aux-questions-incendie"
+CMA_FONDS_URL = "https://www.artisanat.fr/magazine/actus/entreprises-impactees-incendies-cma-se-mobilisent-cotes-artisans"
+URSSAF_CPSTI_URL = "https://www.urssaf.org/accueil/espace-medias/communiques-et-dossiers-de-press/communiques-de-presse/2026/incendies-le-cpsti-et-l-urssaf-m.html"
+MINISTERE_MESURES_URL = "https://www.economie.gouv.fr/actualites/incendies-les-mesures-pour-accompagner-les-sinistres-et-les-entreprises"
 
 # Actualités visibles uniquement dans l'interface collaborateurs.
 # Pour ajouter, masquer ou modifier une actualité, intervenir dans cette liste.
@@ -724,82 +702,92 @@ def get_actualite_badge_class(badge: str) -> str:
     return ""
 
 
+def render_actualite_ligne(
+    actualite: dict[str, Any],
+    index: int,
+    featured: bool = False,
+) -> None:
+    """Affiche une actualité sous forme de ligne compacte et robuste."""
+    with st.container(border=True):
+        info_col, action_col = st.columns([5.2, 1.2], vertical_alignment="center")
+
+        with info_col:
+            meta = (
+                f"**{actualite.get('badge', 'Actualité')}** · "
+                f"{actualite.get('date', '')} · "
+                f"{actualite.get('source', '')}"
+            )
+            st.caption(meta)
+            st.markdown(f"**{actualite.get('titre', '')}**")
+
+            if featured:
+                st.write(actualite.get("resume", ""))
+            else:
+                resume = actualite.get("resume", "")
+                resume_court = resume if len(resume) <= 190 else resume[:187].rstrip() + "…"
+                st.caption(resume_court)
+
+        with action_col:
+            st.link_button(
+                "Ouvrir la source",
+                actualite["url"],
+                use_container_width=True,
+                key=f"actualite_compacte_{index}",
+            )
+
+
 def render_actualites() -> None:
-    """Affiche un briefing collaborateurs premium, sans impact sur le PDF."""
+    """Affiche un briefing court, lisible et réservé aux collaborateurs."""
     actualites_actives = [
-        item for item in ACTUALITES if item.get("active", True)
+        item for item in ACTUALITES if item.get("active", True) and item.get("url")
     ]
     if not actualites_actives:
         return
 
-    featured = next(
+    actualite_principale = next(
         (item for item in actualites_actives if item.get("featured")),
         actualites_actives[0],
     )
-    secondaires = [item for item in actualites_actives if item is not featured]
+    autres_actualites = [
+        item for item in actualites_actives if item is not actualite_principale
+    ]
 
-    cards = []
-    for actualite in secondaires:
-        cards.append(
-            f"""
-            <article class="compact-news-card">
-                <div class="news-meta">
-                    <span class="news-badge">{html.escape(actualite.get("badge", "Actualité"))}</span>
-                    <span>{html.escape(actualite.get("date", ""))}</span>
-                </div>
-                <div class="compact-news-title">
-                    {html.escape(actualite.get("titre", ""))}
-                </div>
-                <div class="compact-news-summary">
-                    {html.escape(actualite.get("resume", ""))}
-                </div>
-                <div class="compact-news-source">
-                    Source : {html.escape(actualite.get("source", ""))}
-                </div>
-            </article>
-            """
+    titre_col, compteur_col = st.columns([5, 1], vertical_alignment="bottom")
+    with titre_col:
+        st.caption("BRIEFING COLLABORATEURS")
+        st.markdown("### Informations à connaître avant les appels")
+    with compteur_col:
+        st.caption(f"{len(actualites_actives)} actualités actives")
+
+    render_actualite_ligne(
+        actualite_principale,
+        index=0,
+        featured=True,
+    )
+
+    # Deux actualités complémentaires restent visibles.
+    for index, actualite in enumerate(autres_actualites[:2], start=1):
+        render_actualite_ligne(
+            actualite,
+            index=index,
+            featured=False,
         )
 
-    briefing_html = f"""
-    <section class="briefing-shell">
-        <div class="briefing-head">
-            <div>
-                <div class="briefing-kicker">Briefing collaborateurs</div>
-                <div class="briefing-title">Les informations à connaître avant les appels</div>
-            </div>
-            <div class="briefing-count">{len(actualites_actives)} actualités actives</div>
-        </div>
-
-        <article class="featured-news">
-            <div class="featured-meta">
-                <span class="featured-badge">{html.escape(featured.get("badge", "À la une"))}</span>
-                <span>{html.escape(featured.get("date", ""))}</span>
-            </div>
-            <div class="featured-title">{html.escape(featured.get("titre", ""))}</div>
-            <div class="featured-summary">{html.escape(featured.get("resume", ""))}</div>
-        </article>
-
-        <div class="news-strip">
-            {''.join(cards)}
-        </div>
-    </section>
-    """
-
-    st.markdown(textwrap.dedent(briefing_html).strip(), unsafe_allow_html=True)
-
-    with st.expander("Accéder aux sources officielles", expanded=False):
-        source_cols = st.columns(2)
-        for index, actualite in enumerate(actualites_actives):
-            with source_cols[index % 2]:
-                st.link_button(
-                    f"{actualite.get('badge', 'Actualité')} — {actualite.get('source', 'Source')}",
-                    actualite["url"],
-                    use_container_width=True,
-                    key=f"actualite_link_{index}",
+    actualites_masquees = autres_actualites[2:]
+    if actualites_masquees:
+        with st.expander(
+            f"Afficher les {len(actualites_masquees)} autres actualités",
+            expanded=False,
+        ):
+            for index, actualite in enumerate(actualites_masquees, start=3):
+                render_actualite_ligne(
+                    actualite,
+                    index=index,
+                    featured=False,
                 )
 
     st.caption(
-        "Ce briefing est réservé aux collaborateurs et n'apparaît pas dans le PDF remis à l'entreprise."
+        "Cet espace est réservé aux collaborateurs et n'apparaît pas dans le PDF remis à l'entreprise."
     )
 
 
@@ -2213,7 +2201,7 @@ st.markdown(
         }}
 
         .module-nav-intro {{
-            margin: 1.15rem 0 .7rem;
+            margin: .75rem 0 .55rem;
         }}
 
         .module-nav-kicker {{
