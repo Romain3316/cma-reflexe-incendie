@@ -702,34 +702,85 @@ def get_actualite_badge_class(badge: str) -> str:
     return ""
 
 
+def get_actualite_style(badge: str) -> tuple[str, str, str]:
+    """Retourne une icône, une classe de couleur et un ton selon le type d'actualité."""
+    normalized = (badge or "").lower()
+
+    if "réintégration" in normalized:
+        return "🗺️", "green", "Retour progressif"
+    if "faq" in normalized:
+        return "❓", "blue", "Ressource officielle"
+    if "cma" in normalized:
+        return "🤝", "red", "Soutien aux artisans"
+    if "assurance" in normalized:
+        return "🛡️", "amber", "Assurance"
+    if "cpsti" in normalized or "urssaf" in normalized:
+        return "💶", "violet", "Aide sociale"
+    if "mesures" in normalized:
+        return "🏛️", "blue", "Mesures publiques"
+
+    return "📌", "blue", "Information"
+
+
 def render_actualite_ligne(
     actualite: dict[str, Any],
     index: int,
     featured: bool = False,
 ) -> None:
-    """Affiche une actualité sous forme de ligne compacte et robuste."""
+    """Affiche une actualité sous forme de carte compacte et colorée."""
+    icon, color, tone = get_actualite_style(actualite.get("badge", ""))
+
     with st.container(border=True):
-        info_col, action_col = st.columns([5.2, 1.2], vertical_alignment="center")
+        icon_col, info_col, action_col = st.columns(
+            [0.7, 4.7, 1.15],
+            vertical_alignment="center",
+        )
+
+        with icon_col:
+            st.markdown(
+                f"""
+                <div class="news-icon news-icon-{color}">
+                    {icon}
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
 
         with info_col:
-            meta = (
-                f"**{actualite.get('badge', 'Actualité')}** · "
-                f"{actualite.get('date', '')} · "
-                f"{actualite.get('source', '')}"
+            st.markdown(
+                f"""
+                <div class="news-meta-line">
+                    <span class="news-pill news-pill-{color}">
+                        {html.escape(actualite.get("badge", "Actualité"))}
+                    </span>
+                    {html.escape(actualite.get("date", ""))} ·
+                    {html.escape(actualite.get("source", ""))}
+                </div>
+                <div class="news-title-line">
+                    {html.escape(actualite.get("titre", ""))}
+                </div>
+                """,
+                unsafe_allow_html=True,
             )
-            st.caption(meta)
-            st.markdown(f"**{actualite.get('titre', '')}**")
 
+            resume = actualite.get("resume", "")
             if featured:
-                st.write(actualite.get("resume", ""))
+                resume_display = resume
             else:
-                resume = actualite.get("resume", "")
-                resume_court = resume if len(resume) <= 190 else resume[:187].rstrip() + "…"
-                st.caption(resume_court)
+                resume_display = resume if len(resume) <= 185 else resume[:182].rstrip() + "…"
+
+            st.markdown(
+                f"""
+                <div class="news-summary-line">
+                    {html.escape(resume_display)}
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
 
         with action_col:
             st.link_button(
-                "Ouvrir la source",
+                "Consulter",
                 actualite["url"],
                 use_container_width=True,
                 key=f"actualite_compacte_{index}",
@@ -737,7 +788,7 @@ def render_actualite_ligne(
 
 
 def render_actualites() -> None:
-    """Affiche un briefing court, lisible et réservé aux collaborateurs."""
+    """Affiche un briefing court, coloré et réservé aux collaborateurs."""
     actualites_actives = [
         item for item in ACTUALITES if item.get("active", True) and item.get("url")
     ]
@@ -752,12 +803,20 @@ def render_actualites() -> None:
         item for item in actualites_actives if item is not actualite_principale
     ]
 
-    titre_col, compteur_col = st.columns([5, 1], vertical_alignment="bottom")
-    with titre_col:
-        st.caption("BRIEFING COLLABORATEURS")
-        st.markdown("### Informations à connaître avant les appels")
-    with compteur_col:
-        st.caption(f"{len(actualites_actives)} actualités actives")
+    st.markdown(
+        f"""
+        <div class="briefing-banner">
+            <div class="briefing-banner-kicker">Briefing collaborateurs</div>
+            <div class="briefing-banner-title">
+                Les informations à connaître avant les appels
+            </div>
+            <div class="briefing-banner-subtitle">
+                {len(actualites_actives)} actualités actives · sources officielles et professionnelles
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
     render_actualite_ligne(
         actualite_principale,
@@ -765,7 +824,6 @@ def render_actualites() -> None:
         featured=True,
     )
 
-    # Deux actualités complémentaires restent visibles.
     for index, actualite in enumerate(autres_actualites[:2], start=1):
         render_actualite_ligne(
             actualite,
@@ -2202,6 +2260,111 @@ st.markdown(
 
         .module-nav-intro {{
             margin: .75rem 0 .55rem;
+        }}
+
+        .briefing-banner {{
+            margin: .55rem 0 .8rem;
+            padding: .9rem 1rem;
+            border-radius: 16px;
+            background:
+                linear-gradient(135deg, rgba(23, 59, 101, .98), rgba(43, 104, 159, .94));
+            color: white;
+            box-shadow: 0 10px 26px rgba(23, 59, 101, .18);
+        }}
+
+        .briefing-banner-kicker {{
+            font-size: .7rem;
+            font-weight: 900;
+            letter-spacing: .11em;
+            text-transform: uppercase;
+            opacity: .8;
+        }}
+
+        .briefing-banner-title {{
+            margin-top: .2rem;
+            font-size: 1.08rem;
+            font-weight: 900;
+        }}
+
+        .briefing-banner-subtitle {{
+            margin-top: .25rem;
+            font-size: .82rem;
+            line-height: 1.4;
+            opacity: .84;
+        }}
+
+        .news-icon {{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            font-size: 1.6rem;
+            box-shadow: 0 6px 15px rgba(18, 52, 86, .11);
+        }}
+
+        .news-icon-blue {{
+            background: #E8F1FB;
+            border: 1px solid #C9DBEE;
+        }}
+
+        .news-icon-red {{
+            background: #FDECEE;
+            border: 1px solid #F5C7CC;
+        }}
+
+        .news-icon-green {{
+            background: #EAF6EF;
+            border: 1px solid #CBE6D5;
+        }}
+
+        .news-icon-amber {{
+            background: #FFF4DA;
+            border: 1px solid #F1D99A;
+        }}
+
+        .news-icon-violet {{
+            background: #F2ECFA;
+            border: 1px solid #D9C8EE;
+        }}
+
+        .news-pill {{
+            display: inline-block;
+            padding: .2rem .52rem;
+            border-radius: 999px;
+            color: white;
+            font-size: .68rem;
+            font-weight: 900;
+            letter-spacing: .03em;
+            text-transform: uppercase;
+            margin-right: .35rem;
+        }}
+
+        .news-pill-blue {{ background: #255D92; }}
+        .news-pill-red {{ background: #D9303E; }}
+        .news-pill-green {{ background: #2E7D56; }}
+        .news-pill-amber {{ background: #C88600; }}
+        .news-pill-violet {{ background: #6C4AA0; }}
+
+        .news-meta-line {{
+            color: #68798D;
+            font-size: .75rem;
+            margin-bottom: .15rem;
+        }}
+
+        .news-title-line {{
+            color: var(--cma-blue);
+            font-size: 1rem;
+            line-height: 1.3;
+            font-weight: 850;
+            margin-bottom: .25rem;
+        }}
+
+        .news-summary-line {{
+            color: #45586D;
+            font-size: .84rem;
+            line-height: 1.45;
         }}
 
         .module-nav-kicker {{
