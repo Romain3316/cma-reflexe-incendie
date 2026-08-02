@@ -55,12 +55,31 @@ PREFECTURE_EVACUATION_URL = (
     "Incendie-Foire-aux-questions/Foire-aux-questions-incendie"
 )
 
+PREFECTURE_WEEKEND_URL = (
+    "https://www.gironde.gouv.fr/Actualites/Communiques-de-presse/"
+    "Communiques-de-presse-2026/Juillet-2026/"
+    "Incendie-de-Saumos-point-de-situation-ce-samedi-1er-aout-a-20h"
+)
+CMA_FONDS_URL = (
+    "https://www.artisanat.fr/magazine/actus/"
+    "entreprises-impactees-incendies-cma-se-mobilisent-cotes-artisans"
+)
+URSSAF_CPSTI_URL = (
+    "https://www.urssaf.org/accueil/espace-medias/"
+    "communiques-et-dossiers-de-press/communiques-de-presse/2026/"
+    "incendies-le-cpsti-et-l-urssaf-m.html"
+)
+MINISTERE_MESURES_URL = (
+    "https://www.economie.gouv.fr/actualites/"
+    "incendies-les-mesures-pour-accompagner-les-sinistres-et-les-entreprises"
+)
+
 # Actualités visibles uniquement dans l'interface collaborateurs.
 # Pour ajouter, masquer ou modifier une actualité, intervenir dans cette liste.
 # Situation cartographique issue des communiqués et de la FAQ de la
 # Préfecture de la Gironde. Mettre à jour à chaque nouveau communiqué.
-CARTE_SITUATION_DATE = "31 juillet 2026 à 12 h – nouvelles réintégrations"
-CARTE_SOURCE_URL = "https://www.gironde.gouv.fr/Actualites/Communiques-de-presse/Communiques-de-presse-2026/Juillet-2026/Incendie-de-Saumos-Reintegration-autorisee-dans-de-nouvelles-communes"
+CARTE_SITUATION_DATE = "1er août 2026 à 20 h – nouvelles réintégrations"
+CARTE_SOURCE_URL = PREFECTURE_WEEKEND_URL
 PORTAIL_INCENDIE_GIRONDE_URL = (
     "https://www.gironde.gouv.fr/Actualites/Incendie-en-Gironde-toutes-les-informations-utile"
 )
@@ -180,14 +199,23 @@ ATTESTATIONS_COMMUNES = {
 
 COMMUNES_INCENDIE = [
     # Évacuation maintenue
-    {"commune": "Arès", "lat": 44.7658, "lon": -1.1397, "statut": "evacuee"},
+    {
+        "commune": "Arès",
+        "lat": 44.7658,
+        "lon": -1.1397,
+        "statut": "reintegree",
+        "precision": "Réintégration autorisée à compter du 1er août 2026.",
+    },
     {"commune": "Andernos-les-Bains", "lat": 44.7424, "lon": -1.1033, "statut": "evacuee"},
     {
         "commune": "Audenge",
         "lat": 44.6843,
         "lon": -1.0133,
-        "statut": "reintegree_partielle",
-        "precision": "Retour autorisé sauf dans les quartiers de Lubec et de La Pointe.",
+        "statut": "reintegree",
+        "precision": (
+            "Réintégration autorisée dans toute la commune, y compris "
+            "les quartiers de Lubec et de La Pointe."
+        ),
     },
     {
         "commune": "Biganos",
@@ -208,10 +236,28 @@ COMMUNES_INCENDIE = [
         ),
     },
     {"commune": "Lège-Cap-Ferret", "lat": 44.7933, "lon": -1.1469, "statut": "evacuee"},
-    {"commune": "Marcheprime", "lat": 44.6929, "lon": -0.8558, "statut": "evacuee"},
+    {
+        "commune": "Marcheprime",
+        "lat": 44.6929,
+        "lon": -0.8558,
+        "statut": "reintegree",
+        "precision": "Réintégration autorisée à compter du 1er août 2026.",
+    },
     {"commune": "Le Porge", "lat": 44.8734, "lon": -1.0922, "statut": "evacuee"},
-    {"commune": "Saumos", "lat": 44.9124, "lon": -0.9958, "statut": "evacuee"},
-    {"commune": "Le Temple", "lat": 44.8790, "lon": -0.9899, "statut": "evacuee"},
+    {
+        "commune": "Saumos",
+        "lat": 44.9124,
+        "lon": -0.9958,
+        "statut": "reintegree",
+        "precision": "Réintégration autorisée à compter du 1er août 2026.",
+    },
+    {
+        "commune": "Le Temple",
+        "lat": 44.8790,
+        "lon": -0.9899,
+        "statut": "reintegree",
+        "precision": "Réintégration autorisée à compter du 1er août 2026.",
+    },
 
     # Réintégration autorisée le 30 juillet 2026
     {"commune": "Mios", "lat": 44.6057, "lon": -0.9378, "statut": "reintegree"},
@@ -233,81 +279,79 @@ COMMUNES_INCENDIE = [
 
 ACTUALITES = [
     {
+        "date": "1er août 2026",
+        "badge": "Aide CMA",
+        "titre": "Jusqu’à 1 500 € d’aide d’urgence pour les artisans sinistrés",
+        "resume": (
+            "Le réseau des CMA mobilise son Fonds de calamités et des catastrophes "
+            "naturelles. Une aide d’urgence pouvant atteindre 1 500 € peut être accordée "
+            "aux entreprises artisanales dont les locaux, équipements ou matériels ont "
+            "été endommagés ou détruits. La demande doit être déposée auprès de la CMA "
+            "compétente dans un délai maximal de trois mois après le sinistre."
+        ),
+        "source": "CMA France",
+        "url": CMA_FONDS_URL,
+        "active": True,
+        "featured": True,
+    },
+    {
+        "date": "1er août 2026",
+        "badge": "Assurances",
+        "titre": "Les expertises d’assurance doivent être accélérées",
+        "resume": (
+            "France Assureurs, les compagnies et les experts se sont engagés auprès "
+            "de la Préfecture à accélérer les passages d’expertise et à suivre chaque "
+            "semaine l’avancement des dossiers. Pour les entreprises en attente, "
+            "conseiller une relance écrite de l’assureur en rappelant cet engagement. "
+            "Le délai exceptionnel de déclaration des sinistres reste fixé au 31 août 2026."
+        ),
+        "source": "Préfecture de la Gironde",
+        "url": PREFECTURE_WEEKEND_URL,
+        "active": True,
+    },
+    {
+        "date": "1er août 2026",
+        "badge": "Réintégration",
+        "titre": "Retour autorisé à Arès, Marcheprime, Saumos, Le Temple et dans tout Audenge",
+        "resume": (
+            "La Préfecture autorise la réintégration à Arès, Marcheprime, Saumos "
+            "et Le Temple, ainsi que dans les quartiers de Lubec et de La Pointe à Audenge. "
+            "Audenge est donc entièrement réintégrée. Lors des rappels, vérifier malgré "
+            "tout l’accès réel aux locaux, les réseaux, les dommages, les fumées et la "
+            "possibilité effective de reprendre l’activité."
+        ),
+        "source": "Préfecture de la Gironde",
+        "url": PREFECTURE_WEEKEND_URL,
+        "active": True,
+    },
+    {
         "date": "31 juillet 2026",
-        "badge": "À la une",
-        "titre": (
-            "Incendie de Saumos : réintégration autorisée dans de nouvelles communes"
-        ),
+        "badge": "Mesures entreprises",
+        "titre": "Activité partielle, CFE, Urssaf et assurances : les mesures de référence",
         "resume": (
-            "Après une nouvelle évaluation des conditions de sécurité, la Préfecture "
-            "de la Gironde autorise la réintégration dans de nouvelles communes. "
-            "Consulter le communiqué officiel pour connaître précisément les secteurs "
-            "concernés, les modalités de retour et les éventuelles restrictions encore "
-            "en vigueur."
+            "La page officielle du ministère centralise les principales mesures : "
+            "activité partielle pour les entreprises empêchées ou affectées, reports "
+            "de cotisations Urssaf avec remise des majorations, modulation des cotisations "
+            "provisionnelles, accompagnement fiscal et dégrèvement possible de CFE pour "
+            "les locaux devenus inutilisables."
         ),
-        "source": "Préfecture de la Gironde — communiqué officiel",
-        "url": "https://www.gironde.gouv.fr/Actualites/Communiques-de-presse/Communiques-de-presse-2026/Juillet-2026/Incendie-de-Saumos-Reintegration-autorisee-dans-de-nouvelles-communes",
+        "source": "Ministère de l’Économie",
+        "url": MINISTERE_MESURES_URL,
         "active": True,
     },
     {
         "date": "30 juillet 2026",
-        "badge": "Dispositif d'aide",
-        "titre": (
-            "Urssaf et CPSTI : mesures d'urgence renforcées pour les victimes "
-            "des incendies en Gironde et dans les Landes"
-        ),
+        "badge": "CPSTI",
+        "titre": "Aide CPSTI renforcée pour les travailleurs indépendants",
         "resume": (
-            "Tous les professionnels touchés peuvent demander un délai de paiement "
-            "de leurs cotisations et, en cas de baisse d'activité anticipée, une "
-            "réduction de leurs cotisations provisionnelles. Le CPSTI prévoit une aide "
-            "pouvant aller jusqu'à 2 000 € pour les indépendants situés en zone "
-            "d'évacuation et empêchés d'exercer, et jusqu'à 8 000 € en cas de "
-            "destruction directe de l'entreprise ou de l'habitation principale. "
-            "Les dossiers complets et éligibles doivent être instruits rapidement, "
-            "avec un objectif de mise en paiement sous 15 jours."
+            "Le CPSTI prévoit une aide pouvant atteindre 2 000 € pour les indépendants "
+            "empêchés d’exercer dans une zone évacuée et jusqu’à 8 000 € lorsque "
+            "l’entreprise ou l’habitation principale a été directement touchée. "
+            "La demande est à transmettre à l’Urssaf avec les justificatifs via la "
+            "messagerie sécurisée, rubrique « situation exceptionnelle »."
         ),
-        "source": "Urssaf / CPSTI — communiqué officiel",
-        "url": "https://www.gironde.gouv.fr/Actualites/Incendie-en-Gironde-toutes-les-informations-utile",
-        "active": True,
-    },
-    {
-        "date": "30 juillet 2026",
-        "badge": "Source officielle",
-        "titre": (
-            "La Préfecture centralise les informations utiles et les attestations "
-            "d'évacuation par commune"
-        ),
-        "resume": (
-            "Une page officielle unique regroupe les informations pratiques liées à "
-            "l'incendie en Gironde. Elle permet notamment d'accéder aux attestations "
-            "d'évacuation publiées pour les communes concernées. Utiliser cette page "
-            "comme source de référence avant toute transmission à une entreprise."
-        ),
-        "source": "Préfecture de la Gironde",
-        "url": "https://www.gironde.gouv.fr/Actualites/Incendie-en-Gironde-toutes-les-informations-utile",
-        "active": True,
-    },
-    {
-        "date": "30 juillet 2026",
-        "badge": "Évolution de situation",
-        "titre": (
-            "Réintégration dans 9 communes et réouverture de l'autoroute A63"
-        ),
-        "resume": (
-            "Après évaluation des conditions de sécurité, la Préfète de la Gironde "
-            "a autorisé la réintégration à Mios, Le Barp, Cestas, Saint-Jean-d'Illac, "
-            "Martignas-sur-Jalle, Saint-Médard-en-Jalles, Saint-Aubin-de-Médoc, "
-            "Salaunes et Sainte-Hélène. L'autoroute A63 rouvre à la circulation à 14 h. "
-            "Pour les appels, vérifier que la reprise est réellement possible : accès "
-            "aux locaux, fumées, réseaux, dommages et disponibilité des salariés."
-        ),
-        "source": "Préfecture de la Gironde",
-        "url": (
-            "https://www.gironde.gouv.fr/Actualites/Communiques-de-presse/"
-            "Communiques-de-presse-2026/Juillet-2026/"
-            "Incendie-de-Saumos-Reintegration-dans-9-nouvelles-communes-"
-            "et-reouverture-de-l-autoroute-A63"
-        ),
+        "source": "Urssaf / CPSTI",
+        "url": URSSAF_CPSTI_URL,
         "active": True,
     },
 ]
@@ -443,14 +487,14 @@ ORGANISMES: dict[str, dict[str, Any]] = {
         "vigilance": [
             "Toutes les démarches URSSAF et les offres de service sont gratuites.",
             "Les demandes sont examinées selon la situation et les justificatifs fournis.",
-            "L'aide d'urgence CPSTI peut aller jusqu'à 2 000 € sous conditions.",
+            "L’aide CPSTI peut atteindre 2 000 € en cas d’interruption liée à une évacuation et jusqu’à 8 000 € en cas de sinistre direct de l’entreprise ou de l’habitation principale, sous conditions.",
             "Le communiqué de juillet 2026 annonce un paiement sous 15 jours après réception d'un dossier recevable.",
         ],
         "contact": (
             "Employeurs : 3957 - Travailleurs indépendants : 3698 - "
             "Messagerie sécurisée de l'espace en ligne."
         ),
-        "source": "Communiqué URSSAF Aquitaine / CPSTI du 24 juillet 2026.",
+        "source": "Communiqué national Urssaf / CPSTI du 30 juillet 2026.",
         "form_url": CPSTI_FORM_URL,
         "form_label": "Télécharger le formulaire de demande d’aide CPSTI",
     },
@@ -624,328 +668,82 @@ def get_actualite_badge_class(badge: str) -> str:
 
 
 def render_actualites() -> None:
-    """Affiche un carrousel HTML propre dans l'interface Streamlit uniquement."""
+    """Affiche un briefing collaborateurs premium, sans impact sur le PDF."""
     actualites_actives = [
         item for item in ACTUALITES if item.get("active", True)
     ]
     if not actualites_actives:
         return
 
-    cards_html = []
-
-    for actualite in actualites_actives:
-        badge = actualite.get("badge", "Actualité")
-        badge_class = get_actualite_badge_class(badge)
-
-        card_html = f"""
-<article class="news-card">
-  <div class="news-body">
-    <div class="news-meta">
-      <span class="news-badge {badge_class}">{badge}</span>
-      <span>{actualite.get("date", "")}</span>
-    </div>
-    <div class="news-title">{actualite.get("titre", "")}</div>
-    <p class="news-summary">{actualite.get("resume", "")}</p>
-    <div class="news-source">Source : {actualite.get("source", "")}</div>
-  </div>
-</article>
-"""
-        cards_html.append(textwrap.dedent(card_html).strip())
-
-    plural = "s" if len(actualites_actives) > 1 else ""
-
-    carousel_html = f"""
-<section class="news-shell">
-  <div class="news-heading-row">
-    <div class="news-heading">À la une pour les conseillers</div>
-    <div class="news-count">{len(actualites_actives)} actualité{plural}</div>
-  </div>
-  <div class="news-carousel">
-    {''.join(cards_html)}
-  </div>
-  <div class="news-hint">
-    Faites défiler horizontalement pour consulter les informations.
-    Cet espace n'apparaît pas dans le PDF remis à l'entreprise.
-  </div>
-</section>
-"""
-
-    st.markdown(
-        textwrap.dedent(carousel_html).strip(),
-        unsafe_allow_html=True,
+    featured = next(
+        (item for item in actualites_actives if item.get("featured")),
+        actualites_actives[0],
     )
+    secondaires = [item for item in actualites_actives if item is not featured]
 
-    cols = st.columns(len(actualites_actives))
-    for index, (column, actualite) in enumerate(zip(cols, actualites_actives)):
-        with column:
-            if actualite.get("url"):
-                st.link_button(
-                    f"Consulter — {actualite.get('source', 'Source')}",
-                    actualite["url"],
-                    use_container_width=True,
-                    key=f"actualite_link_{index}",
-                )
-
-
-# ============================================================
-# ATTESTATIONS OFFICIELLES D'ÉVACUATION
-# ============================================================
-
-def render_attestations_evacuation() -> None:
-    """Page dédiée aux attestations officielles d'évacuation."""
-    st.markdown(
-        """
-        <div class="section-card">
-            <div class="section-title">Attestations officielles d'évacuation</div>
-            <p class="section-help">
-                Sélectionnez une commune pour ouvrir l'attestation officielle
-                dans un nouvel onglet.
-            </p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    commune = st.selectbox(
-        "Commune concernée",
-        options=sorted(ATTESTATIONS_COMMUNES.keys()),
-        index=None,
-        placeholder="Sélectionner une commune",
-        key="commune_attestation_evacuation",
-    )
-
-    if commune:
-        attestation = ATTESTATIONS_COMMUNES[commune]
-        url = attestation["url"]
-        message = (
-            "Le lien mène directement au document officiel."
-            if attestation.get("direct")
-            else "Le lien ouvre la page officielle de la Préfecture. "
-                 "Sélectionnez ensuite l'attestation correspondant à la commune."
-        )
-
-        st.markdown(
+    secondary_cards = []
+    for actualite in secondaires:
+        secondary_cards.append(
             f"""
-            <div style="
-                background:#eef5fb;
-                border:1px solid #cbdceb;
-                border-left:5px solid #173b65;
-                border-radius:12px;
-                padding:14px 16px;
-                margin:10px 0 14px 0;
-            ">
-                <div style="font-weight:800;color:#173b65;font-size:1rem;">
-                    {commune}
+            <article class="secondary-news-card">
+                <div class="news-meta">
+                    <span class="news-badge">{html.escape(actualite.get("badge", "Actualité"))}</span>
+                    <span>{html.escape(actualite.get("date", ""))}</span>
                 </div>
-                <div style="color:#43566b;margin-top:5px;font-size:.9rem;">
-                    {message}
+                <div class="secondary-news-title">
+                    {html.escape(actualite.get("titre", ""))}
                 </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-        st.markdown(
-            f"""
-            <a href="{url}" target="_blank" rel="noopener noreferrer"
-               style="
-                   display:block;
-                   text-align:center;
-                   background:#173b65;
-                   color:white;
-                   text-decoration:none;
-                   font-weight:750;
-                   padding:12px 16px;
-                   border-radius:9px;
-                   margin:6px 0 10px 0;
-               ">
-                Ouvrir / télécharger l'attestation — {commune}
-            </a>
-            """,
-            unsafe_allow_html=True,
-        )
-
-        if attestation.get("direct"):
-            st.caption(
-                "Le document s'ouvre dans un nouvel onglet. Selon les réglages du navigateur, "
-                "le PDF peut s'afficher ou se télécharger automatiquement."
-            )
-        else:
-            st.info(
-                "Les liens directs vers chaque PDF pourront être renseignés "
-                "dans ATTESTATIONS_COMMUNES dès qu'ils sont stabilisés."
-            )
-    else:
-        st.info("Choisissez une commune pour afficher le lien correspondant.")
-
-    st.markdown("---")
-    st.link_button(
-        "Consulter toutes les informations officielles sur l'incendie",
-        PORTAIL_INCENDIE_GIRONDE_URL,
-        use_container_width=True,
-    )
-
-
-# ============================================================
-# CARTE INTERACTIVE DES ÉVACUATIONS
-# ============================================================
-
-def render_carte_incendie() -> None:
-    """Affiche une carte opérationnelle dans l'interface collaborateurs."""
-    evacuees = [
-        item for item in COMMUNES_INCENDIE if item["statut"] == "evacuee"
-    ]
-    reintegrees = [
-        item for item in COMMUNES_INCENDIE if item["statut"] == "reintegree"
-    ]
-    reintegrees_partielles = [
-        item
-        for item in COMMUNES_INCENDIE
-        if item["statut"] == "reintegree_partielle"
-    ]
-
-    with st.expander("Carte interactive — évacuations et réintégrations", expanded=True):
-        col1, col2, col3, col4 = st.columns([1, 1, 1.15, 2])
-        col1.metric("Encore évacuées", len(evacuees))
-        col2.metric("Réintégrées", len(reintegrees))
-        col3.metric("Retours partiels", len(reintegrees_partielles))
-        col4.info(
-            "Carte d'aide aux appels. Avant tout déplacement, vérifier la dernière "
-            "consigne de la Préfecture ou de la commune."
-        )
-
-        carte = folium.Map(
-            location=[44.80, -0.90],
-            zoom_start=9,
-            tiles="OpenStreetMap",
-            control_scale=True,
-            prefer_canvas=True,
-        )
-
-        Fullscreen(
-            position="topright",
-            title="Afficher en plein écran",
-            title_cancel="Quitter le plein écran",
-            force_separate_button=True,
-        ).add_to(carte)
-
-        for item in COMMUNES_INCENDIE:
-            statut = item["statut"]
-
-            if statut == "evacuee":
-                couleur = "#d71920"
-                statut_label = "Évacuation maintenue"
-                conseil = (
-                    "Ne pas encourager de déplacement. Vérifier les consignes officielles."
-                )
-            elif statut == "reintegree_partielle":
-                couleur = "#e69f00"
-                statut_label = "Réintégration partielle"
-                conseil = item.get(
-                    "precision",
-                    "Le retour est autorisé uniquement dans certains secteurs.",
-                )
-            else:
-                couleur = "#238636"
-                statut_label = "Réintégration autorisée"
-                conseil = item.get(
-                    "precision",
-                    "Vérifier que l'accès aux locaux et la reprise sont réellement possibles.",
-                )
-
-            popup_html = f"""
-            <div style="font-family:Arial,sans-serif;min-width:230px">
-                <div style="font-size:16px;font-weight:700;color:#173b65">
-                    {item["commune"]}
+                <div class="secondary-news-summary">
+                    {html.escape(actualite.get("resume", ""))}
                 </div>
-                <div style="margin-top:6px;font-weight:700;color:{couleur}">
-                    {statut_label}
+                <div class="secondary-news-source">
+                    Source : {html.escape(actualite.get("source", ""))}
                 </div>
-                <div style="margin-top:7px;font-size:12px;line-height:1.35">
-                    {conseil}
-                </div>
-                <div style="margin-top:7px;font-size:11px;color:#64748b">
-                    Situation consolidée : {CARTE_SITUATION_DATE}
-                </div>
-            </div>
+            </article>
             """
+        )
 
-            folium.CircleMarker(
-                location=[item["lat"], item["lon"]],
-                radius=9,
-                color="#ffffff",
-                weight=2,
-                fill=True,
-                fill_color=couleur,
-                fill_opacity=0.92,
-                tooltip=f'{item["commune"]} — {statut_label}',
-                popup=folium.Popup(popup_html, max_width=300),
-            ).add_to(carte)
-
-        # Légende HTML fixe
-        legend_html = """
-        <div style="
-            position: fixed;
-            bottom: 25px;
-            left: 25px;
-            z-index: 9999;
-            background: white;
-            border: 1px solid #cbd5e1;
-            border-radius: 10px;
-            padding: 10px 12px;
-            box-shadow: 0 3px 12px rgba(0,0,0,.15);
-            font-family: Arial, sans-serif;
-            font-size: 12px;
-        ">
-            <div style="font-weight:700;margin-bottom:7px;color:#173b65">
-                Situation des communes
-            </div>
-            <div style="margin-bottom:5px">
-                <span style="display:inline-block;width:11px;height:11px;
-                border-radius:50%;background:#d71920;margin-right:6px"></span>
-                Évacuation maintenue
-            </div>
-            <div style="margin-bottom:5px">
-                <span style="display:inline-block;width:11px;height:11px;
-                border-radius:50%;background:#238636;margin-right:6px"></span>
-                Réintégration autorisée
-            </div>
+    briefing_html = f"""
+    <section class="briefing-shell">
+        <div class="briefing-head">
             <div>
-                <span style="display:inline-block;width:11px;height:11px;
-                border-radius:50%;background:#e69f00;margin-right:6px"></span>
-                Réintégration partielle / secteurs exclus
+                <div class="briefing-kicker">Briefing collaborateurs</div>
+                <div class="briefing-title">Les informations à connaître avant les appels</div>
             </div>
+            <div class="briefing-date">{len(actualites_actives)} actualités actives</div>
         </div>
-        """
-        carte.get_root().html.add_child(folium.Element(legend_html))
 
-        st_folium(
-            carte,
-            width=None,
-            height=500,
-            returned_objects=[],
-            use_container_width=True,
-            key="carte_incendie_gironde",
-        )
+        <article class="featured-news">
+            <div class="featured-meta">
+                <span class="featured-badge">{html.escape(featured.get("badge", "À la une"))}</span>
+                <span>{html.escape(featured.get("date", ""))}</span>
+            </div>
+            <div class="featured-title">{html.escape(featured.get("titre", ""))}</div>
+            <div class="featured-summary">{html.escape(featured.get("resume", ""))}</div>
+        </article>
 
-        st.caption(
-            f"Dernière situation intégrée : {CARTE_SITUATION_DATE}. "
-            "Les points correspondent aux centres-bourgs et non aux limites administratives."
-        )
+        <div class="secondary-news-grid">
+            {''.join(secondary_cards)}
+        </div>
+    </section>
+    """
 
-        source_col1, source_col2 = st.columns(2)
-        with source_col1:
+    st.markdown(textwrap.dedent(briefing_html).strip(), unsafe_allow_html=True)
+
+    st.markdown("#### Accéder aux sources")
+    button_cols = st.columns(min(3, len(actualites_actives)))
+    for index, actualite in enumerate(actualites_actives):
+        with button_cols[index % len(button_cols)]:
             st.link_button(
-                "Communiqué officiel de réintégration",
-                CARTE_SOURCE_URL,
+                f"{actualite.get('badge', 'Actualité')} — {actualite.get('source', 'Source')}",
+                actualite["url"],
                 use_container_width=True,
+                key=f"actualite_link_{index}",
             )
-        with source_col2:
-            st.link_button(
-                "FAQ incendie de la Préfecture",
-                CARTE_FAQ_URL,
-                use_container_width=True,
-            )
+
+    st.caption(
+        "Ce briefing est réservé aux collaborateurs et n’apparaît pas dans le PDF remis à l’entreprise."
+    )
 
 
 # ============================================================
@@ -2439,6 +2237,163 @@ st.markdown(
                 min-height: 118px;
             }}
         }}
+        .briefing-shell {{
+            margin: 1rem 0 1.35rem 0;
+            padding: 1.05rem;
+            border: 1px solid #D9E4EE;
+            border-radius: 20px;
+            background:
+                radial-gradient(circle at top right, rgba(229, 37, 42, .08), transparent 30%),
+                linear-gradient(180deg, #F9FBFD 0%, #EEF4F9 100%);
+            box-shadow: 0 14px 34px rgba(17, 52, 86, .10);
+        }}
+
+        .briefing-head {{
+            display: flex;
+            justify-content: space-between;
+            align-items: end;
+            gap: 1rem;
+            margin-bottom: .85rem;
+        }}
+
+        .briefing-kicker {{
+            color: var(--cma-red);
+            font-size: .72rem;
+            font-weight: 900;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+        }}
+
+        .briefing-title {{
+            color: var(--cma-blue);
+            font-size: 1.2rem;
+            font-weight: 900;
+            margin-top: .15rem;
+        }}
+
+        .briefing-date {{
+            color: #607084;
+            font-size: .78rem;
+            white-space: nowrap;
+        }}
+
+        .featured-news {{
+            position: relative;
+            overflow: hidden;
+            min-height: 210px;
+            padding: 1.35rem 1.45rem;
+            border-radius: 17px;
+            color: white;
+            background:
+                linear-gradient(135deg, rgba(20, 51, 86, .98), rgba(34, 84, 134, .96));
+            box-shadow: 0 14px 30px rgba(23, 59, 101, .22);
+        }}
+
+        .featured-news::after {{
+            content: "";
+            position: absolute;
+            width: 210px;
+            height: 210px;
+            right: -65px;
+            top: -70px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, .07);
+        }}
+
+        .featured-meta {{
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            margin-bottom: .85rem;
+            font-size: .78rem;
+            opacity: .9;
+        }}
+
+        .featured-badge {{
+            display: inline-flex;
+            padding: .28rem .65rem;
+            border-radius: 999px;
+            background: var(--cma-red);
+            color: white;
+            font-size: .68rem;
+            font-weight: 900;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+        }}
+
+        .featured-title {{
+            position: relative;
+            z-index: 2;
+            max-width: 82%;
+            font-size: 1.35rem;
+            line-height: 1.25;
+            font-weight: 900;
+            margin-bottom: .7rem;
+        }}
+
+        .featured-summary {{
+            position: relative;
+            z-index: 2;
+            max-width: 90%;
+            color: rgba(255, 255, 255, .88);
+            font-size: .91rem;
+            line-height: 1.52;
+        }}
+
+        .secondary-news-grid {{
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: .8rem;
+            margin-top: .85rem;
+        }}
+
+        .secondary-news-card {{
+            min-height: 185px;
+            padding: 1rem;
+            border-radius: 15px;
+            border: 1px solid #DCE5EE;
+            background: white;
+            box-shadow: 0 7px 20px rgba(18, 52, 86, .07);
+            transition: transform .18s ease, box-shadow .18s ease;
+        }}
+
+        .secondary-news-card:hover {{
+            transform: translateY(-3px);
+            box-shadow: 0 12px 24px rgba(18, 52, 86, .13);
+        }}
+
+        .secondary-news-title {{
+            color: var(--cma-blue);
+            font-size: .96rem;
+            line-height: 1.32;
+            font-weight: 850;
+            margin: .5rem 0 .45rem;
+        }}
+
+        .secondary-news-summary {{
+            color: #485A6E;
+            font-size: .82rem;
+            line-height: 1.45;
+        }}
+
+        .secondary-news-source {{
+            margin-top: .65rem;
+            color: #697A8D;
+            font-size: .73rem;
+            font-weight: 700;
+        }}
+
+        @media (max-width: 760px) {{
+            .secondary-news-grid {{
+                grid-template-columns: 1fr;
+            }}
+
+            .featured-title,
+            .featured-summary {{
+                max-width: 100%;
+            }}
+        }}
+
         .news-shell {{
             margin: 0.85rem 0 1.35rem 0;
             padding: 1rem 1rem 0.8rem 1rem;
