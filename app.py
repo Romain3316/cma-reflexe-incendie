@@ -849,6 +849,272 @@ def render_actualites() -> None:
     )
 
 
+
+# ============================================================
+# ATTESTATIONS OFFICIELLES D'ÉVACUATION
+# ============================================================
+
+def render_attestations_evacuation() -> None:
+    """Page dédiée aux attestations officielles d'évacuation."""
+    st.markdown(
+        """
+        <div class="section-card">
+            <div class="section-title">Attestations officielles d'évacuation</div>
+            <p class="section-help">
+                Sélectionnez une commune pour ouvrir l'attestation officielle
+                dans un nouvel onglet.
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    commune = st.selectbox(
+        "Commune concernée",
+        options=sorted(ATTESTATIONS_COMMUNES.keys()),
+        index=None,
+        placeholder="Sélectionner une commune",
+        key="commune_attestation_evacuation",
+    )
+
+    if commune:
+        attestation = ATTESTATIONS_COMMUNES[commune]
+        url = attestation["url"]
+
+        st.markdown(
+            f"""
+            <div style="
+                background:#eef5fb;
+                border:1px solid #cbdceb;
+                border-left:5px solid #173b65;
+                border-radius:12px;
+                padding:14px 16px;
+                margin:10px 0 14px 0;
+            ">
+                <div style="font-weight:800;color:#173b65;font-size:1rem;">
+                    {html.escape(commune)}
+                </div>
+                <div style="color:#43566b;margin-top:5px;font-size:.9rem;">
+                    Le lien mène directement au document officiel.
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        st.markdown(
+            f"""
+            <a href="{url}" target="_blank" rel="noopener noreferrer"
+               style="
+                   display:block;
+                   text-align:center;
+                   background:#173b65;
+                   color:white;
+                   text-decoration:none;
+                   font-weight:750;
+                   padding:12px 16px;
+                   border-radius:9px;
+                   margin:6px 0 10px 0;
+               ">
+                Ouvrir / télécharger l'attestation — {html.escape(commune)}
+            </a>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        st.caption(
+            "Le document s'ouvre dans un nouvel onglet. Selon les réglages du navigateur, "
+            "le PDF peut s'afficher ou se télécharger automatiquement."
+        )
+    else:
+        st.info("Choisissez une commune pour afficher le lien correspondant.")
+
+    st.markdown("---")
+    st.link_button(
+        "Consulter toutes les informations officielles sur l'incendie",
+        PORTAIL_INCENDIE_GIRONDE_URL,
+        use_container_width=True,
+    )
+
+
+# ============================================================
+# CARTE INTERACTIVE DES ÉVACUATIONS
+# ============================================================
+
+def render_carte_incendie() -> None:
+    """Affiche une carte opérationnelle dans l'interface collaborateurs."""
+    evacuees = [
+        item for item in COMMUNES_INCENDIE if item["statut"] == "evacuee"
+    ]
+    reintegrees = [
+        item for item in COMMUNES_INCENDIE if item["statut"] == "reintegree"
+    ]
+    reintegrees_partielles = [
+        item
+        for item in COMMUNES_INCENDIE
+        if item["statut"] == "reintegree_partielle"
+    ]
+
+    st.markdown(
+        """
+        <div class="section-card">
+            <div class="section-title">Situation cartographique</div>
+            <p class="section-help">
+                Visualisation d'aide aux appels. Toujours vérifier la dernière
+                consigne officielle avant tout déplacement.
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    col1, col2, col3, col4 = st.columns([1, 1, 1.15, 2])
+    col1.metric("Encore évacuées", len(evacuees))
+    col2.metric("Réintégrées", len(reintegrees))
+    col3.metric("Retours partiels", len(reintegrees_partielles))
+    col4.info(
+        "Carte d'aide aux appels. Avant tout déplacement, vérifier la dernière "
+        "consigne de la Préfecture ou de la commune."
+    )
+
+    carte = folium.Map(
+        location=[44.80, -0.90],
+        zoom_start=9,
+        tiles="OpenStreetMap",
+        control_scale=True,
+        prefer_canvas=True,
+    )
+
+    Fullscreen(
+        position="topright",
+        title="Afficher en plein écran",
+        title_cancel="Quitter le plein écran",
+        force_separate_button=True,
+    ).add_to(carte)
+
+    for item in COMMUNES_INCENDIE:
+        statut = item["statut"]
+
+        if statut == "evacuee":
+            couleur = "#d71920"
+            statut_label = "Évacuation maintenue"
+            conseil = (
+                "Ne pas encourager de déplacement. Vérifier les consignes officielles."
+            )
+        elif statut == "reintegree_partielle":
+            couleur = "#e69f00"
+            statut_label = "Réintégration partielle"
+            conseil = item.get(
+                "precision",
+                "Le retour est autorisé uniquement dans certains secteurs.",
+            )
+        else:
+            couleur = "#238636"
+            statut_label = "Réintégration autorisée"
+            conseil = item.get(
+                "precision",
+                "Vérifier que l'accès aux locaux et la reprise sont réellement possibles.",
+            )
+
+        popup_html = f"""
+        <div style="font-family:Arial,sans-serif;min-width:230px">
+            <div style="font-size:16px;font-weight:700;color:#173b65">
+                {html.escape(item["commune"])}
+            </div>
+            <div style="margin-top:6px;font-weight:700;color:{couleur}">
+                {statut_label}
+            </div>
+            <div style="margin-top:7px;font-size:12px;line-height:1.35">
+                {html.escape(conseil)}
+            </div>
+            <div style="margin-top:7px;font-size:11px;color:#64748b">
+                Situation consolidée : {html.escape(CARTE_SITUATION_DATE)}
+            </div>
+        </div>
+        """
+
+        folium.CircleMarker(
+            location=[item["lat"], item["lon"]],
+            radius=9,
+            color="#ffffff",
+            weight=2,
+            fill=True,
+            fill_color=couleur,
+            fill_opacity=0.92,
+            tooltip=f'{item["commune"]} — {statut_label}',
+            popup=folium.Popup(popup_html, max_width=300),
+        ).add_to(carte)
+
+    legend_html = """
+    <div style="
+        position: fixed;
+        bottom: 25px;
+        left: 25px;
+        z-index: 9999;
+        background: white;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        padding: 10px 12px;
+        box-shadow: 0 3px 12px rgba(0,0,0,.15);
+        font-family: Arial, sans-serif;
+        font-size: 12px;
+    ">
+        <div style="font-weight:700;margin-bottom:7px;color:#173b65">
+            Situation des communes
+        </div>
+        <div style="margin-bottom:5px">
+            <span style="display:inline-block;width:11px;height:11px;
+            border-radius:50%;background:#d71920;margin-right:6px"></span>
+            Évacuation maintenue
+        </div>
+        <div style="margin-bottom:5px">
+            <span style="display:inline-block;width:11px;height:11px;
+            border-radius:50%;background:#238636;margin-right:6px"></span>
+            Réintégration autorisée
+        </div>
+        <div>
+            <span style="display:inline-block;width:11px;height:11px;
+            border-radius:50%;background:#e69f00;margin-right:6px"></span>
+            Réintégration partielle / secteurs exclus
+        </div>
+    </div>
+    """
+    carte.get_root().html.add_child(folium.Element(legend_html))
+
+    st_folium(
+        carte,
+        width=None,
+        height=500,
+        returned_objects=[],
+        use_container_width=True,
+        key="carte_incendie_gironde",
+    )
+
+    st.caption(
+        f"Dernière situation intégrée : {CARTE_SITUATION_DATE}. "
+        "Les points correspondent aux centres-bourgs et non aux limites administratives."
+    )
+
+    source_col1, source_col2 = st.columns(2)
+    with source_col1:
+        st.link_button(
+            "Communiqué officiel de réintégration",
+            CARTE_SOURCE_URL,
+            use_container_width=True,
+        )
+    with source_col2:
+        faq_url = (
+            PREFECTURE_FAQ_ENTREPRISES_URL
+            if "PREFECTURE_FAQ_ENTREPRISES_URL" in globals()
+            else CARTE_FAQ_URL
+        )
+        st.link_button(
+            "FAQ incendie de la Préfecture",
+            faq_url,
+            use_container_width=True,
+        )
+
+
 # ============================================================
 # PERSONNALISATION SELON LA SITUATION
 # ============================================================
