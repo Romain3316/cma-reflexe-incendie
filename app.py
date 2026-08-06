@@ -5734,6 +5734,117 @@ def draw_bus_permanences_page(
     )
     draw_footer(pdf, page_number, A4)
 
+def _organism_icon_kind(name: str) -> str:
+    key = normaliser_commune(name)
+    if "assurances complementaires" in key:
+        return "umbrella"
+    if "assurance" in key:
+        return "shield"
+    if "urssaf" in key or "cpsti" in key:
+        return "people"
+    if "banque" in key or "tresorerie" in key:
+        return "bank"
+    if "dgfip" in key or "sie" in key or "impot" in key:
+        return "tax"
+    if "salarie" in key or "fumee" in key:
+        return "health"
+    if "activite partielle" in key or "dreets" in key or "france travail" in key:
+        return "briefcase"
+    return "document"
+
+
+def draw_organism_icon(
+    pdf: canvas.Canvas,
+    name: str,
+    cx: float,
+    cy: float,
+    radius: float = 16,
+) -> None:
+    """Dessine un pictogramme vectoriel simple, sans dépendance à une police emoji."""
+    kind = _organism_icon_kind(name)
+    blue = HexColor(CMA_BLUE)
+    red = HexColor(CMA_RED)
+
+    pdf.setFillColor(HexColor("#F2F7FC"))
+    pdf.circle(cx, cy, radius, stroke=0, fill=1)
+    pdf.setStrokeColor(blue)
+    pdf.setFillColor(blue)
+    pdf.setLineWidth(max(1.0, radius / 11))
+
+    s = radius / 16
+
+    if kind == "shield":
+        p = pdf.beginPath()
+        p.moveTo(cx, cy + 10 * s)
+        p.lineTo(cx + 9 * s, cy + 6 * s)
+        p.lineTo(cx + 7 * s, cy - 5 * s)
+        p.curveTo(cx + 5 * s, cy - 10 * s, cx, cy - 12 * s, cx, cy - 12 * s)
+        p.curveTo(cx, cy - 12 * s, cx - 5 * s, cy - 10 * s, cx - 7 * s, cy - 5 * s)
+        p.lineTo(cx - 9 * s, cy + 6 * s)
+        p.close()
+        pdf.drawPath(p, stroke=1, fill=0)
+        pdf.setStrokeColor(red)
+        pdf.line(cx - 4 * s, cy, cx - 1 * s, cy - 4 * s)
+        pdf.line(cx - 1 * s, cy - 4 * s, cx + 5 * s, cy + 4 * s)
+
+    elif kind == "umbrella":
+        p = pdf.beginPath()
+        p.moveTo(cx - 11 * s, cy + 2 * s)
+        p.curveTo(cx - 7 * s, cy + 12 * s, cx + 7 * s, cy + 12 * s, cx + 11 * s, cy + 2 * s)
+        p.curveTo(cx + 7 * s, cy + 5 * s, cx + 4 * s, cy + 2 * s, cx, cy + 2 * s)
+        p.curveTo(cx - 4 * s, cy + 2 * s, cx - 7 * s, cy + 5 * s, cx - 11 * s, cy + 2 * s)
+        pdf.drawPath(p, stroke=1, fill=0)
+        pdf.line(cx, cy + 2 * s, cx, cy - 8 * s)
+        p = pdf.beginPath()
+        p.moveTo(cx, cy - 8 * s)
+        p.curveTo(cx, cy - 13 * s, cx + 7 * s, cy - 12 * s, cx + 7 * s, cy - 8 * s)
+        pdf.drawPath(p, stroke=1, fill=0)
+
+    elif kind == "people":
+        pdf.circle(cx - 5 * s, cy + 5 * s, 4 * s, stroke=1, fill=0)
+        pdf.circle(cx + 6 * s, cy + 4 * s, 3.5 * s, stroke=1, fill=0)
+        p = pdf.beginPath()
+        p.moveTo(cx - 12 * s, cy - 8 * s)
+        p.curveTo(cx - 11 * s, cy - 1 * s, cx + 1 * s, cy - 1 * s, cx + 2 * s, cy - 8 * s)
+        pdf.drawPath(p, stroke=1, fill=0)
+        p = pdf.beginPath()
+        p.moveTo(cx + 1 * s, cy - 7 * s)
+        p.curveTo(cx + 2 * s, cy - 2 * s, cx + 11 * s, cy - 2 * s, cx + 12 * s, cy - 7 * s)
+        pdf.drawPath(p, stroke=1, fill=0)
+
+    elif kind in {"bank", "tax"}:
+        pdf.line(cx - 11 * s, cy + 5 * s, cx, cy + 12 * s)
+        pdf.line(cx, cy + 12 * s, cx + 11 * s, cy + 5 * s)
+        pdf.line(cx - 12 * s, cy + 4 * s, cx + 12 * s, cy + 4 * s)
+        for dx in (-7, 0, 7):
+            pdf.line(cx + dx * s, cy + 3 * s, cx + dx * s, cy - 8 * s)
+        pdf.line(cx - 12 * s, cy - 9 * s, cx + 12 * s, cy - 9 * s)
+        pdf.line(cx - 10 * s, cy - 12 * s, cx + 10 * s, cy - 12 * s)
+        if kind == "tax":
+            pdf.setFillColor(red)
+            pdf.circle(cx + 9 * s, cy + 9 * s, 2.2 * s, stroke=0, fill=1)
+
+    elif kind == "health":
+        pdf.setStrokeColor(red)
+        pdf.line(cx - 7 * s, cy, cx + 7 * s, cy)
+        pdf.line(cx, cy - 7 * s, cx, cy + 7 * s)
+        pdf.setStrokeColor(blue)
+        pdf.roundRect(cx - 11 * s, cy - 11 * s, 22 * s, 22 * s, 3 * s, stroke=1, fill=0)
+
+    elif kind == "briefcase":
+        pdf.roundRect(cx - 11 * s, cy - 7 * s, 22 * s, 15 * s, 2 * s, stroke=1, fill=0)
+        pdf.rect(cx - 5 * s, cy + 8 * s, 10 * s, 4 * s, stroke=1, fill=0)
+        pdf.line(cx - 11 * s, cy + 1 * s, cx + 11 * s, cy + 1 * s)
+        pdf.setStrokeColor(red)
+        pdf.line(cx - 2 * s, cy + 1 * s, cx + 2 * s, cy + 1 * s)
+
+    else:
+        pdf.roundRect(cx - 8 * s, cy - 11 * s, 16 * s, 22 * s, 2 * s, stroke=1, fill=0)
+        pdf.line(cx - 5 * s, cy + 5 * s, cx + 5 * s, cy + 5 * s)
+        pdf.line(cx - 5 * s, cy, cx + 5 * s, cy)
+        pdf.line(cx - 5 * s, cy - 5 * s, cx + 3 * s, cy - 5 * s)
+
+
 def draw_cover(
     pdf: canvas.Canvas,
     organisation_names: list[str],
@@ -5742,19 +5853,15 @@ def draw_cover(
     date_edition: str,
     commune_entreprise: str,
 ) -> None:
-    """Couverture synthétique, lisible et sans chevauchement."""
+    """Couverture synthétique et adaptative, sans chevauchement."""
     page_w, page_h = A4
     margin = 22
 
-    # Fond principal
     pdf.setFillColor(HexColor("#062A55"))
     pdf.rect(0, 0, page_w, page_h, stroke=0, fill=1)
-
-    # Liseré supérieur
     pdf.setFillColor(HexColor(CMA_RED))
     pdf.rect(0, page_h - 7, page_w, 7, stroke=0, fill=1)
 
-    # Identité institutionnelle
     pdf.setFillColor(white)
     pdf.setFont("Helvetica-Bold", 12)
     pdf.drawString(margin, page_h - 38, "CMA NOUVELLE-AQUITAINE · GIRONDE")
@@ -5764,45 +5871,20 @@ def draw_cover(
     pdf.roundRect(logo_x - 5, logo_y - 5, logo_w + 10, logo_h + 10, 8, stroke=0, fill=1)
     draw_logo_or_fallback(pdf, logo_x, logo_y, logo_w, logo_h)
 
-    # Personnalisation sous le logo
     meta_x = logo_x
     meta_y = logo_y - 29
     pdf.setFillColor(HexColor("#D9E5F3"))
     pdf.setFont("Helvetica-Bold", 7.5)
     pdf.drawString(meta_x, meta_y, "ENTREPRISE")
-    pdf.setFillColor(white)
-    pdf.setFont("Helvetica", 9.2)
-    draw_wrapped(
-        pdf,
-        entreprise or "Non renseignée",
-        meta_x,
-        meta_y - 13,
-        logo_w,
-        font_size=9.2,
-        leading=10,
-        color="#FFFFFF",
-        max_lines=2,
-    )
-
+    draw_wrapped(pdf, entreprise or "Non renseignée", meta_x, meta_y - 13, logo_w,
+                 font_size=9.2, leading=10, color="#FFFFFF", max_lines=2)
     meta_y -= 45
     pdf.setFillColor(HexColor("#D9E5F3"))
     pdf.setFont("Helvetica-Bold", 7.5)
     pdf.drawString(meta_x, meta_y, "CONSEILLER CMA")
-    pdf.setFillColor(white)
-    pdf.setFont("Helvetica", 9.2)
-    draw_wrapped(
-        pdf,
-        conseiller or "Non renseigné",
-        meta_x,
-        meta_y - 13,
-        logo_w,
-        font_size=9.2,
-        leading=10,
-        color="#FFFFFF",
-        max_lines=2,
-    )
+    draw_wrapped(pdf, conseiller or "Non renseigné", meta_x, meta_y - 13, logo_w,
+                 font_size=9.2, leading=10, color="#FFFFFF", max_lines=2)
 
-    # Titre principal
     pdf.setFillColor(white)
     pdf.setFont("Helvetica-Bold", 29)
     pdf.drawString(margin, page_h - 120, "CMA Réflexe")
@@ -5816,10 +5898,10 @@ def draw_cover(
     pdf.drawString(margin, page_h - 198, "Dossier pratique des démarches")
     pdf.drawString(margin, page_h - 214, "après un incendie")
 
-    # Carte des permanences : bloc fixe, trois lignes, sans chevauchement.
+    # Permanences : colonne gauche élargie pour garantir la tenue du titre.
     card_x, card_y = margin, 344
     card_w, card_h = page_w - 2 * margin, 244
-    left_w = 180
+    left_w = 205
 
     pdf.setFillColor(white)
     pdf.roundRect(card_x, card_y, card_w, card_h, 11, stroke=0, fill=1)
@@ -5827,62 +5909,44 @@ def draw_cover(
     pdf.roundRect(card_x, card_y, left_w, card_h, 11, stroke=0, fill=1)
     pdf.rect(card_x + left_w - 10, card_y, 10, card_h, stroke=0, fill=1)
 
-    # Icône localisation / bâtiment, dessinée en vectoriel.
-    icon_cx, icon_cy = card_x + 58, card_y + 162
+    icon_cx, icon_cy = card_x + 54, card_y + 162
     pdf.setFillColor(HexColor("#D8E9F9"))
-    pdf.circle(icon_cx, icon_cy - 12, 39, stroke=0, fill=1)
+    pdf.circle(icon_cx, icon_cy - 12, 37, stroke=0, fill=1)
     pdf.setFillColor(HexColor(CMA_RED))
     pdf.circle(icon_cx, icon_cy + 20, 18, stroke=0, fill=1)
     pdf.setFillColor(white)
     pdf.circle(icon_cx, icon_cy + 20, 6, stroke=0, fill=1)
     pdf.setStrokeColor(HexColor(CMA_BLUE))
     pdf.setLineWidth(2)
-    pdf.line(icon_cx - 29, icon_cy - 27, icon_cx, icon_cy - 7)
-    pdf.line(icon_cx, icon_cy - 7, icon_cx + 29, icon_cy - 27)
-    pdf.rect(icon_cx - 23, icon_cy - 51, 46, 24, stroke=1, fill=0)
-    pdf.rect(icon_cx - 6, icon_cy - 51, 12, 17, stroke=1, fill=0)
+    pdf.line(icon_cx - 28, icon_cy - 27, icon_cx, icon_cy - 7)
+    pdf.line(icon_cx, icon_cy - 7, icon_cx + 28, icon_cy - 27)
+    pdf.rect(icon_cx - 22, icon_cy - 50, 44, 23, stroke=1, fill=0)
+    pdf.rect(icon_cx - 6, icon_cy - 50, 12, 16, stroke=1, fill=0)
 
-    text_x = card_x + 94
+    text_x = card_x + 98
+    text_w = left_w - 108
     pdf.setFillColor(HexColor(CMA_BLUE))
-    pdf.setFont("Helvetica-Bold", 12.5)
+    pdf.setFont("Helvetica-Bold", 11.2)
     pdf.drawString(text_x, card_y + card_h - 34, "PERMANENCES")
-    pdf.drawString(text_x, card_y + card_h - 51, "À PROXIMITÉ")
-    pdf.setFillColor(HexColor(CMA_TEXT))
+    pdf.drawString(text_x, card_y + card_h - 50, "À PROXIMITÉ")
     draw_wrapped(
         pdf,
-        "La CMA organise plusieurs permanences cette semaine pour accompagner les entreprises sinistrées.",
-        text_x,
-        card_y + card_h - 78,
-        left_w - 105,
-        font_size=7.9,
-        leading=10,
-        color=CMA_TEXT,
-        max_lines=5,
+        "La CMA organise cette semaine plusieurs permanences pour accompagner les entreprises sinistrées.",
+        text_x, card_y + card_h - 75, text_w,
+        font_size=7.6, leading=9.4, color=CMA_TEXT, max_lines=6,
     )
     pdf.setFillColor(HexColor(CMA_RED))
-    pdf.rect(text_x, card_y + 78, 25, 2, stroke=0, fill=1)
-    pdf.setFillColor(HexColor(CMA_TEXT))
+    pdf.rect(text_x, card_y + 74, 25, 2, stroke=0, fill=1)
     distance_note = (
         "Distances indicatives à vol d'oiseau depuis la commune de votre entreprise."
         if commune_coordinates(commune_entreprise)
-        else "Commune libre acceptée : les distances s'affichent lorsqu'elles peuvent être calculées."
+        else "Les distances s'affichent lorsqu'elles peuvent être calculées."
     )
-    draw_wrapped(
-        pdf,
-        distance_note,
-        text_x,
-        card_y + 60,
-        left_w - 105,
-        font_size=6.8,
-        leading=8.3,
-        color=CMA_TEXT,
-        max_lines=5,
-    )
+    draw_wrapped(pdf, distance_note, text_x, card_y + 57, text_w,
+                 font_size=6.5, leading=8, color=CMA_TEXT, max_lines=5)
 
-    # Trois lignes de permanences
     rows = permanences_avec_distance(commune_entreprise)
     right_x = card_x + left_w
-    row_w = card_w - left_w
     row_h = card_h / 3
     month_labels = {"08": "AOÛT"}
 
@@ -5894,83 +5958,100 @@ def draw_cover(
             pdf.line(right_x, row_y + row_h, card_x + card_w, row_y + row_h)
 
         dt = datetime.strptime(permanence["date"], "%Y-%m-%d")
-        badge_x, badge_y = right_x + 11, row_y + 10
+        badge_x, badge_y = right_x + 10, row_y + 10
         badge_w, badge_h = 44, row_h - 20
-        badge_color = CMA_RED if idx == 0 else CMA_BLUE
-        pdf.setFillColor(HexColor(badge_color))
+        pdf.setFillColor(HexColor(CMA_RED if idx == 0 else CMA_BLUE))
         pdf.roundRect(badge_x, badge_y, badge_w, badge_h, 7, stroke=0, fill=1)
         pdf.setFillColor(white)
         pdf.setFont("Helvetica-Bold", 7.5)
-        pdf.drawCentredString(badge_x + badge_w / 2, badge_y + badge_h - 12, ["LUN.", "MAR.", "MER.", "JEU.", "VEN.", "SAM.", "DIM."][dt.weekday()])
+        day_label = ["LUN.", "MAR.", "MER.", "JEU.", "VEN.", "SAM.", "DIM."][dt.weekday()]
+        pdf.drawCentredString(badge_x + badge_w / 2, badge_y + badge_h - 12, day_label)
         pdf.setFont("Helvetica-Bold", 17)
         pdf.drawCentredString(badge_x + badge_w / 2, badge_y + 18, str(dt.day))
         pdf.setFont("Helvetica-Bold", 6.8)
         pdf.drawCentredString(badge_x + badge_w / 2, badge_y + 7, month_labels.get(dt.strftime("%m"), dt.strftime("%m")))
 
-        content_x = badge_x + badge_w + 13
+        content_x = badge_x + badge_w + 12
+        available_name_w = card_x + card_w - 120 - content_x
         pdf.setFillColor(HexColor(CMA_BLUE))
-        pdf.setFont("Helvetica-Bold", 12.5)
-        pdf.drawString(content_x, row_y + row_h - 29, permanence["commune"])
-        pdf.setFillColor(HexColor(CMA_TEXT))
-        pdf.setFont("Helvetica", 8.6)
-        draw_wrapped(
-            pdf,
-            permanence["lieu"],
-            content_x,
-            row_y + row_h - 45,
-            125,
-            font_size=8.6,
-            leading=9.5,
-            color=CMA_TEXT,
-            max_lines=2,
-        )
+        pdf.setFont("Helvetica-Bold", 11.6)
+        draw_wrapped(pdf, permanence["commune"], content_x, row_y + row_h - 28,
+                     available_name_w, font_size=11.6, leading=12, color=CMA_BLUE, max_lines=1)
+        draw_wrapped(pdf, permanence["lieu"], content_x, row_y + row_h - 44,
+                     available_name_w, font_size=8.2, leading=9.2, color=CMA_TEXT, max_lines=2)
 
         pdf.setFillColor(HexColor(CMA_BLUE))
-        pdf.setFont("Helvetica-Bold", 9.5)
-        pdf.drawRightString(card_x + card_w - 16, row_y + row_h - 29, permanence["horaires"].replace(" h à ", " h – "))
+        pdf.setFont("Helvetica-Bold", 9.2)
+        pdf.drawRightString(card_x + card_w - 15, row_y + row_h - 28,
+                            permanence["horaires"].replace(" h à ", " h – "))
         distance = permanence.get("distance_km")
         if distance is not None:
             pdf.setFillColor(HexColor("#294F7D"))
-            pdf.roundRect(card_x + card_w - 59, row_y + 13, 43, 20, 7, stroke=0, fill=1)
+            pdf.roundRect(card_x + card_w - 58, row_y + 13, 43, 20, 7, stroke=0, fill=1)
             pdf.setFillColor(white)
             pdf.setFont("Helvetica-Bold", 8.5)
-            pdf.drawCentredString(card_x + card_w - 37.5, row_y + 20, f"{distance} km")
+            pdf.drawCentredString(card_x + card_w - 36.5, row_y + 20, f"{distance} km")
         else:
             pdf.setFillColor(HexColor(CMA_MUTED))
-            pdf.setFont("Helvetica-Oblique", 6.8)
-            pdf.drawRightString(card_x + card_w - 16, row_y + 20, "distance non calculée")
+            pdf.setFont("Helvetica-Oblique", 6.4)
+            pdf.drawRightString(card_x + card_w - 15, row_y + 20, "distance non calculée")
 
-    # Organismes sélectionnés sous forme de quatre tuiles maximum par ligne.
-    org_x, org_y, org_w, org_h = margin, 205, page_w - 2 * margin, 118
+    # Organismes : tous affichés, jusqu'à quatre par ligne, avec vrais pictogrammes.
+    names = organisation_names or ["Aucun organisme sélectionné"]
+    cols = min(4, max(1, len(names)))
+    rows_count = max(1, (len(names) + 3) // 4)
+    rows_count = min(rows_count, 3)
+    visible_names = names[:12]
+
+    if rows_count == 1:
+        org_y, org_h, phrase_y = 205, 118, 185
+        icon_radius, font_size = 17, 7.5
+    elif rows_count == 2:
+        org_y, org_h, phrase_y = 181, 142, 169
+        icon_radius, font_size = 14.5, 6.8
+    else:
+        org_y, org_h, phrase_y = 166, 157, None
+        icon_radius, font_size = 12.5, 6.1
+
+    org_x, org_w = margin, page_w - 2 * margin
     pdf.setFillColor(HexColor("#244A78"))
     pdf.roundRect(org_x, org_y, org_w, org_h, 11, stroke=0, fill=1)
     pdf.setFillColor(white)
     pdf.setFont("Helvetica-Bold", 10.5)
-    pdf.drawString(org_x + 17, org_y + org_h - 24, "ORGANISMES SÉLECTIONNÉS")
+    pdf.drawString(org_x + 17, org_y + org_h - 23, "ORGANISMES SÉLECTIONNÉS")
+    pdf.setFillColor(HexColor("#C8D9EC"))
+    pdf.setFont("Helvetica-Oblique", 7.3)
+    count_text = f"{len(organisation_names)} organisme{'s' if len(organisation_names) != 1 else ''} identifié{'s' if len(organisation_names) != 1 else ''} pour votre situation"
+    pdf.drawRightString(org_x + org_w - 17, org_y + org_h - 23, count_text)
 
-    names = organisation_names[:4]
-    if len(organisation_names) > 4:
-        names = organisation_names[:3] + [f"+ {len(organisation_names) - 3} autres fiches"]
-    col_w = (org_w - 28) / max(len(names), 1)
-    for i, name in enumerate(names):
-        cx = org_x + 14 + col_w * i + col_w / 2
-        pdf.setFillColor(HexColor("#EAF3FC"))
-        pdf.circle(cx, org_y + 64, 18, stroke=0, fill=1)
-        pdf.setFillColor(HexColor(CMA_BLUE))
-        pdf.setFont("Helvetica-Bold", 11)
-        pdf.drawCentredString(cx, org_y + 60, str(i + 1))
+    grid_top = org_y + org_h - 36
+    grid_bottom = org_y + 12
+    row_space = (grid_top - grid_bottom) / rows_count
+    col_space = (org_w - 28) / 4
+
+    for i, name in enumerate(visible_names):
+        row_idx = i // 4
+        col_idx = i % 4
+        items_in_row = min(4, len(visible_names) - row_idx * 4)
+        row_width = items_in_row * col_space
+        row_start = org_x + (org_w - row_width) / 2
+        cx = row_start + col_space * col_idx + col_space / 2
+        cy = grid_top - row_space * row_idx - row_space * 0.36
+        draw_organism_icon(pdf, name, cx, cy, icon_radius)
         pdf.setFillColor(white)
-        lines = textwrap.wrap(name, width=18)[:2]
-        pdf.setFont("Helvetica-Bold", 7.7)
-        for j, line in enumerate(lines):
-            pdf.drawCentredString(cx, org_y + 33 - j * 9, line)
+        wrapped = textwrap.wrap(name, width=20 if rows_count == 1 else 18)[:2]
+        pdf.setFont("Helvetica-Bold", font_size)
+        label_y = cy - icon_radius - 10
+        for j, line in enumerate(wrapped):
+            pdf.drawCentredString(cx, label_y - j * (font_size + 1.2), line)
 
-    # Phrase de liaison
-    pdf.setFillColor(white)
-    pdf.setFont("Helvetica", 9)
-    pdf.drawCentredString(page_w / 2, 185, "Guide personnalisé pour vous aider à faire face aux conséquences des incendies.")
+    if phrase_y is not None:
+        pdf.setFillColor(white)
+        pdf.setFont("Helvetica", 8.7)
+        pdf.drawCentredString(page_w / 2, phrase_y,
+                              "Guide personnalisé pour vous aider à faire face aux conséquences des incendies.")
 
-    # Pied de page : soutien psychologique à gauche, 3006 à droite.
+    # Bas de page : deux cartes alignées, avec le 3006 réellement centré.
     footer_y, footer_h = 44, 116
     support_w = page_w * 0.62 - margin
     gap = 8
@@ -5982,18 +6063,10 @@ def draw_cover(
     pdf.setFillColor(HexColor(CMA_RED))
     pdf.setFont("Helvetica-Bold", 10.5)
     pdf.drawString(margin + 16, footer_y + footer_h - 25, "SOUTIEN PSYCHOLOGIQUE")
-    pdf.setFillColor(HexColor(CMA_TEXT))
-    draw_wrapped(
-        pdf,
-        "Face à cette épreuve, vous n'êtes pas seul. Une cellule d'écoute et de soutien psychologique est à votre disposition.",
-        margin + 16,
-        footer_y + footer_h - 43,
-        support_w - 145,
-        font_size=7.7,
-        leading=9.4,
-        color=CMA_TEXT,
-        max_lines=5,
-    )
+    draw_wrapped(pdf,
+                 "Face à cette épreuve, vous n'êtes pas seul. Une cellule d'écoute et de soutien psychologique est à votre disposition.",
+                 margin + 16, footer_y + footer_h - 43, support_w - 145,
+                 font_size=7.7, leading=9.4, color=CMA_TEXT, max_lines=5)
     phone_x = margin + support_w - 126
     pdf.setFillColor(HexColor(CMA_RED))
     pdf.roundRect(phone_x, footer_y + 20, 110, 60, 8, stroke=0, fill=1)
@@ -6008,15 +6081,16 @@ def draw_cover(
     pdf.setFillColor(HexColor("#0B315D"))
     pdf.setStrokeColor(HexColor("#6C89AA"))
     pdf.roundRect(cma_x, footer_y, cma_w, footer_h, 10, stroke=1, fill=1)
+    center_x = cma_x + cma_w / 2
     pdf.setFillColor(white)
     pdf.setFont("Helvetica", 7.7)
-    pdf.drawString(cma_x + 16, footer_y + footer_h - 25, "Contactez votre CMA au")
-    pdf.setFont("Helvetica-Bold", 23)
-    pdf.drawString(cma_x + 16, footer_y + footer_h - 53, CMA_PHONE_DISPLAY)
+    pdf.drawCentredString(center_x, footer_y + footer_h - 25, "Contactez votre CMA au")
+    pdf.setFont("Helvetica-Bold", 25)
+    pdf.drawCentredString(center_x, footer_y + footer_h - 55, CMA_PHONE_DISPLAY)
     pdf.setFont("Helvetica", 6.8)
-    pdf.drawString(cma_x + 16, footer_y + 37, "Service gratuit + prix appel")
-    pdf.drawString(cma_x + 16, footer_y + 25, "Du lundi au vendredi")
-    pdf.drawString(cma_x + 16, footer_y + 13, "8 h 30 – 17 h 30")
+    pdf.drawCentredString(center_x, footer_y + 39, "Service gratuit + prix appel")
+    pdf.drawCentredString(center_x, footer_y + 26, "Du lundi au vendredi")
+    pdf.drawCentredString(center_x, footer_y + 13, "8 h 30 – 17 h 30")
     pdf.linkURL(CMA_PHONE_LINK, (cma_x, footer_y, cma_x + cma_w, footer_y + footer_h), relative=0, thickness=0)
 
 
