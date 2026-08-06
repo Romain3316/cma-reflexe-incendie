@@ -5509,12 +5509,6 @@ def draw_footer(
 
 
 
-# Seules les permanences officiellement confirmées doivent apparaître dans le PDF.
-# Ajouter une permanence ici uniquement après validation de la communication officielle.
-PERMANENCES_OFFICIELLES = {
-    "le porge",
-}
-
 PERMANENCES_BUS_ARTISANAT = [
     {
         "commune": "Le Porge",
@@ -5524,7 +5518,24 @@ PERMANENCES_BUS_ARTISANAT = [
         "lieu_confirme": True,
         "lat": 44.8739,
         "lon": -1.0918,
-        "publiee": True,
+    },
+    {
+        "commune": "Lège-Cap-Ferret",
+        "date": "2026-08-12",
+        "horaires": "9 h à 13 h",
+        "lieu": "Lieu communiqué prochainement",
+        "lieu_confirme": False,
+        "lat": 44.7933,
+        "lon": -1.1450,
+    },
+    {
+        "commune": "Mios",
+        "date": "2026-08-13",
+        "horaires": "9 h à 13 h",
+        "lieu": "Lieu communiqué prochainement",
+        "lieu_confirme": False,
+        "lat": 44.6057,
+        "lon": -0.9378,
     },
 ]
 
@@ -5582,31 +5593,16 @@ def commune_coordinates(commune: str) -> tuple[float, float] | None:
             return float(item["lat"]), float(item["lon"])
 
     for item in PERMANENCES_BUS_ARTISANAT:
-        item_key = normaliser_commune(item.get("commune", ""))
-        if not item.get("publiee", False):
-            continue
-        if item_key not in PERMANENCES_OFFICIELLES:
-            continue
-        if item_key == commune_key:
+        if normaliser_commune(item["commune"]) == commune_key:
             return float(item["lat"]), float(item["lon"])
 
     return COMMUNE_COORDINATES_EXTRA.get(commune_key)
 
 
 def permanences_avec_distance(commune_entreprise: str) -> list[dict[str, Any]]:
-    """Retourne exclusivement les permanences officiellement publiées.
-
-    La liste blanche évite qu'une ancienne permanence restée dans une version du
-    fichier ou dans une donnée de test puisse réapparaître sur la couverture.
-    """
     origin = commune_coordinates(commune_entreprise)
     rows: list[dict[str, Any]] = []
     for permanence in PERMANENCES_BUS_ARTISANAT:
-        commune_key = normaliser_commune(permanence.get("commune", ""))
-        if not permanence.get("publiee", False):
-            continue
-        if commune_key not in PERMANENCES_OFFICIELLES:
-            continue
         item = dict(permanence)
         item["distance_km"] = None
         if origin:
@@ -5951,12 +5947,10 @@ def draw_cover(
 
     rows = permanences_avec_distance(commune_entreprise)
     right_x = card_x + left_w
-    visible_rows = rows[:3]
-    row_count = max(1, len(visible_rows))
-    row_h = card_h / row_count
+    row_h = card_h / 3
     month_labels = {"08": "AOÛT"}
 
-    for idx, permanence in enumerate(visible_rows):
+    for idx, permanence in enumerate(rows[:3]):
         row_y = card_y + card_h - (idx + 1) * row_h
         if idx:
             pdf.setStrokeColor(HexColor("#DCE6F0"))
@@ -5964,10 +5958,8 @@ def draw_cover(
             pdf.line(right_x, row_y + row_h, card_x + card_w, row_y + row_h)
 
         dt = datetime.strptime(permanence["date"], "%Y-%m-%d")
-        badge_w = 54 if row_count == 1 else 44
-        badge_h = 72 if row_count == 1 else row_h - 20
-        badge_x = right_x + 14
-        badge_y = row_y + (row_h - badge_h) / 2
+        badge_x, badge_y = right_x + 10, row_y + 10
+        badge_w, badge_h = 44, row_h - 20
         pdf.setFillColor(HexColor(CMA_RED if idx == 0 else CMA_BLUE))
         pdf.roundRect(badge_x, badge_y, badge_w, badge_h, 7, stroke=0, fill=1)
         pdf.setFillColor(white)
@@ -5979,36 +5971,30 @@ def draw_cover(
         pdf.setFont("Helvetica-Bold", 6.8)
         pdf.drawCentredString(badge_x + badge_w / 2, badge_y + 7, month_labels.get(dt.strftime("%m"), dt.strftime("%m")))
 
-        content_x = badge_x + badge_w + 16
-        available_name_w = card_x + card_w - 135 - content_x
-        title_y = row_y + row_h / 2 + 18 if row_count == 1 else row_y + row_h - 28
-        place_y = title_y - 18
+        content_x = badge_x + badge_w + 12
+        available_name_w = card_x + card_w - 120 - content_x
         pdf.setFillColor(HexColor(CMA_BLUE))
-        pdf.setFont("Helvetica-Bold", 12.4 if row_count == 1 else 11.6)
-        draw_wrapped(pdf, permanence["commune"], content_x, title_y,
-                     available_name_w, font_size=12.4 if row_count == 1 else 11.6,
-                     leading=13, color=CMA_BLUE, max_lines=1)
-        draw_wrapped(pdf, permanence["lieu"], content_x, place_y,
-                     available_name_w, font_size=8.8 if row_count == 1 else 8.2,
-                     leading=9.5, color=CMA_TEXT, max_lines=2)
+        pdf.setFont("Helvetica-Bold", 11.6)
+        draw_wrapped(pdf, permanence["commune"], content_x, row_y + row_h - 28,
+                     available_name_w, font_size=11.6, leading=12, color=CMA_BLUE, max_lines=1)
+        draw_wrapped(pdf, permanence["lieu"], content_x, row_y + row_h - 44,
+                     available_name_w, font_size=8.2, leading=9.2, color=CMA_TEXT, max_lines=2)
 
         pdf.setFillColor(HexColor(CMA_BLUE))
-        pdf.setFont("Helvetica-Bold", 10 if row_count == 1 else 9.2)
-        pdf.drawRightString(card_x + card_w - 18, title_y,
+        pdf.setFont("Helvetica-Bold", 9.2)
+        pdf.drawRightString(card_x + card_w - 15, row_y + row_h - 28,
                             permanence["horaires"].replace(" h à ", " h – "))
         distance = permanence.get("distance_km")
         if distance is not None:
             pdf.setFillColor(HexColor("#294F7D"))
-            distance_y = row_y + row_h / 2 - 30 if row_count == 1 else row_y + 13
-            pdf.roundRect(card_x + card_w - 62, distance_y, 47, 21, 7, stroke=0, fill=1)
+            pdf.roundRect(card_x + card_w - 58, row_y + 13, 43, 20, 7, stroke=0, fill=1)
             pdf.setFillColor(white)
-            pdf.setFont("Helvetica-Bold", 8.7)
-            pdf.drawCentredString(card_x + card_w - 38.5, distance_y + 7, f"{distance} km")
+            pdf.setFont("Helvetica-Bold", 8.5)
+            pdf.drawCentredString(card_x + card_w - 36.5, row_y + 20, f"{distance} km")
         else:
             pdf.setFillColor(HexColor(CMA_MUTED))
             pdf.setFont("Helvetica-Oblique", 6.4)
-            distance_text_y = row_y + row_h / 2 - 24 if row_count == 1 else row_y + 20
-            pdf.drawRightString(card_x + card_w - 18, distance_text_y, "distance non calculée")
+            pdf.drawRightString(card_x + card_w - 15, row_y + 20, "distance non calculée")
 
     # Organismes : tous affichés, jusqu'à quatre par ligne, avec vrais pictogrammes.
     names = organisation_names or ["Aucun organisme sélectionné"]
@@ -7878,12 +7864,7 @@ with col2:
 with col3:
     communes_options = ["", "Autre commune…"] + sorted(
         {item["commune"] for item in COMMUNES_INCENDIE}
-        | {
-            item["commune"]
-            for item in PERMANENCES_BUS_ARTISANAT
-            if item.get("publiee", False)
-            and normaliser_commune(item.get("commune", "")) in PERMANENCES_OFFICIELLES
-        }
+        | {item["commune"] for item in PERMANENCES_BUS_ARTISANAT}
         | {"Gujan-Mestras"}
     )
     commune_selectionnee = st.selectbox(
