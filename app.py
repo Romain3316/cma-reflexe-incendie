@@ -5593,18 +5593,18 @@ PERMANENCES_BUS_ARTISANAT = [
         "lon": -1.0918,
         "publiee": True,
     },
-    # Permanences à venir : conservées dans le code mais JAMAIS affichées
-    # tant que "publiee" reste à False.
     {
         "commune": "Lège-Cap-Ferret",
         "date": "2026-08-12",
-        "horaires": "9 h à 13 h",
-        "lieu": "Lieu communiqué prochainement",
+        "horaires": "9 h à 17 h",
+        "lieu": "Lieu en attente",
         "lieu_confirme": False,
         "lat": 44.7933,
         "lon": -1.1450,
-        "publiee": False,
+        "publiee": True,
     },
+    # Permanences à venir : conservées dans le code mais JAMAIS affichées
+    # tant que "publiee" reste à False.
     {
         "commune": "Mios",
         "date": "2026-08-13",
