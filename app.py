@@ -5607,7 +5607,7 @@ PERMANENCES_BUS_ARTISANAT = [
         "commune": "Mios",
         "date": "2026-08-13",
         "horaires": "9 h à 16 h 30",
-        "lieu": "Lieu à confirmer",
+        "lieu": "Place Mayonnade (Place du marché) - Allée de la plage",
         "lieu_confirme": False,
         "lat": 44.6057,
         "lon": -0.9378,
