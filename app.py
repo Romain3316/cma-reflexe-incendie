@@ -6774,83 +6774,140 @@ def draw_bank_page(
 
 
 
-def draw_urssaf_summary_page(pdf: canvas.Canvas, page_number: int) -> None:
-    """Synthèse opérationnelle des mesures URSSAF transmise aux partenaires en septembre 2026."""
+def _draw_urssaf_page_header(pdf: canvas.Canvas, title: str, subtitle: str) -> None:
     page_w, page_h = A4
     margin = 34
-    content_w = page_w - 2 * margin
-
     pdf.setFillColor(HexColor(CMA_BLUE))
     pdf.rect(0, page_h - 96, page_w, 96, stroke=0, fill=1)
     pdf.setFillColor(HexColor(CMA_RED))
     pdf.rect(0, page_h - 7, page_w, 7, stroke=0, fill=1)
     pdf.setFillColor(white)
-    pdf.setFont("Helvetica-Bold", 20)
-    pdf.drawString(margin, page_h - 43, "URSSAF — Synthèse des mesures incendies")
-    pdf.setFont("Helvetica", 9)
+    pdf.setFont("Helvetica-Bold", 19)
+    pdf.drawString(margin, page_h - 42, title)
+    pdf.setFont("Helvetica", 8.8)
     pdf.setFillColor(HexColor("#D7E1ED"))
-    pdf.drawString(margin, page_h - 64, "Mesures de trésorerie sociale applicables aux entreprises et indépendants concernés")
+    draw_wrapped(pdf, subtitle, margin, page_h - 61, page_w - 2 * margin,
+                 font_size=8.8, leading=10.5, color="#D7E1ED", max_lines=2)
 
-    y = page_h - 124
-    pdf.setFillColor(HexColor("#EEF4FA"))
-    pdf.roundRect(margin, y - 52, content_w, 52, 8, stroke=0, fill=1)
+
+def _draw_info_box(pdf: canvas.Canvas, x: float, y_top: float, width: float,
+                   title: str, paragraphs: list[str], accent: str = CMA_BLUE,
+                   font_size: float = 8.0, leading: float = 10.0,
+                   bullet: bool = True) -> float:
+    """Dessine un bloc à hauteur calculée et renvoie la nouvelle ordonnée sous le bloc."""
+    pad = 13
+    title_h = 18
+    text_width = width - 2 * pad - (12 if bullet else 0)
+    wrapped = []
+    total_lines = 0
+    for paragraph in paragraphs:
+        lines = wrap_canvas_text(pdf, paragraph, "Helvetica", font_size, text_width)
+        wrapped.append(lines)
+        total_lines += len(lines)
+    content_h = total_lines * leading + max(0, len(paragraphs) - 1) * 5
+    h = pad + title_h + content_h + pad
+    y = y_top - h
+
+    pdf.setFillColor(white)
+    pdf.setStrokeColor(HexColor(CMA_BORDER))
+    pdf.roundRect(x, y, width, h, 8, stroke=1, fill=1)
+    pdf.setFillColor(HexColor(accent))
+    pdf.roundRect(x, y, 6, h, 3, stroke=0, fill=1)
     pdf.setFillColor(HexColor(CMA_BLUE))
-    pdf.setFont("Helvetica-Bold", 10)
-    pdf.drawString(margin + 13, y - 18, "PÉRIODE DE REPORT")
-    draw_wrapped(pdf, "Échéances de septembre, octobre et/ou novembre 2026. Le report est indépendant des autres aides et de la future exonération.",
-                 margin + 13, y - 34, content_w - 26, font_size=8.2, leading=10, color=CMA_TEXT, max_lines=2)
+    pdf.setFont("Helvetica-Bold", 9.4)
+    pdf.drawString(x + pad + 4, y_top - pad - 7, title)
+
+    ty = y_top - pad - title_h - 3
+    for lines in wrapped:
+        if bullet:
+            pdf.setFillColor(HexColor(accent))
+            pdf.circle(x + pad + 7, ty + 2, 1.7, stroke=0, fill=1)
+            tx = x + pad + 15
+        else:
+            tx = x + pad + 4
+        pdf.setFillColor(HexColor(CMA_TEXT))
+        pdf.setFont("Helvetica", font_size)
+        for line in lines:
+            pdf.drawString(tx, ty, line)
+            ty -= leading
+        ty -= 5
+    return y - 10
+
+
+def draw_urssaf_summary_page(pdf: canvas.Canvas, page_number: int) -> None:
+    """Page 1 : synthèse opérationnelle détaillée des mesures Urssaf incendies."""
+    page_w, page_h = A4
+    margin = 34
+    content_w = page_w - 2 * margin
+    _draw_urssaf_page_header(
+        pdf,
+        "URSSAF — Mesures incendies 2026",
+        "Report des cotisations de septembre à novembre : ce que le conseiller doit vérifier selon le statut de l'entreprise.",
+    )
+
+    y = page_h - 118
+    pdf.setFillColor(HexColor("#FFF7E8"))
+    pdf.roundRect(margin, y - 58, content_w, 58, 8, stroke=0, fill=1)
+    pdf.setFillColor(HexColor(CMA_AMBER))
+    pdf.setFont("Helvetica-Bold", 9.4)
+    pdf.drawString(margin + 13, y - 19, "À RETENIR")
+    draw_wrapped(
+        pdf,
+        "Le report concerne les échéances de septembre, octobre et/ou novembre 2026. Il décale le paiement : il ne supprime pas la dette sociale et ne donne pas automatiquement droit à la future exonération.",
+        margin + 13, y - 35, content_w - 26, font_size=8.0, leading=9.6,
+        color=CMA_TEXT, max_lines=3,
+    )
     y -= 72
 
-    sections = [
-        ("EMPLOYEURS", [
-            "Cotisations et contributions patronales : paiement reportable sans demande préalable, sans pénalité ni majoration de retard.",
-            "Les déclarations mensuelles doivent continuer à être effectuées.",
-            "Cotisations salariales, CSG, CRDS et prélèvement à la source : non reportables et restent à payer.",
-            "Délai de paiement déjà en cours, TESE ou CEA : demande via Messagerie > Un paiement > Demander moratoire incendie.",
-        ]),
-        ("TRAVAILLEURS INDÉPENDANTS / MICRO-ENTREPRENEURS", [
-            "Report possible des échéances de septembre, octobre et/ou novembre, sans pénalité ni majoration.",
-            "Le bénéficiaire doit être à jour de ses obligations déclaratives.",
-            "Demande via la messagerie sécurisée Urssaf ; pour les micro-entrepreneurs, depuis l'espace autoentrepreneur.urssaf.fr, motif « Demander moratoire incendie ».",
-        ]),
-        ("EXONÉRATION ANNONCÉE — PAS ENCORE OUVERTE", [
-            "Une exonération de cotisations sociales est annoncée en complément du report.",
-            "Les critères et modalités seront définis dans le cadre du PLFSS 2027, notamment en tenant compte de la baisse d'activité liée aux incendies.",
-            "Le bénéfice du report n'entraîne aucun droit automatique à cette future exonération.",
-        ]),
-        ("AIDE D'URGENCE CPSTI", [
-            "Jusqu'à 2 000 € pour les travailleurs indépendants éligibles, y compris ceux situés en zone d'évacuation et empêchés d'exercer pendant la période concernée.",
-            "Jusqu'à 8 000 € en cas de destruction totale des locaux professionnels et/ou de l'habitation personnelle, sous conditions.",
-            "Dispositif accessible aux artisans, commerçants et professionnels libéraux relevant du CPSTI ou de la Cipav.",
-        ]),
-    ]
+    y = _draw_info_box(pdf, margin, y, content_w, "EMPLOYEURS — REPORT DES COTISATIONS PATRONALES", [
+        "Les cotisations et contributions sociales patronales dont l'échéance intervient en septembre, octobre et/ou novembre 2026 peuvent être reportées en cas de difficulté liée aux incendies.",
+        "Le report est automatique en cas de non-paiement de la part patronale : aucune demande préalable n'est nécessaire et aucune pénalité ni majoration de retard n'est appliquée au titre de ce report.",
+        "Les déclarations sociales restent obligatoires chaque mois. Les cotisations salariales, la CSG, la CRDS et le prélèvement à la source ne sont pas reportables et doivent continuer à être réglés.",
+        "Cas particulier : si l'employeur dispose déjà d'un délai de paiement ou utilise le TESE ou le CEA, il doit demander le report depuis son espace Urssaf : Messagerie > Un paiement > Demander moratoire incendie.",
+    ], accent=CMA_RED, font_size=7.7, leading=9.2)
 
-    for idx, (title, items) in enumerate(sections):
-        h = 118 if idx in (0, 3) else 102
-        pdf.setFillColor(white)
-        pdf.setStrokeColor(HexColor(CMA_BORDER))
-        pdf.roundRect(margin, y - h, content_w, h, 8, stroke=1, fill=1)
-        pdf.setFillColor(HexColor(CMA_RED if idx in (0, 3) else CMA_BLUE))
-        pdf.roundRect(margin, y - h, 6, h, 3, stroke=0, fill=1)
-        pdf.setFillColor(HexColor(CMA_BLUE))
-        pdf.setFont("Helvetica-Bold", 9.5)
-        pdf.drawString(margin + 16, y - 20, title)
-        ty = y - 38
-        for item in items:
-            pdf.setFillColor(HexColor(CMA_RED))
-            pdf.circle(margin + 20, ty + 2, 1.8, stroke=0, fill=1)
-            used = draw_wrapped(pdf, item, margin + 28, ty + 5, content_w - 42,
-                                font_size=7.5, leading=9.2, color=CMA_TEXT, max_lines=3)
-            ty -= max(18, used + 4)
-        y -= h + 12
+    y = _draw_info_box(pdf, margin, y, content_w, "TRAVAILLEURS INDÉPENDANTS, MICRO-ENTREPRENEURS ET AUTRES NON-SALARIÉS", [
+        "Le report est également possible pour les cotisations à prélever ou à payer en septembre, octobre et/ou novembre 2026, sans pénalité ni majoration de retard.",
+        "Le professionnel doit être à jour de ses obligations déclaratives et, contrairement au cas général des employeurs, effectuer une demande de report.",
+        "Indépendants, praticiens et auxiliaires médicaux, artistes-auteurs et marins non-salariés : espace Urssaf > Messagerie > Un paiement > Demander moratoire incendie.",
+        "Micro-entrepreneurs : demande depuis la messagerie de l'espace autoentrepreneur.urssaf.fr en sélectionnant le motif « Demander moratoire incendie ».",
+    ], accent=CMA_BLUE, font_size=7.7, leading=9.2)
 
-    pdf.setFillColor(HexColor("#FFF7E8"))
-    pdf.roundRect(margin, 44, content_w, 48, 8, stroke=0, fill=1)
-    pdf.setFillColor(HexColor(CMA_AMBER))
-    pdf.setFont("Helvetica-Bold", 8.5)
-    pdf.drawString(margin + 12, 76, "POINT DE VIGILANCE")
-    draw_wrapped(pdf, "Le report décale le paiement mais n'efface pas la dette sociale. Conserver les justificatifs de l'impact des incendies et suivre la publication des critères de la future exonération.",
-                 margin + 12, 62, content_w - 24, font_size=7.2, leading=8.7, color=CMA_TEXT, max_lines=2)
+    draw_footer(pdf, page_number, A4)
+
+
+def draw_urssaf_detail_page(pdf: canvas.Canvas, page_number: int) -> None:
+    """Page 2 : exonération annoncée, CPSTI, périmètre et conduite à tenir CMA."""
+    page_w, page_h = A4
+    margin = 34
+    content_w = page_w - 2 * margin
+    _draw_urssaf_page_header(
+        pdf,
+        "URSSAF — Exonération, CPSTI et accompagnement",
+        "Compléments au moratoire : dispositif annoncé, aides d'urgence et points de vigilance pour l'accompagnement CMA.",
+    )
+    y = page_h - 118
+
+    y = _draw_info_box(pdf, margin, y, content_w, "EXONÉRATION DE COTISATIONS — ANNONCÉE, MAIS PAS ENCORE OUVERTE", [
+        "Le Gouvernement a annoncé un dispositif d'exonération de cotisations sociales en complément du report des échéances.",
+        "Les critères et modalités doivent être définis dans le cadre du PLFSS pour 2027. L'éligibilité tiendra notamment compte de la baisse d'activité imputable aux incendies.",
+        "Point de vigilance : bénéficier du moratoire Urssaf ne crée aucun droit automatique à l'exonération. Ne pas présenter les cotisations reportées comme des cotisations qui seront nécessairement annulées.",
+        "Conseil CMA : conserver dès maintenant les éléments permettant d'objectiver l'impact économique des incendies : chiffre d'affaires, annulations, fermetures, période d'évacuation, impossibilité d'exercer et justificatifs associés.",
+    ], accent=CMA_AMBER, font_size=7.6, leading=9.0)
+
+    y = _draw_info_box(pdf, margin, y, content_w, "AIDE D'URGENCE CPSTI — À VÉRIFIER EN PARALLÈLE", [
+        "Jusqu'à 2 000 € pour les travailleurs indépendants éligibles. Le dispositif est étendu aux indépendants dont l'entreprise se situe dans une zone d'évacuation et qui ont été dans l'impossibilité d'exercer pendant cette période.",
+        "En cas de destruction totale des locaux professionnels et/ou de l'habitation personnelle, l'aide financière peut atteindre 8 000 €, sous réserve des conditions et de l'instruction du dossier.",
+        "Peuvent notamment solliciter cette aide les artisans, commerçants et professionnels libéraux relevant du CPSTI ou de la Cipav. L'Urssaf assure la mise en œuvre opérationnelle et l'instruction des dossiers complets et éligibles.",
+        "Le CPSTI est indépendant du moratoire Urssaf : une entreprise peut donc avoir intérêt à examiner les deux dispositifs selon sa situation.",
+    ], accent=CMA_RED, font_size=7.6, leading=9.0)
+
+    y = _draw_info_box(pdf, margin, y, content_w, "PÉRIMÈTRE ET RÉFLEXE CONSEILLER CMA", [
+        "Les mesures concernent les entreprises exerçant leur activité dans les communes sinistrées, confinées ou évacuées visées par le décret n° 2026-776 du 14 août 2026, ainsi que Luglon et Garein selon l'information transmise par l'Urssaf.",
+        "Vérifier d'abord la commune d'activité et le statut du professionnel, puis identifier la bonne procédure : report automatique de la part patronale pour l'employeur dans le cas général ; demande de moratoire pour l'indépendant ou le micro-entrepreneur.",
+        "En cas de tension de trésorerie persistante, ne pas limiter l'accompagnement au report Urssaf : examiner également CPSTI, fiscalité, CCSF et solutions bancaires selon la situation de l'entreprise.",
+    ], accent=CMA_GREEN, font_size=7.5, leading=8.9)
+
     draw_footer(pdf, page_number, A4)
 
 def generate_pdf(
@@ -6882,6 +6939,9 @@ def generate_pdf(
     # Synthèse URSSAF dédiée dès que ce dispositif est recommandé/sélectionné.
     if "URSSAF / CPSTI" in selected:
         draw_urssaf_summary_page(pdf, page_number)
+        pdf.showPage()
+        page_number += 1
+        draw_urssaf_detail_page(pdf, page_number)
         pdf.showPage()
         page_number += 1
 
