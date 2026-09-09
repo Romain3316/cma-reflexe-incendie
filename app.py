@@ -46,6 +46,19 @@ BUS_LOGO_CACHE: ImageReader | None = None
 
 CPSTI_FORM_URL = "https://secu-independants.fr/files/live/sites/ssi/files/mediatheque/Espace_telechargement/Formulaires/CPSTI-%20aide%20d'urgence%20CPSTI%20aux%20actifs%20victimes%20de%20catastrophe%20et%20d'intemp%c3%a9ries.pdf"
 
+URSSAF_URL = "https://www.urssaf.fr/"
+AUTOENTREPRENEUR_URSSAF_URL = "https://www.autoentrepreneur.urssaf.fr/"
+DECRET_INCENDIES_2026_URL = "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000054683092"
+
+COMMUNES_MORATOIRE_INCENDIES = {
+    "Andernos-les-Bains", "Arès", "Audenge", "Biganos", "Le Barp", "Cestas",
+    "Eysines", "Le Haillan", "Lacanau", "Lanton", "Lège-Cap-Ferret",
+    "Marcheprime", "Martignas-sur-Jalle", "Mérignac", "Mios", "Le Porge",
+    "Saint-Aubin-de-Médoc", "Saint-Jean-d'Illac", "Saint-Médard-en-Jalles",
+    "Sainte-Hélène", "Salaunes", "Saumos", "Le Temple",
+    "Biscarrosse", "Parentis-en-Born", "Sanguinet", "Luglon", "Garein",
+}
+
 # Cellule d’Urgence Médico-Psychologique (CUMP)
 CUMP_PHONE_DISPLAY = "0800 719 912"
 CUMP_PHONE_LINK = "tel:+33800719912"
@@ -4221,33 +4234,50 @@ COMMUNES_INCENDIE = [
 
 ACTUALITES = [
     {
-        "date": "3 août 2026",
-        "badge": "Réintégration",
-        "titre": "Réintégration progressive du Porge et de Lège-Cap-Ferret",
+        "date": "9 septembre 2026",
+        "badge": "URSSAF – PRIORITÉ",
+        "titre": "Report des cotisations sociales de septembre à novembre 2026",
         "resume": (
-            "La Préfecture annonce une réintégration progressive à compter du lundi "
-            "3 août, selon les secteurs. Les entreprises peuvent envisager une reprise "
-            "progressive, sous réserve de vérifier l'accès effectif aux locaux et les "
-            "restrictions qui restent applicables. Les campings et certains secteurs "
-            "demeurent exclus."
+            "Les entreprises concernées par les incendies peuvent reporter certaines cotisations "
+            "dont l'échéance intervient en septembre, octobre et/ou novembre 2026. Pour les "
+            "employeurs, le report des cotisations patronales est automatique en cas de non-paiement, "
+            "sans pénalité ni majoration, tout en maintenant les déclarations. Les cotisations "
+            "salariales, CSG, CRDS et prélèvement à la source restent dus. Les travailleurs "
+            "indépendants et micro-entrepreneurs doivent demander un « moratoire incendie » depuis "
+            "leur messagerie sécurisée et rester à jour de leurs obligations déclaratives."
         ),
-        "source": "Préfecture de la Gironde",
-        "url": LEGE_PORGE_REINTEGRATION_URL,
+        "source": "Urssaf – information partenaires septembre 2026",
+        "url": URSSAF_URL,
         "active": True,
         "featured": True,
     },
     {
-        "date": "2 août 2026",
-        "badge": "FAQ officielle",
-        "titre": "Une FAQ regroupe les démarches et contacts utiles",
+        "date": "9 septembre 2026",
+        "badge": "À SURVEILLER",
+        "titre": "Une exonération de cotisations sociales est annoncée",
         "resume": (
-            "La Préfecture met à disposition une foire aux questions consacrée aux "
-            "incendies, avec les principales démarches, les contacts d'urgence et une "
-            "rubrique spécifique pour les entreprises, autoentrepreneurs et travailleurs "
-            "indépendants."
+            "Le Gouvernement a annoncé une exonération distincte du report de cotisations. "
+            "Ses critères et modalités doivent être définis dans le cadre du PLFSS 2027 et "
+            "tiendront notamment compte de la baisse d'activité liée aux incendies. Le report "
+            "actuel ne crée aucun droit automatique à cette future exonération."
         ),
-        "source": "Préfecture de la Gironde",
-        "url": PREFECTURE_FAQ_ENTREPRISES_URL,
+        "source": "Urssaf – information partenaires septembre 2026",
+        "url": DECRET_INCENDIES_2026_URL,
+        "active": True,
+    },
+    {
+        "date": "9 septembre 2026",
+        "badge": "CPSTI",
+        "titre": "Aide d'urgence : jusqu'à 2 000 € et jusqu'à 8 000 € en cas de destruction totale",
+        "resume": (
+            "L'aide d'urgence CPSTI reste mobilisable par les artisans, commerçants et professions "
+            "libérales relevant du CPSTI ou de la Cipav. Elle est étendue aux indépendants dont "
+            "l'entreprise était située en zone d'évacuation et qui ne pouvaient pas exercer. "
+            "Elle peut atteindre 2 000 €, et jusqu'à 8 000 € en cas de destruction totale des "
+            "locaux professionnels et/ou de l'habitation personnelle, sous conditions."
+        ),
+        "source": "Urssaf / CPSTI",
+        "url": URSSAF_CPSTI_URL,
         "active": True,
     },
     {
@@ -4255,75 +4285,16 @@ ACTUALITES = [
         "badge": "Aide CMA",
         "titre": "Jusqu'à 1 500 € d'aide d'urgence pour les artisans sinistrés",
         "resume": (
-            "Le réseau des CMA mobilise son Fonds de calamités et des catastrophes "
-            "naturelles. Une aide d'urgence pouvant atteindre 1 500 € peut être accordée "
-            "aux entreprises artisanales dont les locaux, équipements ou matériels ont "
-            "été endommagés ou détruits. La demande doit être déposée auprès de la CMA "
-            "compétente dans un délai maximal de trois mois après le sinistre."
+            "Le Fonds de calamités et des catastrophes naturelles du réseau CMA peut accorder "
+            "jusqu'à 1 500 € aux entreprises artisanales directement sinistrées. La demande doit "
+            "être déposée auprès de la CMA compétente dans les trois mois suivant le sinistre."
         ),
         "source": "CMA France",
         "url": CMA_FONDS_URL,
         "active": True,
     },
-    {
-        "date": "1er août 2026",
-        "badge": "Assurances",
-        "titre": "Les expertises d'assurance doivent être accélérées",
-        "resume": (
-            "France Assureurs, les compagnies et les experts se sont engagés auprès "
-            "de la Préfecture à accélérer les passages d'expertise et à suivre chaque "
-            "semaine l'avancement des dossiers. Pour les entreprises en attente, "
-            "conseiller une relance écrite de l'assureur. Le délai exceptionnel de "
-            "déclaration des sinistres reste fixé au 31 août 2026."
-        ),
-        "source": "Préfecture de la Gironde",
-        "url": PREFECTURE_WEEKEND_URL,
-        "active": True,
-    },
-    {
-        "date": "1er août 2026",
-        "badge": "Réintégration",
-        "titre": "Arès, Marcheprime, Saumos, Le Temple et Audenge réintégrés",
-        "resume": (
-            "La Préfecture autorise la réintégration à Arès, Marcheprime, Saumos "
-            "et Le Temple, ainsi que dans les quartiers de Lubec et de La Pointe à "
-            "Audenge. Audenge est donc entièrement réintégrée. Vérifier malgré tout "
-            "l'accès réel aux locaux et la possibilité effective de reprendre l'activité."
-        ),
-        "source": "Préfecture de la Gironde",
-        "url": PREFECTURE_WEEKEND_URL,
-        "active": True,
-    },
-    {
-        "date": "31 juillet 2026",
-        "badge": "Mesures entreprises",
-        "titre": "Activité partielle, CFE, Urssaf et assurances : les mesures de référence",
-        "resume": (
-            "La page du ministère centralise les principales mesures : activité "
-            "partielle, reports de cotisations Urssaf, remise des majorations, "
-            "modulation des cotisations provisionnelles, accompagnement fiscal et "
-            "dégrèvement possible de CFE pour les locaux devenus inutilisables."
-        ),
-        "source": "Ministère de l'Économie",
-        "url": MINISTERE_MESURES_URL,
-        "active": True,
-    },
-    {
-        "date": "30 juillet 2026",
-        "badge": "CPSTI",
-        "titre": "Aide CPSTI renforcée pour les travailleurs indépendants",
-        "resume": (
-            "Le CPSTI prévoit une aide pouvant atteindre 2 000 € pour les indépendants "
-            "empêchés d'exercer dans une zone évacuée et jusqu'à 8 000 € lorsque "
-            "l'entreprise ou l'habitation principale a été directement touchée. "
-            "La demande est à transmettre à l'Urssaf avec les justificatifs via la "
-            "messagerie sécurisée, rubrique « situation exceptionnelle »."
-        ),
-        "source": "Urssaf / CPSTI",
-        "url": URSSAF_CPSTI_URL,
-        "active": True,
-    },
 ]
+
 
 LOGO_CANDIDATES = [
     Path("logo_cma_na_gironde.png"),
@@ -4344,10 +4315,10 @@ LOGO_CANDIDATES = [
 ORGANISMES: dict[str, dict[str, Any]] = {
     "Assurance": {
         "icone": "🛡️",
-        "sous_titre": "Déclaration du sinistre, expertise et indemnisation",
+        "sous_titre": "Suivi du dossier, expertise et indemnisation",
         "objectif": (
-            "Ouvrir rapidement le dossier de sinistre, préserver les preuves, "
-            "organiser l'expertise et préparer l'évaluation des dommages."
+            "Suivre le dossier déjà déclaré, identifier les éventuels blocages d'expertise ou "
+            "d'indemnisation et conserver les justificatifs nécessaires."
         ),
         "todo": [
             "Contacter sans délai l'assureur, le courtier ou l'agent général.",
@@ -4432,38 +4403,47 @@ ORGANISMES: dict[str, dict[str, Any]] = {
     },
     "URSSAF / CPSTI": {
         "icone": "🤝",
-        "sous_titre": "Cotisations sociales et aide d'urgence aux indépendants",
+        "sous_titre": "Priorité post-incendies : moratoire septembre-octobre-novembre et aide CPSTI",
         "objectif": (
-            "Signaler rapidement les difficultés, demander un délai de paiement ou une "
-            "modulation des cotisations et solliciter l'action sociale du CPSTI."
+            "Sécuriser immédiatement la trésorerie sociale de l'entreprise, appliquer la bonne "
+            "procédure de report selon le statut et vérifier l'éligibilité à l'aide d'urgence CPSTI."
         ),
         "todo": [
-            "Signaler l'incendie depuis la messagerie sécurisée de l'espace URSSAF.",
-            "Demander un délai de paiement ou le report des échéances de cotisations.",
-            "Vérifier la remise des pénalités et majorations liées au retard provoqué par le sinistre.",
-            "Pour un travailleur indépendant, ajuster les cotisations provisionnelles si l'activité baisse.",
-            "Déposer rapidement une demande d'action sociale CPSTI avec les justificatifs utiles.",
-            "Conserver l'accusé de réception, les messages et la décision reçue.",
+            "Identifier le profil : employeur, travailleur indépendant ou micro-entrepreneur.",
+            "Vérifier que l'activité est exercée dans une commune couverte par le dispositif incendies.",
+            "EMPLOYEUR : continuer les déclarations mensuelles et, si nécessaire, différer sans demande préalable le paiement des seules cotisations et contributions patronales de septembre, octobre et/ou novembre 2026.",
+            "EMPLOYEUR : continuer à payer les cotisations salariales, la CSG, la CRDS et le prélèvement à la source, qui ne peuvent pas être reportés.",
+            "EMPLOYEUR avec délai en cours, TESE ou CEA : demander le report via Messagerie > Un paiement > Demander moratoire incendie.",
+            "INDÉPENDANT : demander le report via Messagerie > Un paiement > Demander moratoire incendie et rester à jour des obligations déclaratives.",
+            "MICRO-ENTREPRENEUR : demander le moratoire depuis la messagerie de l'espace autoentrepreneur.urssaf.fr, motif « Demander moratoire incendie ».",
+            "Vérifier en parallèle l'éligibilité à l'aide d'urgence CPSTI : jusqu'à 2 000 € ; jusqu'à 8 000 € en cas de destruction totale des locaux professionnels et/ou de l'habitation personnelle, sous conditions.",
+            "Conserver les messages, accusés de réception et éléments démontrant la baisse d'activité ou l'impossibilité d'exercer.",
         ],
         "documents": [
             "SIRET, identité et coordonnées de l'entreprise.",
-            "Explication synthétique du sinistre et de ses conséquences.",
-            "Attestation de sinistre, photos ou document des secours.",
-            "État des échéances sociales et difficultés de trésorerie.",
-            "Éléments récents de chiffre d'affaires ou de revenu.",
-            "RIB et justificatifs des dépenses ou pertes urgentes.",
+            "Commune d'implantation de l'établissement concerné.",
+            "Échéancier ou situation des cotisations sociales de septembre à novembre 2026.",
+            "Éléments récents de chiffre d'affaires démontrant l'impact économique des incendies.",
+            "Justificatif d'évacuation ou d'impossibilité d'exercer, lorsque pertinent.",
+            "Photos, attestations ou justificatifs des destructions pour une demande CPSTI renforcée.",
+            "RIB et pièces demandées dans le dossier d'action sociale CPSTI.",
         ],
         "vigilance": [
-            "Toutes les démarches URSSAF et les offres de service sont gratuites.",
-            "Les demandes sont examinées selon la situation et les justificatifs fournis.",
-            "L’aide CPSTI peut atteindre 2 000 € en cas d’interruption liée à une évacuation et jusqu’à 8 000 € en cas de sinistre direct de l’entreprise ou de l’habitation principale, sous conditions.",
-            "Le communiqué de juillet 2026 annonce un paiement sous 15 jours après réception d'un dossier recevable.",
+            "Le report ne supprime pas la dette : les cotisations reportées restent dues.",
+            "Pour les employeurs, seules les cotisations et contributions patronales peuvent être reportées ; les retenues salariales, CSG, CRDS et prélèvement à la source restent dus.",
+            "Le report de cotisations n'ouvre pas automatiquement droit à la future exonération annoncée.",
+            "Les critères de l'exonération seront définis ultérieurement dans le cadre du PLFSS 2027, notamment au regard de la baisse d'activité liée aux incendies.",
+            "L'aide CPSTI est distincte du moratoire Urssaf et reste soumise à l'instruction du dossier.",
         ],
         "contact": (
             "Employeurs : 3957 - Travailleurs indépendants : 3698 - "
-            "Messagerie sécurisée de l'espace en ligne."
+            "Messagerie sécurisée de l'espace Urssaf / espace auto-entrepreneur."
         ),
-        "source": "Communiqué national Urssaf / CPSTI du 30 juillet 2026.",
+        "source": "Urssaf – information partenaires sur les mesures incendies, septembre 2026.",
+        "action_url": URSSAF_URL,
+        "action_label": "Accéder à l'Urssaf",
+        "secondary_url": DECRET_INCENDIES_2026_URL,
+        "secondary_label": "Consulter le décret n° 2026-776 du 14 août 2026",
         "form_url": CPSTI_FORM_URL,
         "form_label": "Télécharger le formulaire de demande d’aide CPSTI",
     },
@@ -5138,10 +5118,7 @@ def render_carte_incendie() -> None:
 
 def get_recommended_organismes(situation: dict[str, Any]) -> set[str]:
     """Détermine les fiches à présélectionner à partir du mini-diagnostic."""
-    recommended: set[str] = {
-        "Assurance",
-        "Assurances complémentaires",
-    }
+    recommended: set[str] = set()
 
     salaries = bool(situation.get("salaries"))
     direct = situation.get("sinistre_direct") == "Oui"
@@ -5178,8 +5155,14 @@ def get_recommended_organismes(situation: dict[str, Any]) -> set[str]:
 
     # Cotisations et aide sociale : utile dès qu'il existe un impact réel
     # sur l'activité ou un sinistre direct.
-    if activity_reduced or direct or access_restricted:
+    if activity_reduced or direct or access_restricted or treasury_risk:
         recommended.add("URSSAF / CPSTI")
+
+    # Assurance : désormais en suivi secondaire, uniquement si le sinistre a touché
+    # directement l'entreprise. Les garanties complémentaires restent sélectionnables
+    # manuellement en cas de blocage ou de besoin spécifique.
+    if direct:
+        recommended.add("Assurance")
 
     # Banque / trésorerie : présélection explicite si le dirigeant anticipe
     # une insuffisance de trésorerie dans les prochaines semaines.
@@ -5223,6 +5206,7 @@ def diagnostic_signature(situation: dict[str, Any]) -> str:
     raw = "||".join(
         [
             str(bool(situation.get("salaries"))),
+            str(situation.get("profil_social", "")),
             str(situation.get("sinistre_direct", "")),
             str(situation.get("acces_locaux", "")),
             str(situation.get("niveau_activite", "")),
@@ -5240,7 +5224,7 @@ def build_activity_recommendations(situation: dict[str, Any]) -> list[str]:
     if not situation.get("salaries", False):
         return [
             "L'entreprise n'a pas déclaré de salarié : l'activité partielle n'est pas à mobiliser.",
-            "Concentrer l'accompagnement sur l'assurance, la trésorerie, l'URSSAF / CPSTI et la reprise.",
+            "Concentrer l'accompagnement sur l'URSSAF / CPSTI, la trésorerie, la fiscalité et le suivi de la reprise.",
         ]
 
     direct = situation.get("sinistre_direct") == "Oui"
@@ -6366,8 +6350,8 @@ def draw_cpsti_submission_box(
     banner_h = 25
 
     for bx, title in [
-        (left_x, "Artisan, commerçant ou profession libérale"),
-        (right_x, "Micro-entrepreneur"),
+        (left_x, "Employeur / travailleur indépendant"),
+        (right_x, "Micro-entrepreneur / CPSTI"),
     ]:
         pdf.setFillColor(HexColor(CMA_BLUE))
         pdf.roundRect(bx, banner_y, col_w, banner_h, 5, stroke=0, fill=1)
@@ -6380,16 +6364,16 @@ def draw_cpsti_submission_box(
             ty -= 8
 
     left_steps = [
-        "1. Se connecter à l'espace personnel sur urssaf.fr.",
-        "2. Ouvrir Messagerie.",
-        "3. Nouveau message > Un autre sujet.",
-        "4. Solliciter l'action sociale du CPSTI.",
+        "Employeur : report patronal sept.-nov. sans demande préalable.",
+        "Déclarations maintenues ; retenues salariales, CSG, CRDS et PAS à payer.",
+        "TI : Messagerie > Un paiement > Demander moratoire incendie.",
+        "Cas TESE/CEA ou délai en cours : demander le moratoire dans la messagerie.",
     ]
     right_steps = [
-        "1. Se connecter sur autoentrepreneur.urssaf.fr.",
-        "2. Ouvrir Ma messagerie.",
-        "3. Nouvelle demande.",
-        "4. Une demande d'action sociale.",
+        "Micro : se connecter sur autoentrepreneur.urssaf.fr.",
+        "Ouvrir la messagerie de l'espace en ligne.",
+        "Choisir le motif « Demander moratoire incendie ».",
+        "CPSTI : vérifier en parallèle l'aide d'urgence selon la situation.",
     ]
 
     steps_top = banner_y - 15
@@ -7972,17 +7956,28 @@ st.markdown(
     <div class="section-card">
         <div class="section-title">2. Qualifier rapidement la situation</div>
         <p class="section-help">
-            Quelques réponses suffisent pour personnaliser les recommandations,
-            notamment lorsque l'entreprise emploie des salariés.
+            Le diagnostic est désormais orienté « post-incendies » : trésorerie, cotisations sociales,
+            aides CPSTI et suivi des conséquences économiques. L'assurance reste disponible en suivi.
         </p>
     </div>
     """,
     unsafe_allow_html=True,
 )
 
+profil_social = st.selectbox(
+    "Profil social de l'entreprise",
+    [
+        "Employeur",
+        "Travailleur indépendant",
+        "Micro-entrepreneur",
+        "Autre / à préciser",
+    ],
+    help="Cette information permet d'afficher la bonne procédure de moratoire Urssaf.",
+)
+
 q1, q2 = st.columns(2)
 with q1:
-    salaries = st.toggle("L'entreprise emploie au moins un salarié", value=False)
+    salaries = st.toggle("L'entreprise emploie au moins un salarié", value=(profil_social == "Employeur"))
     sinistre_direct = st.radio(
         "L'entreprise est-elle directement sinistrée ?",
         ["Oui", "Non"],
@@ -8030,6 +8025,7 @@ if salaries and niveau_activite != "Activité normale":
 
 situation = {
     "commune_entreprise": commune_entreprise,
+    "profil_social": profil_social,
     "salaries": salaries,
     "sinistre_direct": sinistre_direct,
     "acces_locaux": acces_locaux,
@@ -8037,6 +8033,46 @@ situation = {
     "tresorerie_fragile": tresorerie_fragile,
     "causes_arret": causes_arret,
 }
+
+# Focus Urssaf post-incendies
+commune_couverte = commune_entreprise in COMMUNES_MORATOIRE_INCENDIES if commune_entreprise else False
+if commune_entreprise:
+    if commune_couverte:
+        st.success(
+            f"URSSAF : {commune_entreprise} figure dans le périmètre communiqué pour les mesures incendies. "
+            "Vérifier la situation de l'entreprise sur les échéances de septembre, octobre et novembre 2026."
+        )
+    else:
+        st.caption(
+            "La commune saisie n'est pas identifiée dans la liste intégrée au dispositif. "
+            "Vérifier la situation auprès de l'Urssaf avant de conclure à l'inéligibilité."
+        )
+
+if profil_social == "Employeur":
+    st.info(
+        "URSSAF – EMPLOYEUR : les cotisations et contributions patronales de septembre, octobre "
+        "et/ou novembre 2026 peuvent être différées sans demande préalable et sans pénalité. "
+        "Les déclarations restent obligatoires. Cotisations salariales, CSG, CRDS et prélèvement "
+        "à la source restent à payer. Cas particuliers (délai en cours, TESE, CEA) : demander un "
+        "« moratoire incendie » dans la messagerie sécurisée."
+    )
+elif profil_social == "Travailleur indépendant":
+    st.info(
+        "URSSAF – INDÉPENDANT : demander le report des échéances de septembre, octobre et/ou "
+        "novembre 2026 via Messagerie > Un paiement > Demander moratoire incendie. "
+        "Les obligations déclaratives doivent être à jour."
+    )
+elif profil_social == "Micro-entrepreneur":
+    st.info(
+        "URSSAF – MICRO-ENTREPRENEUR : demander le report depuis la messagerie de "
+        "l'espace autoentrepreneur.urssaf.fr avec le motif « Demander moratoire incendie »."
+    )
+
+st.warning(
+    "EXONÉRATION À VENIR : une exonération de cotisations a été annoncée, mais ses critères "
+    "seront définis ultérieurement dans le PLFSS 2027. Le moratoire actuel ne garantit pas "
+    "l'accès à cette future exonération."
+)
 
 if tresorerie_fragile:
     st.info(
@@ -8293,6 +8329,6 @@ if not logo_path:
     )
 
 st.caption(
-    "CMA Réflexe Incendie · Outil d'aide à l'accompagnement. "
+    "CMA Réflexe Incendie · Suivi post-incendies · Outil d'aide à l'accompagnement. "
     "Les procédures et conditions doivent être confirmées auprès des organismes compétents."
 )
