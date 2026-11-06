@@ -7,7 +7,7 @@ from pdf_export import make_pdf, euros
 st.set_page_config(page_title='PASS CMA | Simulateur conseiller',page_icon='🧮',layout='wide')
 st.markdown('''<style>.stApp{background:#f5f7fa} h1,h2,h3{color:#153650} [data-testid="stMetric"]{background:white;border:1px solid #dce5ec;border-radius:12px;padding:18px} .block-container{padding-top:2rem} </style>''',unsafe_allow_html=True)
 T=json.loads(Path(__file__).with_name('tariffs.json').read_text())
-st.caption('CMA NOUVELLE-AQUITAINE · OUTIL CONSEILLER · PREMIÈRE VERSION')
+st.caption('CMA NOUVELLE-AQUITAINE · OUTIL CONSEILLER · VERSION 1.3 — 06/11/2026')
 st.title('Le PASS, chiffres à l’appui.')
 st.write('Comparez les dépenses prévues sur douze mois et remettez une fiche personnalisée à votre client.')
 with st.sidebar:
@@ -32,9 +32,8 @@ with left:
             label=st.selectbox(f'Formalité {i+1}',options,key=f'kind_{i}_{profile}')
             tariff=T['formalites'][label]['societe' if profile=='Société' else 'ei']
             st.write(f'Prix catalogue : **{euros(tariff)} HT**')
-            checked=st.checkbox('Prestation et tarif applicables confirmés',key=f'confirm_{i}_{profile}_{label}')
             covered=st.checkbox('Affecter au PASS',value=i<2,key=f'covered_{i}')
-            formalities.append(dict(label=label,ht=tariff,covered=covered,confirmed=checked))
+            formalities.append(dict(label=label,ht=tariff,covered=covered))
     hours=st.number_input('Heures de conseil nécessaires',0.0,20.0,0.0,.5)
     st.caption('79 € HT/heure · 2 heures maximum couvertes. Conseil Flash gratuit exclu du calcul.')
     st.subheader('02 · La formation')
@@ -71,12 +70,17 @@ with right:
     st.table([{'Prestation':name,f'Sans PASS ({basis})':euros(a),f'Avec PASS ({basis})':euros(b)} for name,a,b in result['rows']])
     st.caption(f"Abonnement : {euros(result['subscription'])} sur 12 mois. {'Deux mensualités offertes.' if free else 'Douze mensualités.'}")
     st.write(f"**Droits encore disponibles :** {result['remaining_formalities']} formalité(s), {result['remaining_hours']:g} h de conseil. Non valorisés dans le gain.")
-    ready=validated and all(f['confirmed'] for f in formalities) and (not days or eligible)
+    ready=validated and (not days or eligible)
     assumptions=[f"Profil : {profile}. Base {basis}, choisie selon récupération de TVA.",f"Conseil : 79 € HT/h ; {hours:g} h prévues, dont {min(hours,2):g} h couvertes.",f"Formation : {days} jours ; reste à charge {euros(rac)}/jour ; plafond de réduction {euros(cap)}/jour, limitée au reste à charge.",f"Grille publique relevée le {T['date_releve']}. Applicabilité confirmée par le conseiller pour cette simulation.", 'Deux mois offerts confirmés : souscription avec assistance CMA à l’immatriculation.' if free else 'Aucune gratuité d’abonnement retenue.', 'Les prestations affectées au PASS sont indiquées à zéro dans la colonne Avec PASS. Les frais légaux ne sont pas inclus.']
     if ready:
         st.download_button('Télécharger la fiche client PDF',make_pdf(result,company,profile,advisor,contact,basis,assumptions),'simulation_pass_cma.pdf','application/pdf',type='primary',use_container_width=True)
         st.caption('À joindre à votre mail habituel. Aucune donnée client enregistrée sur disque par cette application.')
-    else: st.warning('Aperçu de travail : confirmez les tarifs et l’éligibilité avant de générer le PDF client.')
+    else:
+        missing=[]
+        if not validated: missing.append('Cochez la validation générale du conseiller (section 03).')
+        if days and not eligible: missing.append('Confirmez l’éligibilité de la formation (section 02).')
+        st.download_button('Télécharger la fiche client PDF',data=b'',file_name='simulation_pass_cma.pdf',mime='application/pdf',disabled=True,use_container_width=True)
+        st.warning('Pour activer le PDF : ' + ' '.join(missing))
 with st.expander('Grille tarifaire et sources — contrôle avant diffusion'):
     st.write('Tarifs publics relevés le 6 novembre 2026 ; validation interne non présumée. Modifiables dans tariffs.json sur GitHub. Conseil : 79 € HT/h fixé dans calculator.py.')
     st.table([{'Prestation':k,'EI / micro HT':v['ei'],'Société HT':v['societe']} for k,v in T['formalites'].items()])
