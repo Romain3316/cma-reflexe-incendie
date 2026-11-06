@@ -8,7 +8,7 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image, KeepTogether
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image, KeepTogether, PageBreak
 
 FONT_DIR=Path(reportlab.__file__).parent/'fonts'
 for name,file in [('Vera','Vera.ttf'),('VeraBold','VeraBd.ttf')]:
@@ -54,7 +54,24 @@ def make_pdf(result, company, profile, advisor, contact, basis, assumptions):
     data.append([p('TOTAL SUR 12 MOIS'),p(euros(result['before'])),p(euros(result['after']))])
     table=Table(data,colWidths=[277,115,115],repeatRows=1)
     table.setStyle(TableStyle([('BACKGROUND',(0,0),(-1,0),NAVY),('ROWBACKGROUNDS',(0,1),(-1,-2),[colors.white,LIGHT]),('BACKGROUND',(0,-1),(-1,-1),colors.HexColor('#dceeea')),('VALIGN',(0,0),(-1,-1),'TOP'),('TOPPADDING',(0,0),(-1,-1),6),('BOTTOMPADDING',(0,0),(-1,-1),6),('LEFTPADDING',(0,0),(-1,-1),10)]))
-    story += [table,Spacer(1,8),p('Et vos droits encore disponibles ?','Heading3'),p(f"{result['remaining_formalities']} formalité(s) et {result['remaining_hours']:g} heure(s) de conseil. Non comptabilisées dans l’économie annoncée.",'Fine'),Spacer(1,6),p('Hypothèses retenues','Heading3')]
+    story += [table,Spacer(1,8),p('Et vos droits encore disponibles ?','Heading3'),p(f"{result['remaining_formalities']} formalité(s) et {result['remaining_hours']:g} heure(s) de conseil. Non comptabilisées dans l’économie annoncée.",'Fine'),Spacer(1,6)]
+    story += [PageBreak(),p('La CMA à vos côtés, toute l’année','Heading1'),p('Vous consacrez votre énergie à votre métier. Le PASS CMA Liberté vous aide à trouver les bons interlocuteurs pour vos démarches et vos décisions.'),Spacer(1,14)]
+    arguments=[('Un interlocuteur privilégié', 'Un point d’entrée à la CMA pour faire le point sur vos besoins et vous orienter vers l’expertise adaptée à votre entreprise.')]
+    if any(a > b and not name.startswith(('Conseil', 'Formation', 'Abonnement')) for name,a,b in result['rows']):
+        arguments.append(('Vos démarches, accompagnées', 'Pour les formalités retenues dans votre simulation, vous bénéficiez de l’appui de la CMA pour préparer et suivre votre dossier. Vous pouvez vous concentrer sur votre activité.'))
+    if any(name.startswith('Conseil') and a > 0 for name,a,b in result['rows']):
+        arguments.append(('Un regard extérieur sur vos décisions', 'Prix, organisation, développement commercial ou numérique : utilisez vos rendez-vous de conseil pour avancer sur les questions concrètes de votre entreprise. Deux rendez-vous d’une heure sont inclus par an.'))
+    if any(name.startswith('Formation') and a > b for name,a,b in result['rows']):
+        arguments.append(('Des compétences plus accessibles', 'Pour les journées éligibles de votre simulation, le PASS réduit votre reste à charge jusqu’à 70 € par jour. Un moyen de développer vos compétences tout en maîtrisant votre budget.'))
+    for title,body in arguments:
+        block=Table([[p(title,'Heading3')],[p(body)]],colWidths=[507])
+        block.setStyle(TableStyle([('BACKGROUND',(0,0),(-1,-1),LIGHT),('LEFTPADDING',(0,0),(-1,-1),14),('RIGHTPADDING',(0,0),(-1,-1),14),('TOPPADDING',(0,0),(-1,0),8),('BOTTOMPADDING',(0,-1),(-1,-1),12)]))
+        story += [KeepTogether([block,Spacer(1,10)])]
+    if gain>0:
+        message=f'Avec les besoins identifiés ensemble, votre économie estimée atteint {euros(gain)} sur douze mois, abonnement déduit. Votre conseiller vous accompagne pour organiser l’utilisation de vos prestations.'
+    else:
+        message='Avec les seuls besoins renseignés, le PASS ne dégage pas d’économie financière à ce stade. Échangeons sur vos projets pour apprécier si les services inclus et le suivi correspondent réellement à vos attentes.'
+    story += [p('Faisons le point sur vos projets','Heading2'),p(message),Spacer(1,12),p('Les bases de votre comparaison','Heading3')]
     story += [p('• '+x,'Fine') for x in assumptions]
     story += [Spacer(1,6),KeepTogether([p('Votre conseiller CMA','Heading3'),p(advisor or 'Votre conseiller'),p(contact)]),Spacer(1,10),p('Estimation indicative sans valeur contractuelle. Engagement initial de 12 mois, puis reconduction mensuelle. Hors frais légaux et redevances. Économies conditionnées à l’utilisation des prestations.','Fine')]
     def footer(c,d):
