@@ -1,0 +1,12 @@
+{
+  "date_releve": "2026-11-06",
+  "validation_interne": "À confirmer avant diffusion commerciale",
+  "conseil_ht": 79,
+  "formalites": {
+    "Modification / changement d'adresse": {"ei":58.33,"societe":110,"source":"mes-formalites-cle-en-main-modification-"},
+    "Radiation": {"ei":45.83,"societe":100,"source":"mes-formalites-cle-en-main-radiation-"},
+    "Demande d'ACRE": {"ei":30,"societe":30,"source":"declaration-de-l-acre"},
+    "Kit communication titre artisanal": {"ei":30,"societe":30,"source":"kit-communication-maitre-artisan"},
+    "Contrat d'apprentissage": {"ei":70,"societe":70,"source":"redaction-du-contrat-d-apprentissage"}
+  }
+}
