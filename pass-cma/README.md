@@ -20,7 +20,7 @@ Créer une nouvelle app depuis le dépôt `Romain3316/cma-reflexe-incendie`, bra
 - Comparaison sur 12 mois, HT ou TTC (TVA 20 % sur conseil, formalités et abonnement). La récupération partielle n'est pas gérée.
 - Conseil 79 € HT/h ; seules les heures nécessaires sont valorisées, maximum 2 h couvertes.
 - Formalités tarifées selon EI/micro ou société ; maximum 2 affectées explicitement au PASS. Les suivantes restent payantes. Frais légaux exclus des deux colonnes.
-- Formation : reste à charge et réduction journalière saisis dans la base choisie. Aucune conversion implicite du plafond de 70 €. Réduction limitée au reste à charge, sous validation du service formation. Pour des journées avec des restes à charge différents, réaliser des simulations distinctes (V1 homogène par simulation).
+- Formation : reste à charge saisi dans la base choisie ; réduction automatique de 70 € par jour éligible, limitée au reste à charge. Aucune conversion implicite du plafond de 70 €. Réduction limitée au reste à charge, sous validation du service formation. Pour des journées avec des restes à charge différents, réaliser des simulations distinctes (V1 homogène par simulation).
 - Deux mois offerts uniquement sur confirmation d'éligibilité à la souscription avec assistance CMA à l'immatriculation. Pas de cumul parrainage dans cette V1.
 - Grille publique relevée le 06/11/2026 dans tariffs.json, à valider en interne. Sources visibles dans l'application. Conseil confirmé par Romain : 79 € HT/h.
 - Le PDF est débloqué après validation conseiller. Les droits restants ne gonflent pas les économies.

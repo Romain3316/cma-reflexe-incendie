@@ -6,7 +6,7 @@ def money(value):
         raise ValueError('Montant invalide')
     return value.quantize(Decimal('.01'), rounding=ROUND_HALF_UP)
 
-def calculate(formalities, hours=0, days=0, rac=0, eligible=False, cap=0, basis='TTC', free=False):
+def calculate(formalities, hours=0, days=0, rac=0, eligible=False, cap=70, basis='TTC', free=False):
     if basis not in ('HT', 'TTC') or not 0 <= hours <= 20 or not 0 <= days <= 100:
         raise ValueError('Paramètres invalides')
     if sum(bool(f['covered']) for f in formalities) > 2:
