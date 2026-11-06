@@ -41,7 +41,7 @@ with left:
     days=st.number_input('Jours de formation prévus',0,100,0)
     rac=st.number_input(f'Reste à charge par jour avant PASS ({basis})',0.0,10000.0,0.0,5.0)
     eligible=st.checkbox('Formation éligible et financement vérifiés')
-    cap=st.number_input(f'Réduction journalière validée dans cette même base ({basis})',0.0,70.0,0.0,5.0,help='Saisir le montant validé par le service formation. Ne pas convertir automatiquement 70 € HT en 84 € TTC.')
+    cap=st.number_input(f'Réduction journalière validée dans cette même base ({basis})',0.0,70.0,70.0,5.0,help='Saisir le montant validé par le service formation. Ne pas convertir automatiquement 70 € HT en 84 € TTC.')
     st.caption('Exclusions : e-learning, réglementaire, certifiant/qualifiant/diplômant et CPF. Formation courte de moins de 10 jours ; plusieurs sessions possibles. Une participation par session à tarif préférentiel.')
     st.subheader('03 · Validation conseiller')
     validated=st.checkbox('J’ai vérifié la grille tarifaire et les hypothèses de cette simulation')
@@ -58,6 +58,15 @@ with right:
     if gain>0: st.success(f"Économie estimée : {euros(gain)} / an, abonnement déduit.")
     elif gain<0: st.info(f"Coût supplémentaire : {euros(-gain)} / an pour les besoins renseignés.")
     else: st.info('Budget à l’équilibre pour les besoins renseignés.')
+    if days:
+        if not eligible:
+            st.warning('Réduction formation non appliquée : cochez « Formation éligible et financement vérifiés » après vérification.')
+        elif cap == 0:
+            st.warning('Réduction formation non appliquée : le montant journalier est réglé à 0 €.')
+        elif rac == 0:
+            st.info('Aucune économie formation : aucun reste à charge renseigné avant PASS.')
+        else:
+            st.caption(f'Réduction formation appliquée : {days} × {euros(min(rac, cap))} = {euros(days * min(rac, cap))}.')
     st.table([{'Prestation':name,f'Sans PASS ({basis})':euros(a),f'Avec PASS ({basis})':euros(b)} for name,a,b in result['rows']])
     st.caption(f"Abonnement : {euros(result['subscription'])} sur 12 mois. {'Deux mensualités offertes.' if free else 'Douze mensualités.'}")
     st.write(f"**Droits encore disponibles :** {result['remaining_formalities']} formalité(s), {result['remaining_hours']:g} h de conseil. Non valorisés dans le gain.")
