@@ -1,17 +1,60 @@
 from pathlib import Path
 import json
+import base64
 import streamlit as st
 from calculator import calculate
 from pdf_export import make_pdf, euros
 
 st.set_page_config(page_title='PASS CMA | Simulateur conseiller',page_icon='🧮',layout='wide')
-st.markdown('''<style>.stApp{background:#f5f7fa} h1,h2,h3{color:#153650} [data-testid="stMetric"]{background:white;border:1px solid #dce5ec;border-radius:12px;padding:18px} .block-container{padding-top:2rem} </style>''',unsafe_allow_html=True)
+st.markdown("""
+<style>
+.stApp {background:#f4f7fa;color:#123450}
+h1,h2,h3 {color:#123450;letter-spacing:-.025em}
+.block-container {padding-top:1.5rem;max-width:1450px}
+[data-testid="stSidebar"] {background:#e9f0f5;border-right:1px solid #d5e1ea}
+[data-testid="stSidebar"] h2 {color:#123450}
+[data-testid="stMetric"] {background:white;border:1px solid #dce5ec;border-top:4px solid #ef4639;border-radius:14px;padding:20px}
+[data-testid="stMetricValue"] {color:#123450}
+[data-testid="stVerticalBlockBorderWrapper"] {border-radius:14px;background:white}
+[data-testid="stTable"] {background:white;border-radius:12px;overflow:hidden}
+[data-testid="stTable"] th {background:#123450;color:white}
+[data-testid="stTable"] tr:nth-child(even) {background:#edf3f7}
+.stDownloadButton button[kind="primary"] {background:#d93429;border-color:#d93429;color:white;border-radius:10px;min-height:48px}
+.stDownloadButton button[kind="primary"]:hover {background:#b92a21;border-color:#b92a21}
+.pass-hero {display:flex;align-items:center;gap:28px;background:#123450;border-radius:20px;padding:30px 34px;margin:0 0 26px;border-bottom:5px solid #ef4639}
+.pass-hero-logo {width:150px;flex-shrink:0;background:white;padding:16px;border-radius:12px}
+.pass-hero h1 {color:white;font-size:2.2rem;line-height:1.15;margin:8px 0 12px;padding:0}
+.pass-hero p {color:#e4edf4;margin:0;max-width:650px}
+.pass-kicker {color:#ffc0b9;font-size:.75rem;letter-spacing:.12em;font-weight:700;text-transform:uppercase}
+.pass-step {display:flex;align-items:center;gap:12px;margin:28px 0 14px}
+.pass-step span {background:#ef4639;color:white;border-radius:10px;padding:7px 10px;font-weight:700;font-size:.9rem}
+.pass-step h2 {font-size:1.35rem;margin:0;padding:0}
+@media(max-width:700px) {
+.pass-hero {padding:22px;gap:18px;align-items:flex-start;flex-direction:column}
+.pass-hero-logo {width:110px;padding:10px}
+.pass-hero h1 {font-size:1.8rem}
+.block-container {padding-top:1rem}
+}
+</style>
+""",unsafe_allow_html=True)
 T=json.loads(Path(__file__).with_name('tariffs.json').read_text())
-st.caption('CMA NOUVELLE-AQUITAINE · OUTIL CONSEILLER · VERSION 1.3 — 06/11/2026')
-st.title('Le PASS, chiffres à l’appui.')
-st.write('Comparez les dépenses prévues sur douze mois et remettez une fiche personnalisée à votre client.')
+logo_path=Path(__file__).parent/'assets'/'pass-logo.png'
+logo_html=''
+if logo_path.exists():
+    logo_data=base64.b64encode(logo_path.read_bytes()).decode('ascii')
+    logo_html=f'<img class="pass-hero-logo" src="data:image/png;base64,{logo_data}" alt="PASS CMA Liberté">'
+st.markdown(f"""
+<div class="pass-hero">
+{logo_html}
+<div><div class="pass-kicker">CMA Nouvelle-Aquitaine · Espace conseiller</div>
+<h1>Le PASS, chiffres à l’appui.</h1>
+<p>Les projets de votre client. Un budget clair. Comparez ses dépenses sur 12 mois et préparez sa fiche personnalisée.</p>
+</div></div>
+""",unsafe_allow_html=True)
+st.caption('SIMULATEUR PASS LIBERTÉ · VERSION 1.4 — 09/11/2026')
 with st.sidebar:
-    st.header('L’entreprise')
+    st.header('Votre client')
+    st.caption('Personnalisez la simulation et les coordonnées de sa fiche.')
     company=st.text_input('Nom de l’entreprise',max_chars=120)
     profile=st.selectbox('Forme juridique',['Micro-entreprise','EI au réel','Société'])
     basis=st.radio('Base de comparaison',['TTC','HT'],help='TTC si TVA non récupérée ; HT si récupération intégrale. Récupération partielle non gérée dans cette V1.')
@@ -21,7 +64,7 @@ with st.sidebar:
     contact=st.text_input('Contact professionnel',max_chars=180)
 left,right=st.columns([1.1,1],gap='large')
 with left:
-    st.subheader('01 · Les besoins réels')
+    st.markdown('<div class="pass-step"><span>01</span><h2>Les besoins de l’entreprise</h2></div>',unsafe_allow_html=True)
     st.caption('Sélectionnez uniquement les prestations prévues dans les 12 prochains mois.')
     options=list(T['formalites'])
     if profile=='Micro-entreprise': options.remove("Contrat d'apprentissage")
@@ -36,17 +79,18 @@ with left:
             formalities.append(dict(label=label,ht=tariff,covered=covered))
     hours=st.number_input('Heures de conseil nécessaires',0.0,20.0,0.0,.5)
     st.caption('79 € HT/heure · 2 heures maximum couvertes. Conseil Flash gratuit exclu du calcul.')
-    st.subheader('02 · La formation')
+    st.markdown('<div class="pass-step"><span>02</span><h2>Ses projets de formation</h2></div>',unsafe_allow_html=True)
     days=st.number_input('Jours de formation prévus',0,100,0)
     rac=st.number_input(f'Reste à charge par jour avant PASS ({basis})',0.0,10000.0,0.0,5.0)
     eligible=st.checkbox('Formation éligible et financement vérifiés')
     cap=70.0
     st.info("Avantage formation : 70 € par jour éligible, automatiquement limité au reste à charge.")
     st.caption('Exclusions : e-learning, réglementaire, certifiant/qualifiant/diplômant et CPF. Formation courte de moins de 10 jours ; plusieurs sessions possibles. Une participation par session à tarif préférentiel.')
-    st.subheader('03 · Validation conseiller')
+    st.markdown('<div class="pass-step"><span>03</span><h2>Prêt à partager ?</h2></div>',unsafe_allow_html=True)
     validated=st.checkbox('J’ai vérifié la grille tarifaire et les hypothèses de cette simulation')
 with right:
-    st.subheader('Votre comparaison annuelle')
+    st.markdown('<div class="pass-step"><span>12 mois</span><h2>Le PASS en chiffres</h2></div>',unsafe_allow_html=True)
+    st.caption('Une estimation fondée sur les besoins renseignés, abonnement compris.')
     try:
         result=calculate(formalities,hours,days,rac,eligible,cap,basis,free)
     except ValueError as e:
