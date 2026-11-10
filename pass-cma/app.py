@@ -5,6 +5,301 @@ import streamlit as st
 from calculator import calculate
 from pdf_export import make_pdf, euros
 
+# Sélection issue du catalogue CMA NA consulté le 10/11/2026.
+# Durées converties sur 7 h/j ; cas ambigus et formations réglementaires exclus.
+FORMATIONS = {
+  "Numérique": {
+    "Communication et outils numériques": [
+      [
+        "Bien débuter avec les IA génératives",
+        1
+      ],
+      [
+        "Développer sa communication digitale",
+        2
+      ],
+      [
+        "Mon entreprise sur Facebook : bien vendre",
+        1
+      ],
+      [
+        "Créer et développer son compte Instagram professionnel",
+        1
+      ],
+      [
+        "Instagram niveau intermédiaire",
+        1
+      ],
+      [
+        "Mon entreprise sur LinkedIn",
+        1
+      ],
+      [
+        "Communiquer avec son époque : TikTok",
+        1
+      ],
+      [
+        "Réaliser des visuels professionnels avec Canva",
+        1
+      ],
+      [
+        "Réussir ses photos pour valoriser ses produits et ses services",
+        1
+      ],
+      [
+        "Améliorer la visibilité de son entreprise en optimisant son référencement",
+        1
+      ]
+    ]
+  },
+  "Gestion et développement": {
+    "Gestion et prix": [
+      [
+        "Comment organiser et gérer ma micro-entreprise au quotidien ?",
+        1
+      ],
+      [
+        "Dépassement de seuil du CA, quel impact sur votre statut ?",
+        1
+      ],
+      [
+        "Gérer ma TVA",
+        1
+      ],
+      [
+        "Micro-entreprise : calculez vos tarifs",
+        2
+      ],
+      [
+        "Déterminer mes coûts de revient pour mieux fixer mes prix de vente",
+        2
+      ],
+      [
+        "Savoir rédiger vos Conditions Générales de Vente",
+        2
+      ],
+      [
+        "Passer à la facture électronique",
+        1
+      ],
+      [
+        "Maîtriser sa facturation électronique avec une solution de gestion et facturation",
+        1
+      ]
+    ],
+    "Vente et relation client": [
+      [
+        "Construire et développer mon offre commerciale",
+        3
+      ],
+      [
+        "Techniques de vente : les fondamentaux",
+        2
+      ],
+      [
+        "Augmenter ses ventes en magasin",
+        2
+      ],
+      [
+        "Augmentez vos ventes sur les foires, salons et marchés",
+        2
+      ],
+      [
+        "Accueil relation client",
+        1
+      ],
+      [
+        "Optimiser sa relation client digitale",
+        1
+      ],
+      [
+        "Excellence Client",
+        1
+      ],
+      [
+        "Gestion des conflits et des incivilités",
+        1
+      ],
+      [
+        "Savoir accueillir un client en situation de handicap",
+        1
+      ],
+      [
+        "Évènementiel : créer, promouvoir et valoriser un événement",
+        2
+      ],
+      [
+        "Optimiser ses revenus avec le yield management",
+        2
+      ]
+    ]
+  },
+  "Management": {
+    "Équipe et ressources humaines": [
+      [
+        "Manager une équipe au quotidien dans une TPE-PME",
+        2
+      ],
+      [
+        "Recruter ses collaborateurs",
+        1
+      ],
+      [
+        "Intégrer et former les nouveaux embauchés",
+        1
+      ],
+      [
+        "Fidéliser ses collaborateurs",
+        1
+      ],
+      [
+        "Manager au quotidien en hôtels, cafés, restaurants",
+        2
+      ]
+    ]
+  },
+  "Technique": {
+    "Beauté et bien-être": [
+      [
+        "Modelage ayurvédique",
+        2
+      ],
+      [
+        "Modelage singapourien",
+        2
+      ],
+      [
+        "Massage Deep Tissue",
+        2
+      ],
+      [
+        "Modelage japonais visage type Kobido",
+        2
+      ],
+      [
+        "Massage crânien",
+        2
+      ],
+      [
+        "Réflexologie plantaire",
+        2
+      ]
+    ],
+    "Métiers de bouche et restauration": [
+      [
+        "Snacking",
+        3
+      ],
+      [
+        "Snacking tradition — produits de saison",
+        1
+      ],
+      [
+        "Techniques pizza/crêpe",
+        3
+      ],
+      [
+        "Techniques créativité culinaire",
+        3
+      ],
+      [
+        "Les cuisines du monde",
+        3
+      ],
+      [
+        "Techniques de cuisson basse température, sous vide, à la vapeur et mixtes",
+        3
+      ],
+      [
+        "Techniques de cuissons sous-vide, à juste température et cuissons de nuit",
+        2
+      ],
+      [
+        "Pâtisseries",
+        3
+      ],
+      [
+        "Pains, viennoiseries",
+        3
+      ],
+      [
+        "Réalisations spécifiques à l’activité traiteur",
+        3
+      ],
+      [
+        "Nutrition diététique découverte",
+        2
+      ],
+      [
+        "Mettre en place les fiches techniques pour optimiser ses coûts et ratios",
+        2
+      ],
+      [
+        "Développer une gamme de produits secs en charcuterie",
+        2
+      ],
+      [
+        "Valoriser ses pâtés et terrines gastronomiques",
+        2
+      ],
+      [
+        "Savoir développer une gamme de conserves dans son entreprise",
+        2
+      ],
+      [
+        "Bouchées cocktail sucrées",
+        1
+      ],
+      [
+        "Bouchées cocktail salées",
+        2
+      ],
+      [
+        "Techniques — desserts en pots",
+        1
+      ],
+      [
+        "Développer une gamme de burger",
+        1
+      ],
+      [
+        "Prestations salle et réception",
+        2
+      ]
+    ],
+    "Automobile, réparation et atelier": [
+      [
+        "Maintenance de véhicules légers — train roulant et pneumatique",
+        2
+      ],
+      [
+        "Carrosserie et peinture — réparation des éléments en matière plastique",
+        2
+      ],
+      [
+        "Carrosserie et peinture — micro-réparation spot repair",
+        2
+      ],
+      [
+        "Carrosserie et peinture — raccords sur les teintes multicouches",
+        2
+      ],
+      [
+        "Carrosserie et peinture — méthodes de soudure de l’acier et de l’aluminium",
+        2
+      ],
+      [
+        "Maintenance petit matériel en jardins — espaces verts",
+        3
+      ],
+      [
+        "Techniques de soudage — initiation",
+        2
+      ]
+    ]
+  }
+}
+
 st.set_page_config(page_title='PASS CMA | Simulateur conseiller',page_icon='🧮',layout='wide')
 st.markdown("""
 <style>
@@ -51,7 +346,7 @@ st.markdown(f"""
 <p>Les projets de votre client. Un budget clair. Comparez ses dépenses sur 12 mois et préparez sa fiche personnalisée.</p>
 </div></div>
 """,unsafe_allow_html=True)
-st.caption('SIMULATEUR PASS LIBERTÉ · VERSION 1.4 — 09/11/2026')
+st.caption('SIMULATEUR PASS LIBERTÉ · VERSION 1.5 — 10/11/2026')
 with st.sidebar:
     st.header('Votre client')
     st.caption('Personnalisez la simulation et les coordonnées de sa fiche.')
@@ -80,12 +375,32 @@ with left:
     hours=st.number_input('Heures de conseil nécessaires',0.0,20.0,0.0,.5)
     st.caption('79 € HT/heure · 2 heures maximum couvertes. Conseil Flash gratuit exclu du calcul.')
     st.markdown('<div class="pass-step"><span>02</span><h2>Ses projets de formation</h2></div>',unsafe_allow_html=True)
-    days=st.number_input('Jours de formation prévus',0,100,0)
+    st.caption('Choisissez une catégorie, une spécialité puis une formation. Les cas à confirmer sont exclus de cette sélection. Durées : 7 heures par journée.')
+    training_count=st.number_input('Nombre de formations prévues',0,20,0)
+    selected_trainings=[]
+    for i in range(training_count):
+        with st.container(border=True):
+            st.write(f'**Formation {i+1}**')
+            category=st.selectbox('Catégorie',list(FORMATIONS),key=f'training_category_{i}')
+            specialty=st.selectbox('Spécialité',list(FORMATIONS[category]),key=f'training_specialty_{i}_{category}')
+            courses=dict(FORMATIONS[category][specialty])
+            course=st.selectbox('Formation',['— Choisir une formation —']+list(courses),key=f'training_course_{i}_{category}_{specialty}')
+            if course in courses:
+                selected_trainings.append((course,courses[course]))
+                st.caption(f'Durée : {courses[course]} journée(s) · {courses[course]*7} heures')
+    days=sum(duration for _,duration in selected_trainings)
+    training_complete=len(selected_trainings)==training_count
+    st.write(f'**Total : {days} journée(s) de formation**')
+    if selected_trainings:
+        st.table([{'Formation':name,'Journées':duration} for name,duration in selected_trainings])
+    if not training_complete:
+        st.warning('Choisissez une formation dans chaque bloc pour finaliser la simulation.')
+    st.caption('Le reste à charge journalier ci-dessous s’applique à toutes les formations sélectionnées. Si les montants diffèrent, réalisez des simulations distinctes.')
     rac=st.number_input(f'Reste à charge par jour avant PASS ({basis})',0.0,10000.0,0.0,5.0)
     eligible=st.checkbox('Formation éligible et financement vérifiés')
     cap=70.0
     st.info("Avantage formation : 70 € par jour éligible, automatiquement limité au reste à charge.")
-    st.caption('Exclusions : e-learning, réglementaire, certifiant/qualifiant/diplômant et CPF. Formation courte de moins de 10 jours ; plusieurs sessions possibles. Une participation par session à tarif préférentiel.')
+    st.caption('Exclusions : e-learning, formations réglementaires, parcours qualifiants/diplômants et financement CPF. Les cas certifiants à confirmer ne sont pas proposés. Formation courte de moins de 10 jours ; plusieurs sessions possibles. Une participation par session à tarif préférentiel.')
     st.markdown('<div class="pass-step"><span>03</span><h2>Prêt à partager ?</h2></div>',unsafe_allow_html=True)
     validated=st.checkbox('J’ai vérifié la grille tarifaire et les hypothèses de cette simulation')
 with right:
@@ -114,13 +429,14 @@ with right:
     st.table([{'Prestation':name,f'Sans PASS ({basis})':euros(a),f'Avec PASS ({basis})':euros(b)} for name,a,b in result['rows']])
     st.caption(f"Abonnement : {euros(result['subscription'])} sur 12 mois. {'Deux mensualités offertes.' if free else 'Douze mensualités.'}")
     st.write(f"**Droits encore disponibles :** {result['remaining_formalities']} formalité(s), {result['remaining_hours']:g} h de conseil. Non valorisés dans le gain.")
-    ready=validated and (not days or eligible)
+    ready=validated and training_complete and (not days or eligible)
     assumptions=[f"Profil : {profile}. Base {basis}, choisie selon récupération de TVA.",f"Conseil : 79 € HT/h ; {hours:g} h prévues, dont {min(hours,2):g} h couvertes.",f"Formation : {days} jours ; reste à charge {euros(rac)}/jour ; plafond de réduction {euros(cap)}/jour, limitée au reste à charge.",f"Grille publique relevée le {T['date_releve']}. Applicabilité confirmée par le conseiller pour cette simulation.", 'Deux mois offerts confirmés : souscription avec assistance CMA à l’immatriculation.' if free else 'Aucune gratuité d’abonnement retenue.', 'Les prestations affectées au PASS sont indiquées à zéro dans la colonne Avec PASS. Les frais légaux ne sont pas inclus.']
     if ready:
         st.download_button('Télécharger la fiche client PDF',make_pdf(result,company,profile,advisor,contact,basis,assumptions),'simulation_pass_cma.pdf','application/pdf',type='primary',use_container_width=True)
         st.caption('À joindre à votre mail habituel. Aucune donnée client enregistrée sur disque par cette application.')
     else:
         missing=[]
+        if not training_complete: missing.append('Complétez les sélections de formation (section 02).')
         if not validated: missing.append('Cochez la validation générale du conseiller (section 03).')
         if days and not eligible: missing.append('Confirmez l’éligibilité de la formation (section 02).')
         st.download_button('Télécharger la fiche client PDF',data=b'',file_name='simulation_pass_cma.pdf',mime='application/pdf',disabled=True,use_container_width=True)
