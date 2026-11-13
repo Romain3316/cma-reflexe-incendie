@@ -300,6 +300,34 @@ FORMATIONS = {
   }
 }
 
+CONSEILS_PAR_SECTEUR = {
+  "Alimentaire": {
+    "Hygiène et sécurité alimentaire (HSA)": "Faire le point sur vos pratiques d’hygiène alimentaire et identifier les améliorations prioritaires avec un conseiller CMA.",
+    "Prix de revient et marges": "Examiner les coûts de quelques produits et vos prix de vente pour identifier des pistes d’amélioration de vos marges.",
+    "Organisation de l’activité": "Échanger sur votre organisation quotidienne, les pertes et la gestion du temps pour définir des actions prioritaires."
+  },
+  "Services": {
+    "Développement commercial": "Faire le point sur votre clientèle et identifier des actions pour vous faire connaître et fidéliser vos clients.",
+    "Tarifs et rentabilité": "Examiner vos tarifs et le temps consacré à vos prestations pour mieux apprécier leur rentabilité.",
+    "Organisation et outils numériques": "Identifier des pistes pour simplifier la prise de rendez-vous, les relances et la gestion quotidienne."
+  },
+  "Bâtiment": {
+    "Devis et suivi commercial": "Faire le point sur la présentation de vos devis et l’organisation des relances clients.",
+    "Rentabilité des chantiers": "Examiner vos méthodes de chiffrage et de suivi des coûts pour mieux apprécier la rentabilité de vos chantiers.",
+    "Organisation et visibilité locale": "Identifier des actions pour mieux organiser votre activité ou développer votre visibilité auprès des clients de proximité."
+  },
+  "Fabrication / production": {
+    "Coûts de revient et prix de vente": "Faire le point sur vos coûts de production et vos prix de vente pour identifier des pistes d’amélioration.",
+    "Organisation de la production": "Échanger sur vos flux, votre gestion du temps et vos priorités pour améliorer l’organisation de la production.",
+    "Développement commercial": "Identifier les clientèles et les canaux de vente adaptés à vos produits."
+  },
+  "Métiers d’art": {
+    "Valorisation du savoir-faire": "Travailler les arguments qui mettent en valeur vos créations et votre savoir-faire auprès de vos clients.",
+    "Prix de vente": "Examiner le temps de fabrication, les matières et les autres coûts pour éclairer vos choix de prix.",
+    "Communication et commercialisation": "Faire le point sur votre communication et vos canaux de vente pour identifier les actions prioritaires."
+  }
+}
+
 st.set_page_config(page_title='PASS CMA | Simulateur conseiller',page_icon='🧮',layout='wide')
 st.markdown("""
 <style>
@@ -346,7 +374,7 @@ st.markdown(f"""
 <p>Les projets de votre client. Un budget clair. Comparez ses dépenses sur 12 mois et préparez sa fiche personnalisée.</p>
 </div></div>
 """,unsafe_allow_html=True)
-st.caption('SIMULATEUR PASS LIBERTÉ · VERSION 1.5 — 10/11/2026')
+st.caption('SIMULATEUR PASS LIBERTÉ · VERSION 1.6 — 13/11/2026')
 with st.sidebar:
     st.header('Votre client')
     st.caption('Personnalisez la simulation et les coordonnées de sa fiche.')
@@ -372,6 +400,18 @@ with left:
             st.write(f'Prix catalogue : **{euros(tariff)} HT**')
             covered=st.checkbox('Affecter au PASS',value=i<2,key=f'covered_{i}')
             formalities.append(dict(label=label,ht=tariff,covered=covered))
+    with st.container(border=True):
+        st.markdown('### À quoi servira le conseil sur mesure ?')
+        st.caption('Choisissez un exemple selon le besoin réel de l’artisan, ou rédigez votre propre proposition.')
+        sector=st.selectbox('Secteur d’activité', ['— Choisir un secteur —'] + list(CONSEILS_PAR_SECTEUR) + ['Autre secteur'], key='advice_sector')
+        topics=CONSEILS_PAR_SECTEUR.get(sector, {})
+        topic=st.selectbox('Sujet du conseil', ['— Choisir un sujet —'] + list(topics) + ['Sujet libre'], key=f'advice_topic_{sector}')
+        advice_text=''
+        if topic != '— Choisir un sujet —':
+            advice_text=st.text_area('Proposition à personnaliser pour votre client', value=topics.get(topic, ''), max_chars=600, height=120, key=f'advice_text_{sector}_{topic}')
+            st.caption('Périmètre à confirmer avec le conseiller compétent. Ces exemples ne valent pas engagement de réalisation d’un audit ou d’une étude complète.')
+        if topic == 'Hygiène et sécurité alimentaire (HSA)':
+            st.caption('Conseil sur les pratiques : ne remplace ni un audit complet ni une formation réglementaire.')
     hours=st.number_input('Heures de conseil nécessaires',0.0,20.0,0.0,.5)
     st.caption('79 € HT/heure · 2 heures maximum couvertes. Conseil Flash gratuit exclu du calcul.')
     st.markdown('<div class="pass-step"><span>02</span><h2>Ses projets de formation</h2></div>',unsafe_allow_html=True)
@@ -431,6 +471,12 @@ with right:
     st.write(f"**Droits encore disponibles :** {result['remaining_formalities']} formalité(s), {result['remaining_hours']:g} h de conseil. Non valorisés dans le gain.")
     ready=validated and training_complete and (not days or eligible)
     assumptions=[f"Profil : {profile}. Base {basis}, choisie selon récupération de TVA.",f"Conseil : 79 € HT/h ; {hours:g} h prévues, dont {min(hours,2):g} h couvertes.",f"Formation : {days} jours ; reste à charge {euros(rac)}/jour ; plafond de réduction {euros(cap)}/jour, limitée au reste à charge.",f"Grille publique relevée le {T['date_releve']}. Applicabilité confirmée par le conseiller pour cette simulation.", 'Deux mois offerts confirmés : souscription avec assistance CMA à l’immatriculation.' if free else 'Aucune gratuité d’abonnement retenue.', 'Les prestations affectées au PASS sont indiquées à zéro dans la colonne Avec PASS. Les frais légaux ne sont pas inclus.']
+    if hours > 0 and advice_text.strip():
+        st.markdown('#### Votre projet de conseil')
+        st.write(advice_text.strip())
+        assumptions.append('Projet de conseil sur mesure : ' + advice_text.strip())
+    elif advice_text.strip():
+        st.caption('Renseignez les heures de conseil prévues pour intégrer ce projet à la simulation et au PDF.')
     if ready:
         st.download_button('Télécharger la fiche client PDF',make_pdf(result,company,profile,advisor,contact,basis,assumptions),'simulation_pass_cma.pdf','application/pdf',type='primary',use_container_width=True)
         st.caption('À joindre à votre mail habituel. Aucune donnée client enregistrée sur disque par cette application.')
