@@ -5,300 +5,11 @@ import streamlit as st
 from calculator import calculate
 from pdf_export import make_pdf, euros
 
-# Sélection issue du catalogue CMA NA consulté le 10/11/2026.
-# Durées converties sur 7 h/j ; cas ambigus et formations réglementaires exclus.
-FORMATIONS = {
-  "Numérique": {
-    "Communication et outils numériques": [
-      [
-        "Bien débuter avec les IA génératives",
-        1
-      ],
-      [
-        "Développer sa communication digitale",
-        2
-      ],
-      [
-        "Mon entreprise sur Facebook : bien vendre",
-        1
-      ],
-      [
-        "Créer et développer son compte Instagram professionnel",
-        1
-      ],
-      [
-        "Instagram niveau intermédiaire",
-        1
-      ],
-      [
-        "Mon entreprise sur LinkedIn",
-        1
-      ],
-      [
-        "Communiquer avec son époque : TikTok",
-        1
-      ],
-      [
-        "Réaliser des visuels professionnels avec Canva",
-        1
-      ],
-      [
-        "Réussir ses photos pour valoriser ses produits et ses services",
-        1
-      ],
-      [
-        "Améliorer la visibilité de son entreprise en optimisant son référencement",
-        1
-      ]
-    ]
-  },
-  "Gestion et développement": {
-    "Gestion et prix": [
-      [
-        "Comment organiser et gérer ma micro-entreprise au quotidien ?",
-        1
-      ],
-      [
-        "Dépassement de seuil du CA, quel impact sur votre statut ?",
-        1
-      ],
-      [
-        "Gérer ma TVA",
-        1
-      ],
-      [
-        "Micro-entreprise : calculez vos tarifs",
-        2
-      ],
-      [
-        "Déterminer mes coûts de revient pour mieux fixer mes prix de vente",
-        2
-      ],
-      [
-        "Savoir rédiger vos Conditions Générales de Vente",
-        2
-      ],
-      [
-        "Passer à la facture électronique",
-        1
-      ],
-      [
-        "Maîtriser sa facturation électronique avec une solution de gestion et facturation",
-        1
-      ]
-    ],
-    "Vente et relation client": [
-      [
-        "Construire et développer mon offre commerciale",
-        3
-      ],
-      [
-        "Techniques de vente : les fondamentaux",
-        2
-      ],
-      [
-        "Augmenter ses ventes en magasin",
-        2
-      ],
-      [
-        "Augmentez vos ventes sur les foires, salons et marchés",
-        2
-      ],
-      [
-        "Accueil relation client",
-        1
-      ],
-      [
-        "Optimiser sa relation client digitale",
-        1
-      ],
-      [
-        "Excellence Client",
-        1
-      ],
-      [
-        "Gestion des conflits et des incivilités",
-        1
-      ],
-      [
-        "Savoir accueillir un client en situation de handicap",
-        1
-      ],
-      [
-        "Évènementiel : créer, promouvoir et valoriser un événement",
-        2
-      ],
-      [
-        "Optimiser ses revenus avec le yield management",
-        2
-      ]
-    ]
-  },
-  "Management": {
-    "Équipe et ressources humaines": [
-      [
-        "Manager une équipe au quotidien dans une TPE-PME",
-        2
-      ],
-      [
-        "Recruter ses collaborateurs",
-        1
-      ],
-      [
-        "Intégrer et former les nouveaux embauchés",
-        1
-      ],
-      [
-        "Fidéliser ses collaborateurs",
-        1
-      ],
-      [
-        "Manager au quotidien en hôtels, cafés, restaurants",
-        2
-      ]
-    ]
-  },
-  "Technique": {
-    "Beauté et bien-être": [
-      [
-        "Modelage ayurvédique",
-        2
-      ],
-      [
-        "Modelage singapourien",
-        2
-      ],
-      [
-        "Massage Deep Tissue",
-        2
-      ],
-      [
-        "Modelage japonais visage type Kobido",
-        2
-      ],
-      [
-        "Massage crânien",
-        2
-      ],
-      [
-        "Réflexologie plantaire",
-        2
-      ]
-    ],
-    "Métiers de bouche et restauration": [
-      [
-        "Snacking",
-        3
-      ],
-      [
-        "Snacking tradition — produits de saison",
-        1
-      ],
-      [
-        "Techniques pizza/crêpe",
-        3
-      ],
-      [
-        "Techniques créativité culinaire",
-        3
-      ],
-      [
-        "Les cuisines du monde",
-        3
-      ],
-      [
-        "Techniques de cuisson basse température, sous vide, à la vapeur et mixtes",
-        3
-      ],
-      [
-        "Techniques de cuissons sous-vide, à juste température et cuissons de nuit",
-        2
-      ],
-      [
-        "Pâtisseries",
-        3
-      ],
-      [
-        "Pains, viennoiseries",
-        3
-      ],
-      [
-        "Réalisations spécifiques à l’activité traiteur",
-        3
-      ],
-      [
-        "Nutrition diététique découverte",
-        2
-      ],
-      [
-        "Mettre en place les fiches techniques pour optimiser ses coûts et ratios",
-        2
-      ],
-      [
-        "Développer une gamme de produits secs en charcuterie",
-        2
-      ],
-      [
-        "Valoriser ses pâtés et terrines gastronomiques",
-        2
-      ],
-      [
-        "Savoir développer une gamme de conserves dans son entreprise",
-        2
-      ],
-      [
-        "Bouchées cocktail sucrées",
-        1
-      ],
-      [
-        "Bouchées cocktail salées",
-        2
-      ],
-      [
-        "Techniques — desserts en pots",
-        1
-      ],
-      [
-        "Développer une gamme de burger",
-        1
-      ],
-      [
-        "Prestations salle et réception",
-        2
-      ]
-    ],
-    "Automobile, réparation et atelier": [
-      [
-        "Maintenance de véhicules légers — train roulant et pneumatique",
-        2
-      ],
-      [
-        "Carrosserie et peinture — réparation des éléments en matière plastique",
-        2
-      ],
-      [
-        "Carrosserie et peinture — micro-réparation spot repair",
-        2
-      ],
-      [
-        "Carrosserie et peinture — raccords sur les teintes multicouches",
-        2
-      ],
-      [
-        "Carrosserie et peinture — méthodes de soudure de l’acier et de l’aluminium",
-        2
-      ],
-      [
-        "Maintenance petit matériel en jardins — espaces verts",
-        3
-      ],
-      [
-        "Techniques de soudage — initiation",
-        2
-      ]
-    ]
-  }
-}
+# Référentiel officiel 2027 : seules les 80 formations nommées sont proposées.
+CATALOGUE = json.loads(Path(__file__).with_name('formations_2027.json').read_text(encoding='utf-8'))
+FORMATIONS = {}
+for formation in CATALOGUE['courses']:
+    FORMATIONS.setdefault(formation['category'], {}).setdefault(formation['specialty'], []).append(formation)
 
 CONSEILS_PAR_SECTEUR = {
   "Alimentaire": {
@@ -350,7 +61,7 @@ h1,h2,h3 {color:#123450;letter-spacing:-.025em}
 .pass-hero p {color:#e4edf4;margin:0;max-width:650px}
 .pass-kicker {color:#ffc0b9;font-size:.75rem;letter-spacing:.12em;font-weight:700;text-transform:uppercase}
 .pass-step {display:flex;align-items:center;gap:12px;margin:28px 0 14px}
-.pass-step span {background:#ef4639;color:white;border-radius:10px;padding:7px 10px;font-weight:700;font-size:.9rem}
+.pass-step > span {background:#ef4639;color:white;border-radius:10px;padding:7px 10px;font-weight:700;font-size:.9rem}
 .pass-step h2 {font-size:1.35rem;margin:0;padding:0}
 @media(max-width:700px) {
 .pass-hero {padding:22px;gap:18px;align-items:flex-start;flex-direction:column}
@@ -374,7 +85,7 @@ st.markdown(f"""
 <p>Les projets de votre client. Un budget clair. Comparez ses dépenses sur 12 mois et préparez sa fiche personnalisée.</p>
 </div></div>
 """,unsafe_allow_html=True)
-st.caption('SIMULATEUR PASS LIBERTÉ · VERSION 1.6 — 13/11/2026')
+st.caption('SIMULATEUR PASS LIBERTÉ · VERSION 1.7 — CATALOGUE 2027')
 with st.sidebar:
     st.header('Votre client')
     st.caption('Personnalisez la simulation et les coordonnées de sa fiche.')
@@ -384,7 +95,8 @@ with st.sidebar:
     st.caption('Le statut ne détermine pas automatiquement la récupération de TVA.')
     free=st.checkbox('2 mois offerts : éligibilité confirmée',help='Souscription lors d’une prestation CMA d’assistance à l’immatriculation. Engagement de 12 mois maintenu.')
     advisor=st.text_input('Conseiller',max_chars=100)
-    contact=st.text_input('Contact professionnel',max_chars=180)
+    contact='3006'
+    st.caption('Contact CMA pour tous vos clients : 3006')
 left,right=st.columns([1.1,1],gap='large')
 with left:
     st.markdown('<div class="pass-step"><span>01</span><h2>Les besoins de l’entreprise</h2></div>',unsafe_allow_html=True)
@@ -415,39 +127,59 @@ with left:
     hours=st.number_input('Heures de conseil nécessaires',0.0,20.0,0.0,.5)
     st.caption('79 € HT/heure · 2 heures maximum couvertes. Conseil Flash gratuit exclu du calcul.')
     st.markdown('<div class="pass-step"><span>02</span><h2>Ses projets de formation</h2></div>',unsafe_allow_html=True)
-    st.caption('Choisissez une catégorie, une spécialité puis une formation. Les cas à confirmer sont exclus de cette sélection. Durées : 7 heures par journée.')
+    st.caption('Sélection officielle PASS 2027 : choisissez une catégorie, une spécialité puis une formation. Les conditions particulières sont précisées pour chaque formation.')
     training_count=st.number_input('Nombre de formations prévues',0,20,0)
     selected_trainings=[]
+    training_complete=True
+    cpf_conflict=False
     for i in range(training_count):
         with st.container(border=True):
             st.write(f'**Formation {i+1}**')
-            category=st.selectbox('Catégorie',list(FORMATIONS),key=f'training_category_{i}')
-            specialty=st.selectbox('Spécialité',list(FORMATIONS[category]),key=f'training_specialty_{i}_{category}')
-            courses=dict(FORMATIONS[category][specialty])
-            course=st.selectbox('Formation',['— Choisir une formation —']+list(courses),key=f'training_course_{i}_{category}_{specialty}')
-            if course in courses:
-                selected_trainings.append((course,courses[course]))
-                st.caption(f'Durée : {courses[course]} journée(s) · {courses[course]*7} heures')
-    days=sum(duration for _,duration in selected_trainings)
-    training_complete=len(selected_trainings)==training_count
-    st.write(f'**Total : {days} journée(s) de formation**')
+            category=st.selectbox('Catégorie',list(FORMATIONS),key=f'training_category_2027_{i}')
+            specialty=st.selectbox('Spécialité',list(FORMATIONS[category]),key=f'training_specialty_2027_{i}_{category}')
+            courses={c['title']:c for c in FORMATIONS[category][specialty]}
+            course=st.selectbox('Formation',['— Choisir une formation —']+list(courses),key=f'training_course_2027_{i}_{category}_{specialty}')
+            if course not in courses:
+                training_complete=False
+                continue
+            entry=dict(courses[course])
+            duration=entry['days']
+            if duration is None:
+                st.info('Durée non renseignée dans le tableau officiel. Reportez la durée du programme de cette session.')
+                duration=st.number_input('Durée confirmée de la session (journées)',min_value=0.0,max_value=9.5,value=None,step=0.5,key=f'duration_2027_{i}_{entry["id"]}')
+                duration_confirmed=st.checkbox('Durée vérifiée dans le programme de la session',key=f'duration_confirmed_2027_{i}_{entry["id"]}')
+                if duration is None or duration<=0 or not duration_confirmed:
+                    training_complete=False
+            else:
+                st.caption(f'Durée : {duration:g} journée(s) · {duration*7:g} heures')
+            if entry['condition']:
+                st.caption('Condition PASS 2027 : '+entry['condition'])
+            cpf=st.checkbox('Cette formation est financée par le CPF',key=f'cpf_2027_{i}_{entry["id"]}')
+            if cpf:
+                cpf_conflict=True
+                st.warning('Le financement CPF est exclu de cette simulation PASS. Sélectionnez une session financée hors CPF.')
+            entry['days']=duration or 0
+            selected_trainings.append(entry)
+    days=sum(c['days'] for c in selected_trainings)
+    training_complete=training_complete and len(selected_trainings)==training_count
+    st.write(f'**Total : {days:g} journée(s) de formation**')
     if selected_trainings:
-        st.table([{'Formation':name,'Journées':duration} for name,duration in selected_trainings])
+        st.table([{'Formation':c['title'],'Journées':f"{c['days']:g}" if c['days'] else 'À renseigner'} for c in selected_trainings])
     if not training_complete:
-        st.warning('Choisissez une formation dans chaque bloc pour finaliser la simulation.')
+        st.warning('Complétez les formations et confirmez les durées manquantes pour finaliser la simulation.')
     st.caption('Le reste à charge journalier ci-dessous s’applique à toutes les formations sélectionnées. Si les montants diffèrent, réalisez des simulations distinctes.')
     rac=st.number_input(f'Reste à charge par jour avant PASS ({basis})',0.0,10000.0,0.0,5.0)
     eligible=st.checkbox('Formation éligible et financement vérifiés')
     cap=70.0
     st.info("Avantage formation : 70 € par jour éligible, automatiquement limité au reste à charge.")
-    st.caption('Exclusions : e-learning, formations réglementaires, parcours qualifiants/diplômants et financement CPF. Les cas certifiants à confirmer ne sont pas proposés. Formation courte de moins de 10 jours ; plusieurs sessions possibles. Une participation par session à tarif préférentiel.')
+    st.caption('Catalogue limité aux formations nommées dans le tableau officiel PASS 2027. Respectez les conditions propres à la session et au financement. Financement CPF exclu. Formation courte de moins de 10 jours ; plusieurs sessions possibles. Une participation par session à tarif préférentiel.')
     st.markdown('<div class="pass-step"><span>03</span><h2>Prêt à partager ?</h2></div>',unsafe_allow_html=True)
     validated=st.checkbox('J’ai vérifié la grille tarifaire et les hypothèses de cette simulation')
 with right:
     st.markdown('<div class="pass-step"><span>12 mois</span><h2>Le PASS en chiffres</h2></div>',unsafe_allow_html=True)
     st.caption('Une estimation fondée sur les besoins renseignés, abonnement compris.')
     try:
-        result=calculate(formalities,hours,days,rac,eligible,cap,basis,free)
+        result=calculate(formalities,hours,days,rac,eligible and not cpf_conflict,cap,basis,free)
     except ValueError as e:
         st.error(str(e)); st.stop()
     a,b=st.columns(2)
@@ -458,7 +190,9 @@ with right:
     elif gain<0: st.info(f"Coût supplémentaire : {euros(-gain)} / an pour les besoins renseignés.")
     else: st.info('Budget à l’équilibre pour les besoins renseignés.')
     if days:
-        if not eligible:
+        if cpf_conflict:
+            st.warning("Réduction formation non appliquée : une formation est financée par le CPF.")
+        elif not eligible:
             st.warning('Réduction formation non appliquée : cochez « Formation éligible et financement vérifiés » après vérification.')
         elif cap == 0:
             st.warning('Réduction formation non appliquée : le montant journalier est réglé à 0 €.')
@@ -469,8 +203,10 @@ with right:
     st.table([{'Prestation':name,f'Sans PASS ({basis})':euros(a),f'Avec PASS ({basis})':euros(b)} for name,a,b in result['rows']])
     st.caption(f"Abonnement : {euros(result['subscription'])} sur 12 mois. {'Deux mensualités offertes.' if free else 'Douze mensualités.'}")
     st.write(f"**Droits encore disponibles :** {result['remaining_formalities']} formalité(s), {result['remaining_hours']:g} h de conseil. Non valorisés dans le gain.")
-    ready=validated and training_complete and (not days or eligible)
+    ready=validated and training_complete and not cpf_conflict and (not days or eligible)
     assumptions=[f"Profil : {profile}. Base {basis}, choisie selon récupération de TVA.",f"Conseil : 79 € HT/h ; {hours:g} h prévues, dont {min(hours,2):g} h couvertes.",f"Formation : {days} jours ; reste à charge {euros(rac)}/jour ; plafond de réduction {euros(cap)}/jour, limitée au reste à charge.",f"Grille publique relevée le {T['date_releve']}. Applicabilité confirmée par le conseiller pour cette simulation.", 'Deux mois offerts confirmés : souscription avec assistance CMA à l’immatriculation.' if free else 'Aucune gratuité d’abonnement retenue.', 'Les prestations affectées au PASS sont indiquées à zéro dans la colonne Avec PASS. Les frais légaux ne sont pas inclus.']
+    for training in selected_trainings:
+        assumptions.append(f"Formation : {training['title']} — {training['days']:g} jour(s)." + (f" Condition : {training['condition']}." if training['condition'] else ''))
     if hours > 0 and advice_text.strip():
         st.markdown('#### Votre projet de conseil')
         st.write(advice_text.strip())
@@ -478,11 +214,12 @@ with right:
     elif advice_text.strip():
         st.caption('Renseignez les heures de conseil prévues pour intégrer ce projet à la simulation et au PDF.')
     if ready:
-        st.download_button('Télécharger la fiche client PDF',make_pdf(result,company,profile,advisor,contact,basis,assumptions),'simulation_pass_cma.pdf','application/pdf',type='primary',use_container_width=True)
+        st.download_button('Télécharger la fiche client PDF',make_pdf(result,company,profile,advisor,contact,basis,assumptions,trainings=selected_trainings),'simulation_pass_cma.pdf','application/pdf',type='primary',use_container_width=True)
         st.caption('À joindre à votre mail habituel. Aucune donnée client enregistrée sur disque par cette application.')
     else:
         missing=[]
-        if not training_complete: missing.append('Complétez les sélections de formation (section 02).')
+        if not training_complete: missing.append('Complétez les formations et leurs durées vérifiées (section 02).')
+        if cpf_conflict: missing.append('Le financement CPF est exclu du PASS (section 02).')
         if not validated: missing.append('Cochez la validation générale du conseiller (section 03).')
         if days and not eligible: missing.append('Confirmez l’éligibilité de la formation (section 02).')
         st.download_button('Télécharger la fiche client PDF',data=b'',file_name='simulation_pass_cma.pdf',mime='application/pdf',disabled=True,use_container_width=True)
